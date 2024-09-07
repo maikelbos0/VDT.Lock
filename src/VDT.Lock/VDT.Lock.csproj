@@ -8,4 +8,8 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<NoWarn>1701;1702;CA1416</NoWarn>
+	</PropertyGroup>
+
 </Project>
