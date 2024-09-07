@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34902.65
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VDT.Lock", "VDT.Lock\VDT.Lock.csproj", "{3341F5CE-1A02-40DB-88D9-257CF9783EAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VDT.Lock.Tests", "VDT.Lock.Tests\VDT.Lock.Tests.csproj", "{B264C2D7-0FAB-46E7-8E57-A5F86FCFF74F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3341F5CE-1A02-40DB-88D9-257CF9783EAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3341F5CE-1A02-40DB-88D9-257CF9783EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3341F5CE-1A02-40DB-88D9-257CF9783EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3341F5CE-1A02-40DB-88D9-257CF9783EAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B264C2D7-0FAB-46E7-8E57-A5F86FCFF74F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B264C2D7-0FAB-46E7-8E57-A5F86FCFF74F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B264C2D7-0FAB-46E7-8E57-A5F86FCFF74F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B264C2D7-0FAB-46E7-8E57-A5F86FCFF74F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D34A7F22-A648-488B-8473-47FB37582CF9}
+	EndGlobalSection
+EndGlobal
