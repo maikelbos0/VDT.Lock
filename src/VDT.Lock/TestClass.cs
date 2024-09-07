@@ -1,5 +1,8 @@
-﻿namespace VDT.Lock;
+﻿using System.Runtime.InteropServices.JavaScript;
 
-public class TestClass {
-    public bool Test() => true;
+namespace VDT.Lock;
+
+public static partial class TestClass {
+    [JSExport]
+    public static bool Test() => true;
 }
