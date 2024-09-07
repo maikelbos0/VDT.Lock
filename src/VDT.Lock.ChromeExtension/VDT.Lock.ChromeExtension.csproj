@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<OutputType>Library</OutputType>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<DefaultItemExcludes>$(DefaultItemExcludes);publish\**\*.*</DefaultItemExcludes>
+	</PropertyGroup>
+
+	<Target Name="PostBuildScript" AfterTargets="AfterBuild">
+		<ItemGroup>
+			<Files Include="$(ProjectDir)*.*" Exclude="*.csproj" />
+		</ItemGroup>
+		<ItemGroup>
+			<LibraryFiles Include="$(ProjectDir)..\VDT.Lock\publish\*.*" />
+		</ItemGroup>
+
+		<RemoveDir Directories="publish" />
+		<Copy SourceFiles="@(Files)" DestinationFolder="$(ProjectDir)publish" />
+		<Copy SourceFiles="@(LibraryFiles)" DestinationFolder="$(ProjectDir)publish\wasm" />
+	</Target>
+	
+</Project>

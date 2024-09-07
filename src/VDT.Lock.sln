@@ -5,7 +5,12 @@ VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VDT.Lock", "VDT.Lock\VDT.Lock.csproj", "{3341F5CE-1A02-40DB-88D9-257CF9783EAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VDT.Lock.Tests", "VDT.Lock.Tests\VDT.Lock.Tests.csproj", "{B264C2D7-0FAB-46E7-8E57-A5F86FCFF74F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VDT.Lock.Tests", "VDT.Lock.Tests\VDT.Lock.Tests.csproj", "{B264C2D7-0FAB-46E7-8E57-A5F86FCFF74F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VDT.Lock.ChromeExtension", "VDT.Lock.ChromeExtension\VDT.Lock.ChromeExtension.csproj", "{D4BADC87-6CA9-476D-B426-6B2329493FFB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3341F5CE-1A02-40DB-88D9-257CF9783EAA} = {3341F5CE-1A02-40DB-88D9-257CF9783EAA}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +26,14 @@ Global
 		{B264C2D7-0FAB-46E7-8E57-A5F86FCFF74F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B264C2D7-0FAB-46E7-8E57-A5F86FCFF74F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B264C2D7-0FAB-46E7-8E57-A5F86FCFF74F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87F78077-879A-43EE-BC0F-5E4DFAB1FE3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87F78077-879A-43EE-BC0F-5E4DFAB1FE3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87F78077-879A-43EE-BC0F-5E4DFAB1FE3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87F78077-879A-43EE-BC0F-5E4DFAB1FE3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4BADC87-6CA9-476D-B426-6B2329493FFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4BADC87-6CA9-476D-B426-6B2329493FFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4BADC87-6CA9-476D-B426-6B2329493FFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4BADC87-6CA9-476D-B426-6B2329493FFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

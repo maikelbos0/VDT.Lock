@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  },
+  "name": "VDT.Lock",
+  "description": "Extension for managing data locked with VDT.Lock",
+  "version": "1.0",
+  "action": {
+    "default_popup": "test.html",
+    "default_icon": "test.png"
+  }
+}

@@ -12,4 +12,17 @@
 		<NoWarn>1701;1702;CA1416</NoWarn>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<DefaultItemExcludes>$(DefaultItemExcludes);publish\**\*.*</DefaultItemExcludes>
+	</PropertyGroup>
+
+	<Target Name="PostBuildScript" AfterTargets="AfterBuild" Condition="$(TargetFramework) == 'net8.0-browser'">
+		<ItemGroup>
+			<WasmFiles Include="$(TargetDir)wwwroot\_framework/*.*" />
+		</ItemGroup>
+
+		<RemoveDir Directories="$(ProjectDir)publish" />
+		<Copy SourceFiles="@(WasmFiles)" DestinationFolder="$(ProjectDir)publish" />
+	</Target>
+	
 </Project>
