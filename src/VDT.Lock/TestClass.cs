@@ -4,5 +4,5 @@ namespace VDT.Lock;
 
 public static partial class TestClass {
     [JSExport]
-    public static bool Test() => true;
+    public static string Test() => "Hello world!";
 }
