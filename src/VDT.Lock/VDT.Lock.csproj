@@ -9,10 +9,6 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<NoWarn>1701;1702;CA1416</NoWarn>
-	</PropertyGroup>
-
-	<PropertyGroup>
 		<DefaultItemExcludes>$(DefaultItemExcludes);publish\**\*.*</DefaultItemExcludes>
 	</PropertyGroup>
 

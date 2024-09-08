@@ -2,6 +2,7 @@
 
 namespace VDT.Lock;
 
+#if BROWSER
 public static partial class TestClass {
     [JSExport]
     public static string Test() => "Hello world!";
@@ -19,3 +20,4 @@ public static partial class TestClass {
         return Convert.ToHexString(result);
     }
 }
+#endif
