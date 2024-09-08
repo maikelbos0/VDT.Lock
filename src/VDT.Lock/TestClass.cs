@@ -19,5 +19,12 @@ public static partial class TestClass {
 
         return Convert.ToHexString(result);
     }
+
+    [JSExport]
+    public static async Task<string> Test3(string input) {
+        await JSHost.ImportAsync("Encryptor", "../encryptor.js");
+
+        return JsEncryptor.Test(input);
+    }
 }
 #endif
