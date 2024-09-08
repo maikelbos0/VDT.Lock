@@ -24,7 +24,7 @@ public static partial class TestClass {
     public static async Task<string> Test3(string input) {
         await JSHost.ImportAsync("Encryptor", "../encryptor.js");
 
-        return JsEncryptor.Test(input);
+        return await JsEncryptor.Test(input, new byte[32]);
     }
 }
 #endif

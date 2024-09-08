@@ -1,6 +1,13 @@
 
-export function Test(input) {
-    return `Called Test with input: ${input}`;
+export async function Test(input, key) {
+    var cryptoKey = await crypto.subtle.importKey(
+        "raw" /* format */,
+        key.buffer /* keyData */,
+        { name: "HMAC", hash: "SHA-256" } /* algorithm (HmacImportParams) */,
+        false /* extractable */,
+        ["sign", "verify"] /* keyUsages */);
+
+    return `Called Test with input: ${input}, ${cryptoKey}`;
 }
 
 //export async function Encrypt(key, inputText) {
@@ -16,13 +23,6 @@ export function Test(input) {
 //    // await a Task-based function in .NET.
 //    //
 //    // https://developer.mozilla.org/docs/Web/API/SubtleCrypto/importKey
-
-//    var cryptoKey = await crypto.subtle.importKey(
-//        "raw" /* format */,
-//        key.buffer /* keyData */,
-//        { name: "HMAC", hash: "SHA-256" } /* algorithm (HmacImportParams) */,
-//        false /* extractable */,
-//        ["sign", "verify"] /* keyUsages */);
 
 //    // Now that we've imported the key, we can compute the HMACSHA256 digest.
 //    //
