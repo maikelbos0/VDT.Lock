@@ -1,12 +1,9 @@
-﻿using System.Runtime.InteropServices.JavaScript;
+﻿#if BROWSER
+using System.Runtime.InteropServices.JavaScript;
 
 namespace VDT.Lock;
 
-#if BROWSER
 public static partial class TestClass {
-    [JSExport]
-    public static string Test() => "Hello world!";
-
     [JSExport]
     public static async Task<string> Test2() {
         using var stream = new MemoryStream();
