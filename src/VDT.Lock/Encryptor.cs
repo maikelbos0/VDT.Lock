@@ -7,21 +7,28 @@ public sealed partial class Encryptor {
     public const int KeySizeInBytes = 32;
     public const int BlockSizeInBytes = 16;
 
+    private readonly IRandomByteGenerator randomByteGenerator;
+
+    public Encryptor(IRandomByteGenerator randomByteGenerator) {
+        this.randomByteGenerator = randomByteGenerator;
+    }
+
     public async Task<byte[]> Encrypt(Stream stream, byte[] key) {
-        var iv = RandomNumberGenerator.GetBytes(BlockSizeInBytes);
+        var iv = randomByteGenerator.Generate(BlockSizeInBytes);
 
 #if BROWSER
         await JSHost.ImportAsync("Encryptor", "../encryptor.js");
 
         using var memoryStream = new MemoryStream();
-        stream.CopyTo(memoryStream);
+        await stream.CopyToAsync(memoryStream);
+
         var input = memoryStream.ToArray();
 
         return await Encrypt(input, key, iv) as byte[] ?? throw new InvalidOperationException();
 #else
         using var aes = Aes.Create();
         aes.Mode = CipherMode.CBC;
-        
+
         var encryptor = aes.CreateEncryptor(key, iv);
         using var encryptedStream = new MemoryStream();
         using var cryptoStream = new CryptoStream(encryptedStream, encryptor, CryptoStreamMode.Write);

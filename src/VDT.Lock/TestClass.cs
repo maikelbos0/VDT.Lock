@@ -11,7 +11,7 @@ public static partial class TestClass {
         stream.Write(password, 0, password.Length);
         stream.Seek(0, SeekOrigin.Begin);
 
-        var encryptor = new Encryptor();
+        var encryptor = new Encryptor(new RandomByteGenerator());
         var result = await encryptor.Encrypt(stream, new byte[32]);
 
         return Convert.ToHexString(result);
