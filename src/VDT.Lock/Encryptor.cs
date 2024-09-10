@@ -27,6 +27,7 @@ public sealed partial class Encryptor {
         using var cryptoStream = new CryptoStream(encryptedStream, encryptor, CryptoStreamMode.Write);
 
         stream.CopyTo(cryptoStream);
+        cryptoStream.FlushFinalBlock();
 
         return encryptedStream.ToArray();
 #endif
