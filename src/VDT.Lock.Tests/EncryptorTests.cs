@@ -37,4 +37,20 @@ public class EncryptorTests {
 
         Assert.Equal(expectedResult, result.ToArray());
     }
+
+    [Fact]
+    public async Task RoundTrip() {
+        var expectedResult = Encoding.UTF8.GetBytes("password");
+
+        var randomByteGenerator = new RandomByteGenerator();
+
+        var subject = new Encryptor(randomByteGenerator);
+        var inputStream = expectedResult.ToStream();
+        var key = randomByteGenerator.Generate(Encryptor.KeySizeInBytes);
+
+        var encryptedBytes = await subject.Encrypt(inputStream, key);
+        var result = subject.Decrypt(encryptedBytes, key);
+
+        Assert.Equal(expectedResult, result.ToArray());
+    }
 }
