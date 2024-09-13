@@ -13,35 +13,50 @@ public sealed partial class Encryptor {
         this.randomByteGenerator = randomByteGenerator;
     }
 
-    public async Task<byte[]> Encrypt(Stream stream, byte[] key) {
+    public async Task<byte[]> Encrypt(Stream inputStream, byte[] key) {
         var iv = randomByteGenerator.Generate(BlockSizeInBytes);
 
 #if BROWSER
         await JSHost.ImportAsync("Encryptor", "../encryptor.js");
 
-        using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
+        var memoryStream = new MemoryStream();
+        await inputStream.CopyToAsync(memoryStream);
 
         var input = memoryStream.ToArray();
 
-        return await Encrypt(input, key, iv) as byte[] ?? throw new InvalidOperationException();
+        var encryptedBytes = await Encrypt(input, key, iv) as byte[] ?? throw new InvalidOperationException();
 #else
         using var aes = Aes.Create();
         aes.Mode = CipherMode.CBC;
 
         var encryptor = aes.CreateEncryptor(key, iv);
-        using var encryptedStream = new MemoryStream();
+        var encryptedStream = new MemoryStream();
         using var cryptoStream = new CryptoStream(encryptedStream, encryptor, CryptoStreamMode.Write);
 
-        stream.CopyTo(cryptoStream);
+        inputStream.CopyTo(cryptoStream);
         cryptoStream.FlushFinalBlock();
 
-        return encryptedStream.ToArray();
+        var encryptedBytes = encryptedStream.ToArray();
+
 #endif
+        
+        var result = new byte[iv.Length +  encryptedBytes.Length];
+        Buffer.BlockCopy(iv, 0, result, 0, iv.Length);
+        Buffer.BlockCopy(encryptedBytes, 0, result, iv.Length, encryptedBytes.Length);
+        return result;
     }
 
     public Stream Decrypt(byte[] bytes, byte[] key) {
-        return null!;
+        var iv = bytes.Take(BlockSizeInBytes).ToArray();
+
+        bytes = bytes.Skip(BlockSizeInBytes).ToArray();
+
+        using var aes = Aes.Create();
+        aes.Mode = CipherMode.CBC;
+
+        var decryptor = aes.CreateDecryptor(key, iv);
+
+        return new CryptoStream(new MemoryStream(bytes), decryptor, CryptoStreamMode.Read);
     }
 
 
@@ -55,4 +70,6 @@ public sealed partial class Encryptor {
     );
 #endif
 
+    // TODO rename bytes/encryptedbytes = encryptedData / encryptedBytes?
+    // TODO rename stream = inputStream / plainDataStream?
 }
