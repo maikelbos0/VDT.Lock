@@ -14,16 +14,16 @@ public class EncryptorTests {
         randomByteGenerator.Generate(Arg.Any<int>()).Returns(callInfo => new byte[callInfo.ArgAt<int>(0)]);
 
         var subject = new Encryptor(randomByteGenerator);
-        var inputStream = "password".ToStream();
+        var plainStream = "password".ToStream();
         var key = new byte[Encryptor.KeySizeInBytes];
 
-        var result = await subject.Encrypt(inputStream, key);
+        var result = await subject.Encrypt(plainStream, key);
 
         Assert.Equal(expectedResult, result);
     }
 
     [Fact]
-    public void Decrypt() {
+    public async Task Decrypt() {
         var expectedResult = "password"u8.ToArray();
 
         var randomByteGenerator = Substitute.For<IRandomByteGenerator>();
@@ -33,7 +33,7 @@ public class EncryptorTests {
         var encryptedBytes = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 152, 35, 44, 52, 128, 214, 112, 9, 199, 100, 68, 128, 204, 138, 16, 22 };
         var key = new byte[Encryptor.KeySizeInBytes];
 
-        var result = subject.Decrypt(encryptedBytes, key);
+        var result = await subject.Decrypt(encryptedBytes, key);
 
         Assert.Equal(expectedResult, result.ToArray());
     }
@@ -45,11 +45,11 @@ public class EncryptorTests {
         var randomByteGenerator = new RandomByteGenerator();
 
         var subject = new Encryptor(randomByteGenerator);
-        var inputStream = expectedResult.ToStream();
+        var plainStream = expectedResult.ToStream();
         var key = randomByteGenerator.Generate(Encryptor.KeySizeInBytes);
 
-        var encryptedBytes = await subject.Encrypt(inputStream, key);
-        var result = subject.Decrypt(encryptedBytes, key);
+        var encryptedBytes = await subject.Encrypt(plainStream, key);
+        var result = await subject.Decrypt(encryptedBytes, key);
 
         Assert.Equal(expectedResult, result.ToArray());
     }

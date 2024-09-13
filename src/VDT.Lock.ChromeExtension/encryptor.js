@@ -1,9 +1,8 @@
 
-export async function Encrypt(input, keyData, iv) {
+export async function Encrypt(plainBytes, key, iv) {
     var key = await crypto.subtle.importKey(
         "raw",
-        keyData.buffer,
-        //{ name: "HMAC", hash: "SHA-256" },
+        key.buffer,
         "AES-CBC",
         false,
         ["encrypt"] //, "decrypt"
@@ -15,6 +14,25 @@ export async function Encrypt(input, keyData, iv) {
             iv: iv,
         },
         key,
-        input,
+        plainBytes,
+    ));
+}
+
+export async function Decrypt(encryptedBytes, key, iv) {
+    var key = await crypto.subtle.importKey(
+        "raw",
+        key.buffer,
+        "AES-CBC",
+        false,
+        ["decrypt"]
+    );
+
+    return new Uint8Array(await window.crypto.subtle.decrypt(
+        {
+            name: "AES-CBC",
+            iv: iv
+        },
+        key,
+        encryptedBytes
     ));
 }
