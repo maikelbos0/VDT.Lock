@@ -1,12 +1,10 @@
-﻿#if BROWSER
-using System.Runtime.InteropServices.JavaScript;
-#else
+﻿#if !BROWSER
 using System.Security.Cryptography;
 #endif
 
 namespace VDT.Lock;
 
-public sealed partial class Encryptor {
+public sealed class Encryptor {
     public const int KeySizeInBytes = 32;
     public const int BlockSizeInBytes = 16;
 
@@ -18,7 +16,7 @@ public sealed partial class Encryptor {
 
 #if BROWSER
     public async Task<byte[]> Encrypt(Stream plainStream, byte[] key) {
-        await ImportModule();
+        await JSEncryptor.ImportModule();
 
         var iv = randomByteGenerator.Generate(BlockSizeInBytes);
         var memoryStream = new MemoryStream();
@@ -26,7 +24,7 @@ public sealed partial class Encryptor {
 
         var plainBytes = memoryStream.ToArray();
 
-        var encryptedBytes = await Encrypt(plainBytes, key, iv) as byte[] ?? throw new InvalidOperationException();
+        var encryptedBytes = await JSEncryptor.Encrypt(plainBytes, key, iv) as byte[] ?? throw new InvalidOperationException();
         
         var result = new byte[iv.Length +  encryptedBytes.Length];
         Buffer.BlockCopy(iv, 0, result, 0, iv.Length);
@@ -56,13 +54,13 @@ public sealed partial class Encryptor {
 
 #if BROWSER
     public async Task<Stream> Decrypt(byte[] encryptedBytes, byte[] key) {
-        await ImportModule();
+        await JSEncryptor.ImportModule();
 
         var iv = encryptedBytes.Take(BlockSizeInBytes).ToArray();
 
         encryptedBytes = encryptedBytes.Skip(BlockSizeInBytes).ToArray();
 
-        var plainBytes = await Decrypt(encryptedBytes, key, iv) as byte[] ?? throw new InvalidOperationException();
+        var plainBytes = await JSEncryptor.Decrypt(encryptedBytes, key, iv) as byte[] ?? throw new InvalidOperationException();
 
         var plainStream = new MemoryStream();
         plainStream.Write(plainBytes, 0, plainBytes.Length);
@@ -85,25 +83,5 @@ public sealed partial class Encryptor {
 
         return Task.FromResult((Stream)new CryptoStream(new MemoryStream(encryptedBytes), decryptor, CryptoStreamMode.Read));
     }
-#endif
-
-#if BROWSER
-    public static Task ImportModule() => JSHost.ImportAsync("Encryptor", "../encryptor.js");
-
-    [JSImport("Encrypt", "Encryptor")]
-    [return: JSMarshalAs<JSType.Promise<JSType.Any>>()]
-    public static partial Task<object?> Encrypt(
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] plainBytes,
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] key,
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] iv
-    );
-
-    [JSImport("Decrypt", "Encryptor")]
-    [return: JSMarshalAs<JSType.Promise<JSType.Any>>()]
-    public static partial Task<object?> Decrypt(
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] encryptedBytes,
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] key,
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] iv
-    );
 #endif
 }
