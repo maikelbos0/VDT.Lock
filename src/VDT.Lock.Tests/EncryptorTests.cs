@@ -1,5 +1,5 @@
 ﻿using NSubstitute;
-using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -15,9 +15,9 @@ public class EncryptorTests {
 
         var subject = new Encryptor(randomByteGenerator);
         var inputStream = "password".ToStream();
-        var iv = new byte[Encryptor.KeySizeInBytes];
+        var key = new byte[Encryptor.KeySizeInBytes];
 
-        var result = await subject.Encrypt(inputStream, iv);
+        var result = await subject.Encrypt(inputStream, key);
 
         Assert.Equal(expectedResult, result);
     }
@@ -31,12 +31,10 @@ public class EncryptorTests {
 
         var subject = new Encryptor(randomByteGenerator);
         var encryptedBytes = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 152, 35, 44, 52, 128, 214, 112, 9, 199, 100, 68, 128, 204, 138, 16, 22 };
+        var key = new byte[Encryptor.KeySizeInBytes];
 
-        var result = subject.Decrypt(encryptedBytes, new byte[Encryptor.KeySizeInBytes]);
+        var result = subject.Decrypt(encryptedBytes, key);
 
-        var memoryStream = new MemoryStream();
-        result.CopyTo(memoryStream);
-
-        Assert.Equal(expectedResult, memoryStream.ToArray());
+        Assert.Equal(expectedResult, result.ToArray());
     }
 }
