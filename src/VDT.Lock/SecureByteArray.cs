@@ -17,11 +17,17 @@ public sealed class SecureByteArray : IDisposable {
         bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
     }
 
-    public void Add(char c) => Add((byte)c);
+    public void Push(char c) => Push((byte)c);
 
-    public void Add(byte b) {
+    public void Push(byte b) {
         lock (bufferLock) {
             buffer[length++] = b;
+        }
+    }
+
+    public void Pop() {
+        lock (bufferLock) {
+            buffer[--length] = 0;
         }
     }
 
