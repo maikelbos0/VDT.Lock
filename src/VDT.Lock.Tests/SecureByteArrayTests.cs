@@ -26,6 +26,36 @@ public sealed class SecureByteArrayTests {
     }
 
     [Fact]
+    public void EnsureCapacity() {
+        using var subject = new SecureByteArray(4);
+        var oldBuffer = GetBuffer(subject);
+
+        subject.Push(97);
+        subject.Push(98);
+        subject.Push(99);
+
+        subject.EnsureCapacity(6);
+
+        Assert.Equal("abc"u8.ToArray(), subject.GetValue());
+        Assert.Equal(new byte[4], oldBuffer);
+        Assert.Equal(new byte[] { 97, 98, 99, 0, 0, 0, 0, 0 }, GetBuffer(subject));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(2)]
+    public void PushEnsuresCapacity(int capacity) {
+        using var subject = new SecureByteArray(capacity);
+
+        subject.Push(97);
+        subject.Push(98);
+        subject.Push(99);
+
+        Assert.Equal("abc"u8.ToArray(), subject.GetValue());
+        Assert.Equal(new byte[] { 97, 98, 99, 0 }, GetBuffer(subject));
+    }
+
+    [Fact]
     public void Pop() {
         using var subject = new SecureByteArray(4);
 
