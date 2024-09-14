@@ -39,7 +39,7 @@ public sealed class SecureByteArray : IDisposable {
         length = 0;
     }
 
-    public ReadOnlySpan<byte> GetValue() => new ReadOnlySpan<byte>(buffer, 0, length);
+    public ReadOnlySpan<byte> GetValue() => new(buffer, 0, length);
 
     public void Dispose() {
         Dispose(true);

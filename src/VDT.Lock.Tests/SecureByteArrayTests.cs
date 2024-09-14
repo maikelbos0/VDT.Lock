@@ -21,7 +21,7 @@ public sealed class SecureByteArrayTests {
 
         subject.Push(97);
 
-        Assert.Equal(new byte[] { 97 }, subject.GetValue());
+        Assert.Equal("a"u8.ToArray(), subject.GetValue());
         Assert.Equal(new byte[] { 97, 0, 0, 0 }, GetBuffer(subject));
     }
 
@@ -35,7 +35,7 @@ public sealed class SecureByteArrayTests {
 
         subject.Pop();
 
-        Assert.Equal(new byte[] { 97, 98 }, subject.GetValue());
+        Assert.Equal("ab"u8.ToArray(), subject.GetValue());
         Assert.Equal(new byte[] { 97, 98, 0, 0 }, GetBuffer(subject));
     }
 
