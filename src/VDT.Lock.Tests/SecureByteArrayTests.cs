@@ -1,40 +1,49 @@
-﻿using Xunit;
+﻿using System;
+using System.Reflection;
+using Xunit;
 
 namespace VDT.Lock.Tests;
 
 public sealed class SecureByteArrayTests {
     [Fact]
-    public void Constructor() {
-        using var subject = new SecureByteArray(16);
+    public void AddChar() {
+        using var subject = new SecureByteArray(4);
 
-        Assert.Equal(16, subject.Buffer.Length);
+        subject.Add('a');
+
+        Assert.Equal("a"u8.ToArray(), subject.GetValue());
+        Assert.Equal(new byte[] { (byte)'a', 0, 0, 0 } , GetBuffer(subject));
+    }
+
+    [Fact]
+    public void AddByte() {
+        using var subject = new SecureByteArray(4);
+
+        subject.Add(97);
+
+        Assert.Equal(new byte[] { 97 }, subject.GetValue());
+        Assert.Equal(new byte[] { 97, 0, 0, 0 }, GetBuffer(subject));
     }
 
     [Fact]
     public void Clear() {
-        using var subject = new SecureByteArray(16);
+        using var subject = new SecureByteArray(4);
 
-        for (var i = 0; i < 16; i++) {
-            subject.Buffer[i] = 255;
-        }
+        subject.Add('a');
+        subject.Add('b');
+        subject.Add('c');
 
         subject.Clear();
 
-        Assert.Equal(new byte[16], subject.Buffer);
+        Assert.Equal(Array.Empty<byte>(), subject.GetValue());
+        Assert.Equal(new byte[4], GetBuffer(subject));
     }
 
-    [Fact]
-    public void Dispose() {
-        byte[] buffer;
+    private static byte[] GetBuffer(SecureByteArray bytes) {
+        var fieldInfo = typeof(SecureByteArray).GetField("buffer", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException();
 
-        using (var subject = new SecureByteArray(16)) {
-            for (var i = 0; i < 16; i++) {
-                subject.Buffer[i] = 255;
-            }
-
-            buffer = subject.Buffer;
-        }
-
-        Assert.Equal(new byte[16], buffer);
+        return fieldInfo.GetValue(bytes) as byte[]
+            ?? throw new InvalidOperationException();
     }
 }
