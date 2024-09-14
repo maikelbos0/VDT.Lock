@@ -6,6 +6,18 @@ namespace VDT.Lock.Tests;
 
 public sealed class SecureByteArrayTests {
     [Fact]
+    public void IntConstructor() {
+        using var subject = new SecureByteArray(7);
+
+        Assert.Equal(new byte[7], GetBuffer(subject));
+    }
+
+    [Fact]
+    public void IntConstructorThrowsWhenNegative() {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new SecureByteArray(-1));
+    }
+
+    [Fact]
     public void PushChar() {
         using var subject = new SecureByteArray(4);
 
