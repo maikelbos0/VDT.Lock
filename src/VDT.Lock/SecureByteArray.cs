@@ -5,7 +5,7 @@ namespace VDT.Lock;
 
 // TODO: while instances of this class may be short-lived, ideally it should still be prevented from being swapped to disk
 public sealed class SecureByteArray : IDisposable {
-    public const int DefaultCapacity = 4;
+    public const int DefaultCapacity = 64;
 
     private int length = 0;
     private byte[] buffer;
@@ -13,7 +13,7 @@ public sealed class SecureByteArray : IDisposable {
     private readonly object arrayLock = new();
 
     public SecureByteArray(int capacity = DefaultCapacity) {
-        ArgumentOutOfRangeException.ThrowIfNegative(capacity);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity);
 
         buffer = new byte[capacity];
         bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
@@ -27,10 +27,6 @@ public sealed class SecureByteArray : IDisposable {
             buffer[length++] = b;
         }
     }
-
-    //public void CopyFrom(Stream stream) {
-
-    //}
 
     public void Pop() {
         lock (arrayLock) {
@@ -48,7 +44,7 @@ public sealed class SecureByteArray : IDisposable {
 
     public void EnsureCapacity(int requestedCapacity) {
         if (buffer.Length < requestedCapacity && buffer.Length < Array.MaxLength) {
-            var capacity = Math.Max(Math.Min(2 * buffer.Length, Array.MaxLength), DefaultCapacity);
+            var capacity = Math.Min(2 * buffer.Length, Array.MaxLength);
             var newBuffer = new byte[capacity];
             var newBufferHandle = GCHandle.Alloc(newBuffer, GCHandleType.Pinned);
 

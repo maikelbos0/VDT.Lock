@@ -6,15 +6,17 @@ namespace VDT.Lock.Tests;
 
 public sealed class SecureByteArrayTests {
     [Fact]
-    public void IntConstructor() {
-        using var subject = new SecureByteArray(7);
+    public void EmptyConstructor() {
+        using var subject = new SecureByteArray(4);
 
-        Assert.Equal(new byte[7], GetBuffer(subject));
+        Assert.Equal(new byte[4], GetBuffer(subject));
     }
 
-    [Fact]
-    public void IntConstructorThrowsWhenNegative() {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new SecureByteArray(-1));
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0)]
+    public void EmptyConstructorThrowsForZeroOrNegativeCapacity(int capacity) {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new SecureByteArray(capacity));
     }
 
     [Fact]
@@ -24,7 +26,7 @@ public sealed class SecureByteArrayTests {
         subject.Push('a');
 
         Assert.Equal("a"u8.ToArray(), subject.GetValue());
-        Assert.Equal(new byte[] { (byte)'a', 0, 0, 0 } , GetBuffer(subject));
+        Assert.Equal(new byte[] { (byte)'a', 0, 0, 0 }, GetBuffer(subject));
     }
 
     [Fact]
@@ -54,8 +56,9 @@ public sealed class SecureByteArrayTests {
     }
 
     [Theory]
-    [InlineData(0)]
+    [InlineData(1)]
     [InlineData(2)]
+    [InlineData(4)]
     public void PushEnsuresCapacity(int capacity) {
         using var subject = new SecureByteArray(capacity);
 
