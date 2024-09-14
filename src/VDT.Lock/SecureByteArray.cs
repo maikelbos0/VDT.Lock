@@ -7,10 +7,10 @@ namespace VDT.Lock;
 public sealed class SecureByteArray : IDisposable {
     public const int DefaultCapacity = 4;
 
-    private readonly GCHandle bufferHandle;
     private int length = 0;
     private byte[] buffer;
-    private readonly object bufferLock = new();
+    private GCHandle bufferHandle;
+    private readonly object arrayLock = new();
 
     public SecureByteArray(int capacity = DefaultCapacity) {
         buffer = new byte[capacity];
@@ -20,19 +20,28 @@ public sealed class SecureByteArray : IDisposable {
     public void Push(char c) => Push((byte)c);
 
     public void Push(byte b) {
-        lock (bufferLock) {
+        lock (arrayLock) {
             buffer[length++] = b;
         }
     }
 
     public void Pop() {
-        lock (bufferLock) {
+        lock (arrayLock) {
             buffer[--length] = 0;
         }
     }
 
     [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Clear() {
+        lock (arrayLock) {
+            ClearBuffer();
+            length = 0;
+        }
+    }
+
+    public ReadOnlySpan<byte> GetValue() => new(buffer, 0, length);
+
+    private void ClearBuffer() {
         for (int i = 0; i < buffer.Length; i++) {
             buffer[i] = 0;
         }
@@ -51,7 +60,8 @@ public sealed class SecureByteArray : IDisposable {
     }
 
     private void Dispose(bool _) {
-        Clear();
+        ClearBuffer();
+        length = 0;
         bufferHandle.Free();
     }
 }
