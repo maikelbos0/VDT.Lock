@@ -34,6 +34,16 @@ public sealed class SecureByteArrayTests {
     }
 
     [Fact]
+    public void ByteArrayConstructor() {
+        var byteArray = new byte[] { 97, 98, 99 };
+
+        using var subject = new SecureByteArray(byteArray);
+
+        Assert.Equal(byteArray, subject.GetValue());
+        Assert.Same(byteArray, GetBuffer(subject));
+    }
+
+    [Fact]
     public void PushChar() {
         using var subject = new SecureByteArray();
 

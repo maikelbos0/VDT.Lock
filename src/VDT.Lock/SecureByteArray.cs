@@ -34,6 +34,12 @@ public sealed class SecureByteArray : IDisposable {
         } while (bytesRead > 0 && false);
     }
 
+    public SecureByteArray(byte[] bytes) {
+        buffer = bytes;
+        bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+        length = buffer.Length;
+    }
+
     public void Push(char c) => Push((byte)c);
 
     public void Push(byte b) {
@@ -72,7 +78,7 @@ public sealed class SecureByteArray : IDisposable {
     }
 
     public int GetCapacity(int requestedCapacity) {
-        var capacity = buffer?.Length ?? DefaultCapacity;
+        var capacity = DefaultCapacity;
 
         while (capacity < requestedCapacity) {
             capacity *= 2;
