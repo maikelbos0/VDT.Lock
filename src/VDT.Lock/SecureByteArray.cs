@@ -12,30 +12,26 @@ public sealed class SecureByteArray : IDisposable {
     private GCHandle bufferHandle;
     private readonly object arrayLock = new();
 
-    public SecureByteArray(int capacity = DefaultCapacity) {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity);
-
-        buffer = new byte[capacity];
+    public SecureByteArray() {
+        buffer = new byte[DefaultCapacity];
         bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
     }
 
-    public SecureByteArray(Stream stream, int capacity = DefaultCapacity) {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity);
-
+    public SecureByteArray(Stream stream) {
         if (!stream.CanRead) {
             throw new ArgumentException("Cannot read from stream");
         }
 
-        buffer = new byte[capacity];
+        buffer = new byte[DefaultCapacity];
         bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
 
         int bytesRead;
 
         do {
-            EnsureCapacity(length + capacity);
-            bytesRead = stream.Read(buffer, length, capacity);
+            //EnsureCapacity(length + DefaultCapacity);
+            bytesRead = stream.Read(buffer, length, DefaultCapacity);
             length += bytesRead;
-        } while (bytesRead > 0);
+        } while (bytesRead > 0 && false);
     }
 
     public void Push(char c) => Push((byte)c);

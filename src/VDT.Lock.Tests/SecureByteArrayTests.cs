@@ -1,6 +1,7 @@
 ﻿using NSubstitute;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
@@ -9,26 +10,19 @@ namespace VDT.Lock.Tests;
 public sealed class SecureByteArrayTests {
     [Fact]
     public void EmptyConstructor() {
-        using var subject = new SecureByteArray(4);
+        using var subject = new SecureByteArray();
 
-        Assert.Equal(new byte[4], GetBuffer(subject));
-    }
-
-    [Theory]
-    [InlineData(-1)]
-    [InlineData(0)]
-    public void EmptyConstructorThrowsForZeroOrNegativeCapacity(int capacity) {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new SecureByteArray(capacity));
+        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity), GetBuffer(subject));
     }
 
     [Fact]
     public void StreamConstructor() {
         var stream = "abc".ToStream();
 
-        using var subject = new SecureByteArray(stream, 4);
+        using var subject = new SecureByteArray(stream);
 
         Assert.Equal("abc"u8.ToArray(), subject.GetValue());
-        Assert.Equal(new byte[] { (byte)'a', (byte)'b', (byte)'c', 0, 0, 0, 0, 0 }, GetBuffer(subject));
+        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity, "abc"u8.ToArray()), GetBuffer(subject));
     }
 
     [Fact]
@@ -39,69 +33,59 @@ public sealed class SecureByteArrayTests {
         Assert.Throws<ArgumentException>(() => new SecureByteArray(stream));
     }
 
-    [Theory]
-    [InlineData(-1)]
-    [InlineData(0)]
-    public void StreamConstructorThrowsForZeroOrNegativeCapacity(int capacity) {
-        var stream = "abc".ToStream();
-
-        Assert.Throws<ArgumentOutOfRangeException>(() => new SecureByteArray(stream, capacity));
-    }
-
     [Fact]
     public void PushChar() {
-        using var subject = new SecureByteArray(4);
+        using var subject = new SecureByteArray();
 
         subject.Push('a');
 
         Assert.Equal("a"u8.ToArray(), subject.GetValue());
-        Assert.Equal(new byte[] { (byte)'a', 0, 0, 0 }, GetBuffer(subject));
+        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity, "a"u8.ToArray()), GetBuffer(subject));
     }
 
     [Fact]
     public void PushByte() {
-        using var subject = new SecureByteArray(4);
+        using var subject = new SecureByteArray();
 
         subject.Push(97);
 
-        Assert.Equal("a"u8.ToArray(), subject.GetValue());
-        Assert.Equal(new byte[] { 97, 0, 0, 0 }, GetBuffer(subject));
+        Assert.Equal(new byte[] { 97 }, subject.GetValue());
+        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity, 97), GetBuffer(subject));
     }
 
     [Fact]
     public void EnsureCapacity() {
-        using var subject = new SecureByteArray(4);
+        using var subject = new SecureByteArray();
         var oldBuffer = GetBuffer(subject);
 
         subject.Push(97);
         subject.Push(98);
         subject.Push(99);
 
-        subject.EnsureCapacity(6);
+        subject.EnsureCapacity(SecureByteArray.DefaultCapacity + 1);
 
-        Assert.Equal("abc"u8.ToArray(), subject.GetValue());
-        Assert.Equal(new byte[4], oldBuffer);
-        Assert.Equal(new byte[] { 97, 98, 99, 0, 0, 0, 0, 0 }, GetBuffer(subject));
+        Assert.Equal(new byte[] { 97, 98, 99 }, subject.GetValue());
+        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity), oldBuffer);
+        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity * 2, 97, 98, 99), GetBuffer(subject));
     }
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(4)]
-    public void PushEnsuresCapacity(int capacity) {
-        using var subject = new SecureByteArray(capacity);
+    [Fact]
+    public void PushEnsuresCapacity() {
+        using var subject = new SecureByteArray();
 
-        subject.Push(97);
-        subject.Push(98);
-        subject.Push(99);
+        for (var i = 0; i < SecureByteArray.DefaultCapacity + 1; i++) {
+            subject.Push(97);
+        }
 
-        Assert.Equal("abc"u8.ToArray(), subject.GetValue());
-        Assert.Equal(new byte[] { 97, 98, 99, 0 }, GetBuffer(subject));
+        var expectedValue = Enumerable.Repeat((byte)97, SecureByteArray.DefaultCapacity + 1).ToArray();
+
+        Assert.Equal(expectedValue, subject.GetValue());
+        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity * 2, expectedValue), GetBuffer(subject));
     }
 
     [Fact]
     public void Pop() {
-        using var subject = new SecureByteArray(4);
+        using var subject = new SecureByteArray();
 
         subject.Push('a');
         subject.Push('b');
@@ -110,12 +94,12 @@ public sealed class SecureByteArrayTests {
         subject.Pop();
 
         Assert.Equal("ab"u8.ToArray(), subject.GetValue());
-        Assert.Equal(new byte[] { 97, 98, 0, 0 }, GetBuffer(subject));
+        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity, 97, 98), GetBuffer(subject));
     }
 
     [Fact]
     public void Clear() {
-        using var subject = new SecureByteArray(4);
+        using var subject = new SecureByteArray();
 
         subject.Push('a');
         subject.Push('b');
@@ -124,7 +108,13 @@ public sealed class SecureByteArrayTests {
         subject.Clear();
 
         Assert.Equal(Array.Empty<byte>(), subject.GetValue());
-        Assert.Equal(new byte[4], GetBuffer(subject));
+        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity), GetBuffer(subject));
+    }
+
+    private static byte[] GetExpectedBuffer(int length, params byte[] bytes) {
+        var expectedBuffer = new byte[length];
+        Buffer.BlockCopy(bytes, 0, expectedBuffer, 0, bytes.Length);
+        return expectedBuffer;
     }
 
     private static byte[] GetBuffer(SecureByteArray bytes) {
