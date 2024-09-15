@@ -49,7 +49,6 @@ public sealed class SecureByteArray : IDisposable {
         }
     }
 
-    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Clear() {
         lock (arrayLock) {
             ClearBuffer();
@@ -84,6 +83,7 @@ public sealed class SecureByteArray : IDisposable {
 
     public ReadOnlySpan<byte> GetValue() => new(buffer, 0, length);
 
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     private void ClearBuffer() {
         for (int i = 0; i < buffer.Length; i++) {
             buffer[i] = 0;
