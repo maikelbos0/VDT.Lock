@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NSubstitute;
+using System;
+using System.IO;
 using System.Reflection;
 using Xunit;
 
@@ -17,6 +19,33 @@ public sealed class SecureByteArrayTests {
     [InlineData(0)]
     public void EmptyConstructorThrowsForZeroOrNegativeCapacity(int capacity) {
         Assert.Throws<ArgumentOutOfRangeException>(() => new SecureByteArray(capacity));
+    }
+
+    [Fact]
+    public void StreamConstructor() {
+        var stream = "abc".ToStream();
+
+        using var subject = new SecureByteArray(stream, 4);
+
+        Assert.Equal("abc"u8.ToArray(), subject.GetValue());
+        Assert.Equal(new byte[] { (byte)'a', (byte)'b', (byte)'c', 0, 0, 0, 0, 0 }, GetBuffer(subject));
+    }
+
+    [Fact]
+    public void StreamConstructorThrowsForUnreadableStream() {
+        var stream = Substitute.For<Stream>();
+        stream.CanRead.Returns(false);
+
+        Assert.Throws<ArgumentException>(() => new SecureByteArray(stream));
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0)]
+    public void StreamConstructorThrowsForZeroOrNegativeCapacity(int capacity) {
+        var stream = "abc".ToStream();
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => new SecureByteArray(stream, capacity));
     }
 
     [Fact]
