@@ -22,13 +22,13 @@ public sealed class SecureByteArray : IDisposable {
             throw new ArgumentException("Cannot read from stream");
         }
 
-        buffer = new byte[DefaultCapacity];
+        buffer = new byte[GetCapacity(stream.CanRead ? (int)stream.Length + DefaultCapacity : DefaultCapacity)];
         bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
 
         int bytesRead;
 
         do {
-            //EnsureCapacity(length + DefaultCapacity);
+            EnsureCapacity(length + DefaultCapacity);
             bytesRead = stream.Read(buffer, length, DefaultCapacity);
             length += bytesRead;
         } while (bytesRead > 0 && false);
@@ -73,7 +73,7 @@ public sealed class SecureByteArray : IDisposable {
     }
 
     public int GetCapacity(int requestedCapacity) {
-        var capacity = buffer.Length;
+        var capacity = buffer?.Length ?? DefaultCapacity;
 
         while (capacity < requestedCapacity) {
             capacity *= 2;

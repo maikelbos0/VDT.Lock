@@ -22,7 +22,7 @@ public sealed class SecureByteArrayTests {
         using var subject = new SecureByteArray(stream);
 
         Assert.Equal("abc"u8.ToArray(), subject.GetValue());
-        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity, "abc"u8.ToArray()), GetBuffer(subject));
+        Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity * 2, "abc"u8.ToArray()), GetBuffer(subject));
     }
 
     [Fact]
