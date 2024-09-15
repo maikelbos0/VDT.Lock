@@ -8,6 +8,15 @@ using Xunit;
 namespace VDT.Lock.Tests;
 
 public sealed class SecureByteArrayTests {
+    [Theory]
+    [InlineData(2, SecureByteArray.DefaultCapacity)]
+    [InlineData(SecureByteArray.DefaultCapacity, SecureByteArray.DefaultCapacity)]
+    [InlineData(SecureByteArray.DefaultCapacity + 1, SecureByteArray.DefaultCapacity * 2)]
+    [InlineData(SecureByteArray.DefaultCapacity * 2 + 1, SecureByteArray.DefaultCapacity * 4)]
+    public void GetCapacity(int requestedCapacity, int expectedCapacity) {
+        Assert.Equal(expectedCapacity, SecureByteArray.GetCapacity(requestedCapacity));
+    }
+
     [Fact]
     public void EmptyConstructor() {
         using var subject = new SecureByteArray();
@@ -119,17 +128,6 @@ public sealed class SecureByteArrayTests {
 
         Assert.Equal(expectedValue, subject.GetValue());
         Assert.Equal(GetExpectedBuffer(SecureByteArray.DefaultCapacity * 2, expectedValue), GetBuffer(subject));
-    }
-
-    [Theory]
-    [InlineData(2, SecureByteArray.DefaultCapacity)]
-    [InlineData(SecureByteArray.DefaultCapacity, SecureByteArray.DefaultCapacity)]
-    [InlineData(SecureByteArray.DefaultCapacity + 1, SecureByteArray.DefaultCapacity * 2)]
-    [InlineData(SecureByteArray.DefaultCapacity * 2 + 1, SecureByteArray.DefaultCapacity * 4)]
-    public void GetCapacity(int requestedCapacity, int expectedCapacity) {
-        using var subject = new SecureByteArray();
-
-        Assert.Equal(expectedCapacity, subject.GetCapacity(requestedCapacity));
     }
 
     private static byte[] GetExpectedBuffer(int length, params byte[] bytes) {

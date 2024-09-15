@@ -12,6 +12,16 @@ public sealed class SecureByteArray : IDisposable {
     private GCHandle bufferHandle;
     private readonly object arrayLock = new();
 
+    public static int GetCapacity(int requestedCapacity) {
+        var capacity = DefaultCapacity;
+
+        while (capacity < requestedCapacity) {
+            capacity *= 2;
+        }
+
+        return Math.Min(capacity, Array.MaxLength);
+    }
+
     public SecureByteArray() {
         buffer = new byte[DefaultCapacity];
         bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
@@ -75,16 +85,6 @@ public sealed class SecureByteArray : IDisposable {
             buffer = newBuffer;
             bufferHandle = newBufferHandle;
         }
-    }
-
-    public int GetCapacity(int requestedCapacity) {
-        var capacity = DefaultCapacity;
-
-        while (capacity < requestedCapacity) {
-            capacity *= 2;
-        }
-
-        return Math.Min(capacity, Array.MaxLength);
     }
 
     public ReadOnlySpan<byte> GetValue() => new(buffer, 0, length);
