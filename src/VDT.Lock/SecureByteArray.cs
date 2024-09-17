@@ -1,5 +1,5 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace VDT.Lock;
 
@@ -67,7 +67,7 @@ public sealed class SecureByteArray : IDisposable {
 
     public void Clear() {
         lock (arrayLock) {
-            ClearBuffer();
+            CryptographicOperations.ZeroMemory(buffer);
             length = 0;
         }
     }
@@ -79,7 +79,7 @@ public sealed class SecureByteArray : IDisposable {
             var newBufferHandle = GCHandle.Alloc(newBuffer, GCHandleType.Pinned);
 
             Buffer.BlockCopy(buffer, 0, newBuffer, 0, buffer.Length);
-            ClearBuffer();
+            CryptographicOperations.ZeroMemory(buffer);
             bufferHandle.Free();
 
             buffer = newBuffer;
@@ -88,13 +88,6 @@ public sealed class SecureByteArray : IDisposable {
     }
 
     public ReadOnlySpan<byte> GetValue() => new(buffer, 0, length);
-
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    private void ClearBuffer() {
-        for (int i = 0; i < buffer.Length; i++) {
-            buffer[i] = 0;
-        }
-    }
 
     public void Dispose() {
         Dispose(true);
@@ -106,7 +99,7 @@ public sealed class SecureByteArray : IDisposable {
     }
 
     private void Dispose(bool _) {
-        ClearBuffer();
+        CryptographicOperations.ZeroMemory(buffer);
         length = 0;
         bufferHandle.Free();
     }
