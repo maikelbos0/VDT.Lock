@@ -1,5 +1,5 @@
 ﻿namespace VDT.Lock;
 
 public interface IHashProvider {
-    byte[] Provide(Stream stream, byte[] salt);
+    byte[] Provide(SecureByteArray plainBytes, byte[] salt);
 }

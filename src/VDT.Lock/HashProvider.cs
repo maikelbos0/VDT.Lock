@@ -5,13 +5,6 @@ namespace VDT.Lock;
 public sealed class HashProvider : IHashProvider {
     public const int Iterations = 1_000_000;
 
-    public byte[] Provide(Stream plainStream, byte[] salt) {
-        using var sha = SHA256.Create();
-
-        var password = sha.ComputeHash(plainStream);
-
-        using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations, HashAlgorithmName.SHA256);
-
-        return pbkdf2.GetBytes(SHA256.HashSizeInBytes);
-    }
+    public byte[] Provide(SecureByteArray plainBytes, byte[] salt)
+        => Rfc2898DeriveBytes.Pbkdf2(plainBytes.GetValue(), salt.AsSpan(), Iterations, HashAlgorithmName.SHA256, SHA256.HashSizeInBytes);
 }
