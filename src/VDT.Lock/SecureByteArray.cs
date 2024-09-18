@@ -1,15 +1,11 @@
-﻿using System.Runtime.InteropServices;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 
 namespace VDT.Lock;
 
-// TODO: while instances of this class may be short-lived, ideally it should still be prevented from being swapped to disk
-public sealed class SecureByteArray : IDisposable {
+public sealed class SecureByteArray : SecureByteCollectionBase {
     public const int DefaultCapacity = 64;
 
     private int length = 0;
-    private byte[] buffer;
-    private GCHandle bufferHandle;
     private readonly object arrayLock = new();
 
     public static int GetCapacity(int requestedCapacity) {
@@ -23,8 +19,7 @@ public sealed class SecureByteArray : IDisposable {
     }
 
     public SecureByteArray() {
-        buffer = new byte[DefaultCapacity];
-        bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+        SetBuffer(new byte[DefaultCapacity]);
     }
 
     public SecureByteArray(Stream stream) {
@@ -32,8 +27,7 @@ public sealed class SecureByteArray : IDisposable {
             throw new ArgumentException("Cannot read from stream");
         }
 
-        buffer = new byte[GetCapacity(stream.CanRead ? (int)stream.Length + DefaultCapacity : DefaultCapacity)];
-        bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+        SetBuffer(new byte[GetCapacity(stream.CanRead ? (int)stream.Length + DefaultCapacity : DefaultCapacity)]);
 
         int bytesRead;
 
@@ -45,8 +39,7 @@ public sealed class SecureByteArray : IDisposable {
     }
 
     public SecureByteArray(byte[] bytes) {
-        buffer = bytes;
-        bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+        SetBuffer(bytes);
         length = buffer.Length;
     }
 
@@ -61,7 +54,7 @@ public sealed class SecureByteArray : IDisposable {
 
     public void Pop() {
         lock (arrayLock) {
-            buffer[--length] = 0;
+            CryptographicOperations.ZeroMemory(new Span<byte>(buffer, --length, 1));
         }
     }
 
@@ -76,31 +69,12 @@ public sealed class SecureByteArray : IDisposable {
         if (buffer.Length < requestedCapacity && buffer.Length < Array.MaxLength) {
             var capacity = GetCapacity(requestedCapacity);
             var newBuffer = new byte[capacity];
-            var newBufferHandle = GCHandle.Alloc(newBuffer, GCHandleType.Pinned);
 
             Buffer.BlockCopy(buffer, 0, newBuffer, 0, buffer.Length);
-            CryptographicOperations.ZeroMemory(buffer);
-            bufferHandle.Free();
-
-            buffer = newBuffer;
-            bufferHandle = newBufferHandle;
+            ReleaseBuffer();
+            SetBuffer(newBuffer);
         }
     }
 
     public ReadOnlySpan<byte> GetValue() => new(buffer, 0, length);
-
-    public void Dispose() {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    ~SecureByteArray() {
-        Dispose(false);
-    }
-
-    private void Dispose(bool _) {
-        CryptographicOperations.ZeroMemory(buffer);
-        length = 0;
-        bufferHandle.Free();
-    }
 }
