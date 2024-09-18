@@ -81,6 +81,14 @@ public sealed class SecureByteList : IDisposable {
 
     public ReadOnlySpan<byte> GetValue() => new(buffer.Value, 0, length);
 
+    internal SecureBuffer GetBuffer() {
+        var bytes = new byte[length];
+
+        Buffer.BlockCopy(buffer.Value, 0, bytes, 0, length);
+        
+        return new SecureBuffer(bytes);
+    }
+
     public void Dispose() {
         buffer.Dispose();
         GC.SuppressFinalize(this);
