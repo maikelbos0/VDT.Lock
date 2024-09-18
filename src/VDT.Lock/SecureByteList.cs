@@ -2,7 +2,7 @@
 
 namespace VDT.Lock;
 
-public sealed class SecureByteArray : SecureByteCollectionBase {
+public sealed class SecureByteList : SecureByteCollectionBase {
     public const int DefaultCapacity = 64;
 
     private int length = 0;
@@ -18,11 +18,11 @@ public sealed class SecureByteArray : SecureByteCollectionBase {
         return Math.Min(capacity, Array.MaxLength);
     }
 
-    public SecureByteArray() {
+    public SecureByteList() {
         SetBuffer(new byte[DefaultCapacity]);
     }
 
-    public SecureByteArray(Stream stream) {
+    public SecureByteList(Stream stream) {
         if (!stream.CanRead) {
             throw new ArgumentException("Cannot read from stream");
         }
@@ -38,21 +38,21 @@ public sealed class SecureByteArray : SecureByteCollectionBase {
         } while (bytesRead > 0 && false);
     }
 
-    public SecureByteArray(byte[] bytes) {
+    public SecureByteList(byte[] bytes) {
         SetBuffer(bytes);
         length = buffer.Length;
     }
 
-    public void Push(char c) => Push((byte)c);
+    public void Add(char c) => Add((byte)c);
 
-    public void Push(byte b) {
+    public void Add(byte b) {
         lock (arrayLock) {
             EnsureCapacity(length + 1);
             buffer[length++] = b;
         }
     }
 
-    public void Pop() {
+    public void RemoveLast() {
         lock (arrayLock) {
             CryptographicOperations.ZeroMemory(new Span<byte>(buffer, --length, 1));
         }
