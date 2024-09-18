@@ -136,11 +136,10 @@ public sealed class SecureByteListTests {
         return expectedBuffer;
     }
 
-    private static byte[] GetBuffer(SecureByteList bytes) {
-        var fieldInfo = typeof(SecureByteList).GetField("buffer", BindingFlags.Instance | BindingFlags.NonPublic)
-            ?? throw new InvalidOperationException();
+    private static byte[] GetBuffer(SecureByteList list) {
+        var fieldInfo = typeof(SecureByteList).GetField("buffer", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new InvalidOperationException();
+        var buffer = fieldInfo.GetValue(list) as SecureBuffer ?? throw new InvalidOperationException();
 
-        return fieldInfo.GetValue(bytes) as byte[]
-            ?? throw new InvalidOperationException();
+        return buffer.Value;
     }
 }

@@ -20,5 +20,9 @@
 		<RemoveDir Directories="$(ProjectDir)publish" />
 		<Copy SourceFiles="@(WasmFiles)" DestinationFolder="$(ProjectDir)publish" />
 	</Target>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="$(AssemblyName).Tests" />
+	</ItemGroup>
 	
 </Project>

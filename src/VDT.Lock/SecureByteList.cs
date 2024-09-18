@@ -2,11 +2,14 @@
 
 namespace VDT.Lock;
 
-public sealed class SecureByteList : SecureByteCollectionBase {
+public sealed class SecureByteList : IDisposable {
     public const int DefaultCapacity = 64;
 
+    private readonly object listLock = new();
+    private SecureBuffer buffer;
     private int length = 0;
-    private readonly object arrayLock = new();
+
+    internal SecureBuffer Buffer => buffer;
 
     public static int GetCapacity(int requestedCapacity) {
         var capacity = DefaultCapacity;
@@ -19,7 +22,7 @@ public sealed class SecureByteList : SecureByteCollectionBase {
     }
 
     public SecureByteList() {
-        SetBuffer(new byte[DefaultCapacity]);
+        buffer = new(new byte[DefaultCapacity]);
     }
 
     public SecureByteList(Stream stream) {
@@ -27,54 +30,59 @@ public sealed class SecureByteList : SecureByteCollectionBase {
             throw new ArgumentException("Cannot read from stream");
         }
 
-        SetBuffer(new byte[GetCapacity(stream.CanRead ? (int)stream.Length + DefaultCapacity : DefaultCapacity)]);
+        buffer = new(new byte[GetCapacity(stream.CanRead ? (int)stream.Length + DefaultCapacity : DefaultCapacity)]);
 
         int bytesRead;
 
         do {
             EnsureCapacity(length + DefaultCapacity);
-            bytesRead = stream.Read(buffer, length, DefaultCapacity);
+            bytesRead = stream.Read(buffer.Value, length, DefaultCapacity);
             length += bytesRead;
-        } while (bytesRead > 0 && false);
+        } while (bytesRead > 0);
     }
 
     public SecureByteList(byte[] bytes) {
-        SetBuffer(bytes);
-        length = buffer.Length;
+        buffer = new(bytes);
+        length = bytes.Length;
     }
 
     public void Add(char c) => Add((byte)c);
 
     public void Add(byte b) {
-        lock (arrayLock) {
+        lock (listLock) {
             EnsureCapacity(length + 1);
-            buffer[length++] = b;
+            buffer.Value[length++] = b;
         }
     }
 
     public void RemoveLast() {
-        lock (arrayLock) {
-            CryptographicOperations.ZeroMemory(new Span<byte>(buffer, --length, 1));
+        lock (listLock) {
+            CryptographicOperations.ZeroMemory(new Span<byte>(buffer.Value, --length, 1));
         }
     }
 
     public void Clear() {
-        lock (arrayLock) {
-            CryptographicOperations.ZeroMemory(buffer);
+        lock (listLock) {
+            CryptographicOperations.ZeroMemory(buffer.Value);
             length = 0;
         }
     }
 
     public void EnsureCapacity(int requestedCapacity) {
-        if (buffer.Length < requestedCapacity && buffer.Length < Array.MaxLength) {
+        if (buffer.Value.Length < requestedCapacity && buffer.Value.Length < Array.MaxLength) {
             var capacity = GetCapacity(requestedCapacity);
             var newBuffer = new byte[capacity];
 
-            Buffer.BlockCopy(buffer, 0, newBuffer, 0, buffer.Length);
-            ReleaseBuffer();
-            SetBuffer(newBuffer);
+            System.Buffer.BlockCopy(buffer.Value, 0, newBuffer, 0, buffer.Value.Length);
+            buffer.Dispose();
+            buffer = new(newBuffer);
         }
     }
 
-    public ReadOnlySpan<byte> GetValue() => new(buffer, 0, length);
+    public ReadOnlySpan<byte> GetValue() => new(buffer.Value, 0, length);
+
+    public void Dispose() {
+        buffer.Dispose();
+        GC.SuppressFinalize(this);
+    }
 }
