@@ -1,6 +1,4 @@
-﻿using NSubstitute;
-using System;
-using System.IO;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -32,14 +30,6 @@ public sealed class SecureByteListTests {
 
         Assert.Equal("abc"u8.ToArray(), subject.GetValue());
         Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity * 2, "abc"u8.ToArray()), GetBufferValue(subject));
-    }
-
-    [Fact]
-    public void StreamConstructorThrowsForUnreadableStream() {
-        var stream = Substitute.For<Stream>();
-        stream.CanRead.Returns(false);
-
-        Assert.Throws<ArgumentException>(() => new SecureByteList(stream));
     }
 
     [Fact]

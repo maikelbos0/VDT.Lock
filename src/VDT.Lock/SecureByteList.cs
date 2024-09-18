@@ -9,8 +9,6 @@ public sealed class SecureByteList : IDisposable {
     private SecureBuffer buffer;
     private int length = 0;
 
-    internal SecureBuffer Buffer => buffer;
-
     public static int GetCapacity(int requestedCapacity) {
         var capacity = DefaultCapacity;
 
@@ -26,13 +24,9 @@ public sealed class SecureByteList : IDisposable {
     }
 
     public SecureByteList(Stream stream) {
-        if (!stream.CanRead) {
-            throw new ArgumentException("Cannot read from stream");
-        }
+        int bytesRead;
 
         buffer = new(new byte[GetCapacity(stream.CanRead ? (int)stream.Length + DefaultCapacity : DefaultCapacity)]);
-
-        int bytesRead;
 
         do {
             EnsureCapacity(length + DefaultCapacity);
@@ -54,6 +48,17 @@ public sealed class SecureByteList : IDisposable {
             buffer.Value[length++] = b;
         }
     }
+    
+    internal void EnsureCapacity(int requestedCapacity) {
+        if (buffer.Value.Length < requestedCapacity && buffer.Value.Length < Array.MaxLength) {
+            var capacity = GetCapacity(requestedCapacity);
+            var newBytes = new byte[capacity];
+
+            Buffer.BlockCopy(buffer.Value, 0, newBytes, 0, buffer.Value.Length);
+            buffer.Dispose();
+            buffer = new(newBytes);
+        }
+    }
 
     public void RemoveLast() {
         lock (listLock) {
@@ -65,17 +70,6 @@ public sealed class SecureByteList : IDisposable {
         lock (listLock) {
             CryptographicOperations.ZeroMemory(buffer.Value);
             length = 0;
-        }
-    }
-
-    public void EnsureCapacity(int requestedCapacity) {
-        if (buffer.Value.Length < requestedCapacity && buffer.Value.Length < Array.MaxLength) {
-            var capacity = GetCapacity(requestedCapacity);
-            var newBuffer = new byte[capacity];
-
-            System.Buffer.BlockCopy(buffer.Value, 0, newBuffer, 0, buffer.Value.Length);
-            buffer.Dispose();
-            buffer = new(newBuffer);
         }
     }
 
