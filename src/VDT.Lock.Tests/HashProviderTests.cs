@@ -1,17 +1,18 @@
-﻿using Xunit;
+﻿using System.Text;
+using Xunit;
 
 namespace VDT.Lock.Tests;
 
 public class HashProviderTests {
     [Fact]
     public void Provide() {
-        var expectedResult = new byte[] { 94, 127, 205, 144, 246, 91, 11, 57, 225, 92, 158, 62, 250, 193, 91, 110, 190, 217, 203, 200, 94, 121, 41, 154, 149, 62, 49, 26, 113, 1, 233, 151 };
+        var expectedResult = new byte[] { 42, 3, 50, 180, 96, 215, 180, 143, 204, 234, 68, 211, 146, 144, 213, 1, 146, 63, 163, 109, 156, 255, 82, 157, 65, 255, 159, 145, 220, 11, 80, 75 };
 
         var subject = new HashProvider();
-        var plainStream = "password".ToStream();
+        var plainBytes = new SecureByteArray(Encoding.UTF8.GetBytes("password"));
         var salt = new byte[] { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
 
-        var result = subject.Provide(plainStream, salt);
+        var result = subject.Provide(plainBytes, salt);
 
         Assert.Equal(expectedResult, result);
     }
