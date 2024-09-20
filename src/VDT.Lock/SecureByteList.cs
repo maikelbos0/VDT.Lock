@@ -48,8 +48,8 @@ public sealed class SecureByteList : IDisposable {
             buffer.Value[length++] = b;
         }
     }
-    
-    internal void EnsureCapacity(int requestedCapacity) {
+
+    public void EnsureCapacity(int requestedCapacity) {
         if (buffer.Value.Length < requestedCapacity && buffer.Value.Length < Array.MaxLength) {
             var capacity = GetCapacity(requestedCapacity);
             var newBytes = new byte[capacity];
@@ -75,7 +75,7 @@ public sealed class SecureByteList : IDisposable {
 
     public ReadOnlySpan<byte> GetValue() => new(buffer.Value, 0, length);
 
-    internal SecureBuffer GetBuffer() {
+    public SecureBuffer GetBuffer() {
         var bytes = new byte[length];
 
         Buffer.BlockCopy(buffer.Value, 0, bytes, 0, length);
