@@ -33,24 +33,26 @@ public sealed class Encryptor {
     }
 #else
     public Task<SecureBuffer> Encrypt(SecureBuffer plainBuffer, byte[] key) {
-        using var iv = new SecureBuffer(randomByteGenerator.Generate(BlockSizeInBytes));
+        using var ivBuffer = new SecureBuffer(randomByteGenerator.Generate(BlockSizeInBytes));
 #pragma warning disable CA1416 // Validate platform compatibility
         using var aes = Aes.Create();
 #pragma warning restore CA1416 // Validate platform compatibility
         aes.Mode = CipherMode.CBC;
 
-        var encryptor = aes.CreateEncryptor(key, iv.Value);
-        // TODO eliminate memorystream
-        var encryptedStream = new MemoryStream();
-        encryptedStream.Write(iv.Value, 0, iv.Value.Length);
+        using var encryptor = aes.CreateEncryptor(key, ivBuffer.Value);
 
-        using var cryptoStream = new CryptoStream(encryptedStream, encryptor, CryptoStreamMode.Write);
+        var payloadBuffer = new SecureBuffer(new byte[plainBuffer.Value.Length + 2 * BlockSizeInBytes - (plainBuffer.Value.Length % BlockSizeInBytes)]);
+        Buffer.BlockCopy(ivBuffer.Value, 0, payloadBuffer.Value, 0, BlockSizeInBytes);
+
+        using var payloadStream = new MemoryStream(payloadBuffer.Value);
+        payloadStream.Position = BlockSizeInBytes;
+
+        using var cryptoStream = new CryptoStream(payloadStream, encryptor, CryptoStreamMode.Write);
 
         cryptoStream.Write(plainBuffer.Value, 0, plainBuffer.Value.Length);
         cryptoStream.FlushFinalBlock();
-        encryptedStream.Seek(0, SeekOrigin.Begin);
 
-        return Task.FromResult(new SecureBuffer(encryptedStream.ToArray()));
+        return Task.FromResult(payloadBuffer);
     }
 #endif
 
@@ -85,11 +87,7 @@ public sealed class Encryptor {
 
         using var decryptor = aes.CreateDecryptor(key, ivBuffer.Value);
         using var cryptoStream = new CryptoStream(new MemoryStream(encryptedBuffer.Value), decryptor, CryptoStreamMode.Read);
-
-        // TODO eliminate memorystream
-        var encryptedStream = new MemoryStream();
-        cryptoStream.CopyTo(encryptedStream);
-        encryptedStream.Seek(0, SeekOrigin.Begin);
+        using var plainBytes = new SecureByteList(cryptoStream);
 
         return Task.FromResult(plainBytes.ToBuffer());
     }
