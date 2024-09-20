@@ -33,17 +33,16 @@ public sealed class Encryptor {
     }
 #else
     public Task<SecureBuffer> Encrypt(SecureBuffer plainBuffer, byte[] key) {
-        // TODO secure this
-        var iv = randomByteGenerator.Generate(BlockSizeInBytes);
+        using var iv = new SecureBuffer(randomByteGenerator.Generate(BlockSizeInBytes));
 #pragma warning disable CA1416 // Validate platform compatibility
         using var aes = Aes.Create();
 #pragma warning restore CA1416 // Validate platform compatibility
         aes.Mode = CipherMode.CBC;
 
-        var encryptor = aes.CreateEncryptor(key, iv);
+        var encryptor = aes.CreateEncryptor(key, iv.Value);
         // TODO eliminate memorystream
         var encryptedStream = new MemoryStream();
-        encryptedStream.Write(iv, 0, iv.Length);
+        encryptedStream.Write(iv.Value, 0, iv.Value.Length);
 
         using var cryptoStream = new CryptoStream(encryptedStream, encryptor, CryptoStreamMode.Write);
 
@@ -73,9 +72,11 @@ public sealed class Encryptor {
     }
 #else
     public Task<SecureBuffer> Decrypt(SecureBuffer payloadBuffer, byte[] key) {
-        // TODO eliminate toarray
-        using var ivBuffer = new SecureBuffer(payloadBuffer.Value.Take(BlockSizeInBytes).ToArray());
-        using var encryptedBuffer = new SecureBuffer(payloadBuffer.Value.Skip(BlockSizeInBytes).ToArray());
+        using var ivBuffer = new SecureBuffer(new byte[BlockSizeInBytes]);
+        Buffer.BlockCopy(payloadBuffer.Value, 0, ivBuffer.Value, 0, BlockSizeInBytes);
+
+        using var encryptedBuffer = new SecureBuffer(new byte[payloadBuffer.Value.Length - BlockSizeInBytes]);
+        Buffer.BlockCopy(payloadBuffer.Value, BlockSizeInBytes, encryptedBuffer.Value, 0, payloadBuffer.Value.Length - BlockSizeInBytes);
 
 #pragma warning disable CA1416 // Validate platform compatibility
         using var aes = Aes.Create();
