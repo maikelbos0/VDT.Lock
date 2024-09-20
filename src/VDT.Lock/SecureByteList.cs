@@ -75,7 +75,7 @@ public sealed class SecureByteList : IDisposable {
 
     public ReadOnlySpan<byte> GetValue() => new(buffer.Value, 0, length);
 
-    public SecureBuffer GetBuffer() {
+    public SecureBuffer ToBuffer() {
         var bytes = new byte[length];
 
         Buffer.BlockCopy(buffer.Value, 0, bytes, 0, length);

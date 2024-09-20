@@ -121,14 +121,14 @@ public sealed class SecureByteListTests {
     }
 
     [Fact]
-    public void GetBuffer() {
+    public void ToBuffer() {
         using var subject = new SecureByteList();
 
         subject.Add(97);
         subject.Add(98);
         subject.Add(99);
 
-        using var buffer = subject.GetBuffer();
+        using var buffer = subject.ToBuffer();
 
         Assert.Equal(new byte[] { 97, 98, 99 }, buffer.Value);
     }
