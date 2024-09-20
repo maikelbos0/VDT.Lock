@@ -83,7 +83,7 @@ public sealed class Encryptor {
 #pragma warning restore CA1416 // Validate platform compatibility
         aes.Mode = CipherMode.CBC;
 
-        var decryptor = aes.CreateDecryptor(key, ivBuffer.Value);
+        using var decryptor = aes.CreateDecryptor(key, ivBuffer.Value);
         using var cryptoStream = new CryptoStream(new MemoryStream(encryptedBuffer.Value), decryptor, CryptoStreamMode.Read);
 
         // TODO eliminate memorystream
@@ -91,7 +91,7 @@ public sealed class Encryptor {
         cryptoStream.CopyTo(encryptedStream);
         encryptedStream.Seek(0, SeekOrigin.Begin);
 
-        return Task.FromResult(new SecureByteList(encryptedStream).ToBuffer());
+        return Task.FromResult(plainBytes.ToBuffer());
     }
 #endif
 }
