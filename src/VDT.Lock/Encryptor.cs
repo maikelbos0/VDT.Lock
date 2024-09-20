@@ -32,7 +32,8 @@ public sealed class Encryptor {
         return result;
     }
 #else
-    public Task<byte[]> Encrypt(Stream plainStream, byte[] key) {
+    public Task<SecureBuffer> Encrypt(SecureBuffer plainBuffer, byte[] key) {
+        // TODO secure this
         var iv = randomByteGenerator.Generate(BlockSizeInBytes);
 #pragma warning disable CA1416 // Validate platform compatibility
         using var aes = Aes.Create();
@@ -40,15 +41,17 @@ public sealed class Encryptor {
         aes.Mode = CipherMode.CBC;
 
         var encryptor = aes.CreateEncryptor(key, iv);
+        // TODO eliminate memorystream
         var encryptedStream = new MemoryStream();
         encryptedStream.Write(iv, 0, iv.Length);
 
         using var cryptoStream = new CryptoStream(encryptedStream, encryptor, CryptoStreamMode.Write);
 
-        plainStream.CopyTo(cryptoStream);
+        cryptoStream.Write(plainBuffer.Value, 0, plainBuffer.Value.Length);
         cryptoStream.FlushFinalBlock();
+        encryptedStream.Seek(0, SeekOrigin.Begin);
 
-        return Task.FromResult(encryptedStream.ToArray());
+        return Task.FromResult(new SecureBuffer(encryptedStream.ToArray()));
     }
 #endif
 
@@ -69,19 +72,25 @@ public sealed class Encryptor {
         return plainStream;
     }
 #else
-    public Task<Stream> Decrypt(byte[] encryptedBytes, byte[] key) {
-        var iv = encryptedBytes.Take(BlockSizeInBytes).ToArray();
-
-        encryptedBytes = encryptedBytes.Skip(BlockSizeInBytes).ToArray();
+    public Task<SecureBuffer> Decrypt(SecureBuffer payloadBuffer, byte[] key) {
+        // TODO eliminate toarray
+        using var ivBuffer = new SecureBuffer(payloadBuffer.Value.Take(BlockSizeInBytes).ToArray());
+        using var encryptedBuffer = new SecureBuffer(payloadBuffer.Value.Skip(BlockSizeInBytes).ToArray());
 
 #pragma warning disable CA1416 // Validate platform compatibility
         using var aes = Aes.Create();
 #pragma warning restore CA1416 // Validate platform compatibility
         aes.Mode = CipherMode.CBC;
 
-        var decryptor = aes.CreateDecryptor(key, iv);
+        var decryptor = aes.CreateDecryptor(key, ivBuffer.Value);
+        using var cryptoStream = new CryptoStream(new MemoryStream(encryptedBuffer.Value), decryptor, CryptoStreamMode.Read);
 
-        return Task.FromResult((Stream)new CryptoStream(new MemoryStream(encryptedBytes), decryptor, CryptoStreamMode.Read));
+        // TODO eliminate memorystream
+        var encryptedStream = new MemoryStream();
+        cryptoStream.CopyTo(encryptedStream);
+        encryptedStream.Seek(0, SeekOrigin.Begin);
+
+        return Task.FromResult(new SecureByteList(encryptedStream).ToBuffer());
     }
 #endif
 }
