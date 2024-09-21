@@ -56,7 +56,7 @@ public sealed class Encryptor(IRandomByteGenerator randomByteGenerator) : IEncry
         using var encryptedBuffer = new SecureBuffer(new byte[payloadBuffer.Value.Length - BlockSizeInBytes]);
         Buffer.BlockCopy(payloadBuffer.Value, BlockSizeInBytes, encryptedBuffer.Value, 0, payloadBuffer.Value.Length - BlockSizeInBytes);
 
-        return new SecureBuffer(await JSEncryptor.Decrypt(payloadBuffer.Value, key, ivBuffer.Value) as byte[] ?? throw new InvalidOperationException());
+        return new SecureBuffer(await JSEncryptor.Decrypt(encryptedBuffer.Value, keyBuffer.Value, ivBuffer.Value) as byte[] ?? throw new InvalidOperationException());
     }
 #else
     public Task<SecureBuffer> Decrypt(SecureBuffer payloadBuffer, byte[] key) {
