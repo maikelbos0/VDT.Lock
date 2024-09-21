@@ -4,15 +4,9 @@ using System.Security.Cryptography;
 
 namespace VDT.Lock;
 
-public sealed class Encryptor {
+public sealed class Encryptor(IRandomByteGenerator randomByteGenerator) : IEncryptor {
     public const int KeySizeInBytes = 32;
     public const int BlockSizeInBytes = 16;
-
-    private readonly IRandomByteGenerator randomByteGenerator;
-
-    public Encryptor(IRandomByteGenerator randomByteGenerator) {
-        this.randomByteGenerator = randomByteGenerator;
-    }
 
 #if BROWSER
     public async Task<SecureBuffer> Encrypt(SecureBuffer plainBuffer, byte[] key) {
@@ -20,8 +14,8 @@ public sealed class Encryptor {
 
         using var ivBuffer = new SecureBuffer(randomByteGenerator.Generate(BlockSizeInBytes));
         using var encryptedBuffer = new SecureBuffer(await JSEncryptor.Encrypt(plainBuffer.Value, key, ivBuffer.Value) as byte[] ?? throw new InvalidOperationException());
-        
-        var payloadBuffer = new SecureBuffer(new byte[ivBuffer.Value.Length +  encryptedBuffer.Value.Length]);
+
+        var payloadBuffer = new SecureBuffer(new byte[ivBuffer.Value.Length + encryptedBuffer.Value.Length]);
         Buffer.BlockCopy(ivBuffer.Value, 0, payloadBuffer.Value, 0, ivBuffer.Value.Length);
         Buffer.BlockCopy(encryptedBuffer.Value, 0, payloadBuffer.Value, ivBuffer.Value.Length, encryptedBuffer.Value.Length);
 
