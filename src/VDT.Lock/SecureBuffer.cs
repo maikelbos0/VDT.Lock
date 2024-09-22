@@ -5,12 +5,19 @@ namespace VDT.Lock;
 
 // TODO: while instances of this class and its implementations may be short-lived, ideally it should still be prevented from being swapped to disk
 public sealed class SecureBuffer : IDisposable {
-    private GCHandle handle;
+    private readonly GCHandle handle;
+    private readonly byte[] value;
+    private bool isDisposed;
 
-    public byte[] Value { get; }
+    public byte[] Value {
+        get {
+            ObjectDisposedException.ThrowIf(isDisposed, this);
+            return value;
+        }
+    }
 
     public SecureBuffer(byte[] buffer) {
-        Value = buffer;
+        value = buffer;
         handle = GCHandle.Alloc(Value, GCHandleType.Pinned);
     }
 
@@ -24,7 +31,10 @@ public sealed class SecureBuffer : IDisposable {
     }
 
     private void Dispose(bool _) {
-        CryptographicOperations.ZeroMemory(Value);
-        handle.Free();
+        CryptographicOperations.ZeroMemory(value);
+        if (handle.IsAllocated) {
+            handle.Free();
+        }
+        isDisposed = true;
     }
 }
