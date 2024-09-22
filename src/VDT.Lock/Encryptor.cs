@@ -4,9 +4,15 @@ using System.Security.Cryptography;
 
 namespace VDT.Lock;
 
-public sealed class Encryptor(IRandomByteGenerator randomByteGenerator) : IEncryptor {
+public sealed class Encryptor : IEncryptor {
     public const int KeySizeInBytes = 32;
     public const int BlockSizeInBytes = 16;
+
+    private readonly IRandomByteGenerator randomByteGenerator;
+
+    public Encryptor(IRandomByteGenerator randomByteGenerator) {
+        this.randomByteGenerator = randomByteGenerator;
+    }
 
 #if BROWSER
     public async Task<SecureBuffer> Encrypt(SecureBuffer plainBuffer, SecureBuffer keyBuffer) {
