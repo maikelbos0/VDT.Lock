@@ -16,6 +16,8 @@ public sealed class SecureBuffer : IDisposable {
         }
     }
 
+    public bool IsDisposed => isDisposed;
+
     public SecureBuffer(byte[] buffer) {
         value = buffer;
         handle = GCHandle.Alloc(Value, GCHandleType.Pinned);

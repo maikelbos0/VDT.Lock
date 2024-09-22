@@ -19,7 +19,7 @@ public sealed class SecureByteListTests {
     public void EmptyConstructor() {
         using var subject = new SecureByteList();
 
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity), subject.GetBufferValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity), subject.GetBuffer().Value);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public sealed class SecureByteListTests {
         using var subject = new SecureByteList(stream);
 
         Assert.Equal("abc"u8.ToArray(), subject.GetValue());
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity * 2, "abc"u8.ToArray()), subject.GetBufferValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity * 2, "abc"u8.ToArray()), subject.GetBuffer().Value);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class SecureByteListTests {
         using var subject = new SecureByteList(byteArray);
 
         Assert.Equal(byteArray, subject.GetValue());
-        Assert.Same(byteArray, subject.GetBufferValue());
+        Assert.Same(byteArray, subject.GetBuffer().Value);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public sealed class SecureByteListTests {
         subject.Add('a');
 
         Assert.Equal("a"u8.ToArray(), subject.GetValue());
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, "a"u8.ToArray()), subject.GetBufferValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, "a"u8.ToArray()), subject.GetBuffer().Value);
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public sealed class SecureByteListTests {
         subject.Add(97);
 
         Assert.Equal(new byte[] { 97 }, subject.GetValue());
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, 97), subject.GetBufferValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, 97), subject.GetBuffer().Value);
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public sealed class SecureByteListTests {
         subject.RemoveLast();
 
         Assert.Equal("ab"u8.ToArray(), subject.GetValue());
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, 97, 98), subject.GetBufferValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, 97, 98), subject.GetBuffer().Value);
     }
 
     [Fact]
@@ -89,13 +89,13 @@ public sealed class SecureByteListTests {
         subject.Clear();
 
         Assert.Equal(Array.Empty<byte>(), subject.GetValue());
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity), subject.GetBufferValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity), subject.GetBuffer().Value);
     }
 
     [Fact]
     public void EnsureCapacity() {
         using var subject = new SecureByteList();
-        var oldBuffer = subject.GetBufferValue();
+        var oldBuffer = subject.GetBuffer();
 
         subject.Add(97);
         subject.Add(98);
@@ -104,8 +104,8 @@ public sealed class SecureByteListTests {
         subject.EnsureCapacity(SecureByteList.DefaultCapacity + 1);
 
         Assert.Equal(new byte[] { 97, 98, 99 }, subject.GetValue());
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity), oldBuffer);
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity * 2, 97, 98, 99), subject.GetBufferValue());
+        Assert.True(oldBuffer.IsDisposed);
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity * 2, 97, 98, 99), subject.GetBuffer().Value);
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public sealed class SecureByteListTests {
         var expectedValue = Enumerable.Repeat((byte)97, SecureByteList.DefaultCapacity + 1).ToArray();
 
         Assert.Equal(expectedValue, subject.GetValue());
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity * 2, expectedValue), subject.GetBufferValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity * 2, expectedValue), subject.GetBuffer().Value);
     }
 
     [Fact]
@@ -137,17 +137,17 @@ public sealed class SecureByteListTests {
 
     [Fact]
     public void Dispose() {
-        byte[] bufferValue;
+        SecureBuffer buffer;
 
         using (var subject = new SecureByteList()) {
             subject.Add(97);
             subject.Add(98);
             subject.Add(99);
 
-            bufferValue = subject.GetBufferValue();
+            buffer = subject.GetBuffer();
         }
 
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity), bufferValue);
+        Assert.True(buffer.IsDisposed);
     }
 
     private static byte[] GetExpectedBufferValue(int length, params byte[] bytes) {

@@ -18,18 +18,18 @@ public class StoreManagerTests {
 
     [Fact]
     public async Task Dispose() {
-        byte[] sessionKeyBufferValue;
-        byte[] encryptedStoreKeyBufferValue;
+        SecureBuffer sessionKeyBuffer;
+        SecureBuffer encryptedStoreKeyBuffer;
 
         using var masterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
         using var expectedStoreKey = new HashProvider().Provide(masterPasswordBuffer, StoreManagerFactory.MasterPasswordSalt);
 
         using (var subject = await new StoreManagerFactory().Create(masterPasswordBuffer)) {
-            sessionKeyBufferValue = subject.GetBufferValue("sessionKeyBuffer");
-            encryptedStoreKeyBufferValue = subject.GetBufferValue("encryptedStoreKeyBuffer");
+            sessionKeyBuffer = subject.GetBuffer("sessionKeyBuffer");
+            encryptedStoreKeyBuffer = subject.GetBuffer("encryptedStoreKeyBuffer");
         };
         
-        Assert.Equal(new byte[Encryptor.KeySizeInBytes], sessionKeyBufferValue);
-        Assert.Equal(new byte[Encryptor.BlockSizeInBytes + Encryptor.BlockSizeInBytes + Encryptor.KeySizeInBytes], encryptedStoreKeyBufferValue);
+        Assert.True(sessionKeyBuffer.IsDisposed);
+        Assert.True(encryptedStoreKeyBuffer.IsDisposed);
     }
 }
