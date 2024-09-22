@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -24,7 +25,9 @@ public sealed class SecureByteListTests {
 
     [Fact]
     public void StreamConstructor() {
-        var stream = "abc".ToStream();
+        using var stream = new MemoryStream();
+        stream.Write("abc"u8.ToArray(), 0, 3);
+        stream.Seek(0, SeekOrigin.Begin);
 
         using var subject = new SecureByteList(stream);
 
