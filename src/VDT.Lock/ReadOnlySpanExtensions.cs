@@ -15,4 +15,13 @@ public static class ReadOnlySpanExtensions {
 
         return value;
     }
+
+    public static SecureBuffer ReadSecureBuffer(this ReadOnlySpan<byte> span, ref int position) {
+        var length = ReadInt(span, ref position);
+        var buffer = new SecureBuffer(span.Slice(position, length).ToArray());
+
+        position += length;
+
+        return buffer;
+    }
 }
