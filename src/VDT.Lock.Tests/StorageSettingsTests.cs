@@ -17,12 +17,12 @@ public class StorageSettingsTests {
 
         using var subject = new StorageSettings(settingsSpan);
 
-        Assert.Equal(new ReadOnlySpan<byte>([1, 2, 3, 4]), subject.GetSetting("bar"));
-        Assert.Equal(new ReadOnlySpan<byte>([5, 6, 7, 8, 9]), subject.GetSetting("foo"));
+        Assert.Equal(new ReadOnlySpan<byte>([1, 2, 3, 4]), subject.Get("bar"));
+        Assert.Equal(new ReadOnlySpan<byte>([5, 6, 7, 8, 9]), subject.Get("foo"));
     }
 
     [Fact]
-    public void SetSettingAdd() {
+    public void SetToAddSetting() {
         var settingsSpan = new ReadOnlySpan<byte>([
             3, 0, 0, 0, 98, 97, 114,
             4, 0, 0, 0, 1, 2, 3, 4,
@@ -32,13 +32,13 @@ public class StorageSettingsTests {
 
         using var subject = new StorageSettings(settingsSpan);
 
-        subject.SetSetting("baz", new ReadOnlySpan<byte>([15, 15, 15]));
+        subject.Set("baz", new ReadOnlySpan<byte>([15, 15, 15]));
 
-        Assert.Equal(new ReadOnlySpan<byte>([15, 15, 15]), subject.GetSetting("baz"));
+        Assert.Equal(new ReadOnlySpan<byte>([15, 15, 15]), subject.Get("baz"));
     }
 
     [Fact]
-    public void SetSettingOverwrite() {
+    public void SetToOverwriteSetting() {
         var settingsSpan = new ReadOnlySpan<byte>([
             3, 0, 0, 0, 98, 97, 114,
             4, 0, 0, 0, 1, 2, 3, 4,
@@ -50,9 +50,9 @@ public class StorageSettingsTests {
         
         var previousValue = GetSettings(subject)["foo"];
 
-        subject.SetSetting("foo", new ReadOnlySpan<byte>([15, 15, 15]));
+        subject.Set("foo", new ReadOnlySpan<byte>([15, 15, 15]));
 
-        Assert.Equal(new ReadOnlySpan<byte>([15, 15, 15]), subject.GetSetting("foo"));
+        Assert.Equal(new ReadOnlySpan<byte>([15, 15, 15]), subject.Get("foo"));
         Assert.True(previousValue.IsDisposed);
     }
 

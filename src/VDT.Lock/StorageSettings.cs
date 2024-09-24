@@ -13,10 +13,10 @@ public sealed class StorageSettings : IDisposable {
         }
     }
 
-    public ReadOnlySpan<byte> GetSetting(string key)
+    public ReadOnlySpan<byte> Get(string key)
         => new ReadOnlySpan<byte>(settings[key].Value);
 
-    public void SetSetting(string key, ReadOnlySpan<byte> valueSpan) {
+    public void Set(string key, ReadOnlySpan<byte> valueSpan) {
         var value = new SecureBuffer(valueSpan.ToArray());
 
         settings.AddOrUpdate(key, value, (key, previousValue) => {
