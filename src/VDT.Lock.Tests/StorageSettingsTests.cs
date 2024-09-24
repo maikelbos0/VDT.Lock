@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Reflection;
 using Xunit;
 
@@ -64,7 +64,7 @@ public class StorageSettingsTests {
             3, 0, 0, 0, 102, 111, 111,
             5, 0, 0, 0, 5, 6, 7, 8, 9
         ]);
-        Dictionary<string, SecureBuffer> settings;
+        ConcurrentDictionary<string, SecureBuffer> settings;
         
         using (var subject = new StorageSettings(settingsSpan)) {
             settings = GetSettings(subject);
@@ -77,9 +77,9 @@ public class StorageSettingsTests {
         }
     }
 
-    private static Dictionary<string, SecureBuffer> GetSettings(StorageSettings storageSettings) {
+    private static ConcurrentDictionary<string, SecureBuffer> GetSettings(StorageSettings storageSettings) {
         var settingsField = typeof(StorageSettings).GetField("settings", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new InvalidOperationException();
         
-        return settingsField.GetValue(storageSettings) as Dictionary<string, SecureBuffer> ?? throw new InvalidOperationException();
+        return settingsField.GetValue(storageSettings) as ConcurrentDictionary<string, SecureBuffer> ?? throw new InvalidOperationException();
     }
 }
