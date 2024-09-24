@@ -49,6 +49,14 @@ public sealed class SecureByteList : IDisposable {
         }
     }
 
+    public void Add(ReadOnlySpan<byte> span) {
+        lock (listLock) {
+            EnsureCapacity(length + span.Length);
+            span.CopyTo(new Span<byte>(buffer.Value, length, span.Length));
+            length += span.Length;
+        }
+    }
+
     public void EnsureCapacity(int requestedCapacity) {
         if (buffer.Value.Length < requestedCapacity && buffer.Value.Length < Array.MaxLength) {
             var capacity = GetCapacity(requestedCapacity);

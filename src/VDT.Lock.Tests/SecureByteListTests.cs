@@ -65,6 +65,16 @@ public sealed class SecureByteListTests {
     }
 
     [Fact]
+    public void AddReadOnlySpan() {
+        using var subject = new SecureByteList();
+
+        subject.Add(new ReadOnlySpan<byte>([97, 98, 99]));
+
+        Assert.Equal(new byte[] { 97, 98, 99 }, subject.GetValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, 97, 98, 99), subject.GetBuffer().Value);
+    }
+
+    [Fact]
     public void RemoveLast() {
         using var subject = new SecureByteList();
 
@@ -117,6 +127,17 @@ public sealed class SecureByteListTests {
         }
 
         var expectedValue = Enumerable.Repeat((byte)97, SecureByteList.DefaultCapacity + 1).ToArray();
+
+        Assert.Equal(expectedValue, subject.GetValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity * 2, expectedValue), subject.GetBuffer().Value);
+    }
+
+    [Fact]
+    public void AddReadOnlySpanEnsuresCapacity() {
+        var expectedValue = Enumerable.Repeat((byte)97, SecureByteList.DefaultCapacity + 1).ToArray();
+        using var subject = new SecureByteList();
+
+        subject.Add(new ReadOnlySpan<byte>(expectedValue));
 
         Assert.Equal(expectedValue, subject.GetValue());
         Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity * 2, expectedValue), subject.GetBuffer().Value);
