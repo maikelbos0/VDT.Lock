@@ -22,6 +22,41 @@ public class StorageSettingsTests {
     }
 
     [Fact]
+    public void SetSettingAdd() {
+        var settingsSpan = new ReadOnlySpan<byte>([
+            3, 0, 0, 0, 98, 97, 114,
+            4, 0, 0, 0, 1, 2, 3, 4,
+            3, 0, 0, 0, 102, 111, 111,
+            5, 0, 0, 0, 5, 6, 7, 8, 9
+        ]);
+
+        using var subject = new StorageSettings(settingsSpan);
+
+        subject.SetSetting("baz", new ReadOnlySpan<byte>([15, 15, 15]));
+
+        Assert.Equal(new ReadOnlySpan<byte>([15, 15, 15]), subject.GetSetting("baz"));
+    }
+
+    [Fact]
+    public void SetSettingOverwrite() {
+        var settingsSpan = new ReadOnlySpan<byte>([
+            3, 0, 0, 0, 98, 97, 114,
+            4, 0, 0, 0, 1, 2, 3, 4,
+            3, 0, 0, 0, 102, 111, 111,
+            5, 0, 0, 0, 5, 6, 7, 8, 9
+        ]);
+
+        using var subject = new StorageSettings(settingsSpan);
+        
+        var previousValue = GetSettings(subject)["foo"];
+
+        subject.SetSetting("foo", new ReadOnlySpan<byte>([15, 15, 15]));
+
+        Assert.Equal(new ReadOnlySpan<byte>([15, 15, 15]), subject.GetSetting("foo"));
+        Assert.True(previousValue.IsDisposed);
+    }
+
+    [Fact]
     public void Dispose() {
         var settingsSpan = new ReadOnlySpan<byte>([
             3, 0, 0, 0, 98, 97, 114,
@@ -32,8 +67,7 @@ public class StorageSettingsTests {
         Dictionary<string, SecureBuffer> settings;
         
         using (var subject = new StorageSettings(settingsSpan)) {
-            var settingsField = typeof(StorageSettings).GetField("settings", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new InvalidOperationException();
-            settings = settingsField.GetValue(subject) as Dictionary<string, SecureBuffer> ?? throw new InvalidOperationException();
+            settings = GetSettings(subject);
         };
 
         Assert.Equal(2, settings.Count);
@@ -41,5 +75,11 @@ public class StorageSettingsTests {
         foreach (var buffer in settings.Values) {
             Assert.True(buffer.IsDisposed);
         }
+    }
+
+    private static Dictionary<string, SecureBuffer> GetSettings(StorageSettings storageSettings) {
+        var settingsField = typeof(StorageSettings).GetField("settings", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new InvalidOperationException();
+        
+        return settingsField.GetValue(storageSettings) as Dictionary<string, SecureBuffer> ?? throw new InvalidOperationException();
     }
 }

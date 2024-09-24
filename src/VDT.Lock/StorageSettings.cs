@@ -14,6 +14,14 @@ public sealed class StorageSettings : IDisposable {
     public ReadOnlySpan<byte> GetSetting(string key)
         => new ReadOnlySpan<byte>(settings[key].Value);
 
+    public void SetSetting(string key, ReadOnlySpan<byte> valueSpan) {
+        if (settings.TryGetValue(key, out var previousValue)) {
+            previousValue.Dispose();
+        }
+
+        settings[key] = new SecureBuffer(valueSpan.ToArray());
+    }
+
     public void Dispose() {
         foreach (var value in settings.Values) {
             value.Dispose();
