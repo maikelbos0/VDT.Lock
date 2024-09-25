@@ -53,7 +53,7 @@ public sealed class SecureByteListTests {
         subject.Add('c');
 
         Assert.Equal("abc"u8.ToArray(), subject.GetValue());
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, "a"u8.ToArray()), subject.GetBuffer().Value);
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, "abc"u8.ToArray()), subject.GetBuffer().Value);
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public sealed class SecureByteListTests {
         subject.Add(99);
 
         Assert.Equal(new byte[] { 97, 98, 99 }, subject.GetValue());
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, 97), subject.GetBuffer().Value);
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, 97, 98, 99), subject.GetBuffer().Value);
     }
 
     [Fact]
