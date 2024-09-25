@@ -36,4 +36,12 @@ public class SettingsSerializerTests {
         Assert.Equal(11, position);
         Assert.Equal(new byte[] { 97, 98, 99 }, result.Value);
     }
+
+    [Fact]
+    public void WriteInt() {
+        using var plainSettingsBytes = new SecureByteList();
+
+        SettingsSerializer.WriteInt(plainSettingsBytes, 16909320);
+        Assert.Equal(new byte[] { 8, 4, 2, 1 }, plainSettingsBytes.GetValue());
+    }
 }
