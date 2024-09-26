@@ -42,6 +42,26 @@ public class SettingsSerializerTests {
         using var plainSettingsBytes = new SecureByteList();
 
         SettingsSerializer.WriteInt(plainSettingsBytes, 16909320);
+
         Assert.Equal(new byte[] { 8, 4, 2, 1 }, plainSettingsBytes.GetValue());
+    }
+
+    [Fact]
+    public void WriteString() {
+        using var plainSettingsBytes = new SecureByteList();
+
+        SettingsSerializer.WriteString(plainSettingsBytes, "abc");
+
+        Assert.Equal(new byte[] { 3, 0, 0, 0, 97, 98, 99 }, plainSettingsBytes.GetValue());
+    }
+
+    [Fact]
+    public void WriteSecureBuffer() {
+        using var plainSettingsBytes = new SecureByteList();
+        using var plainBuffer = new SecureBuffer(new byte[] { 97, 98, 99 });
+
+        SettingsSerializer.WriteSecureBuffer(plainSettingsBytes, plainBuffer);
+
+        Assert.Equal(new byte[] { 3, 0, 0, 0, 97, 98, 99 }, plainSettingsBytes.GetValue());
     }
 }
