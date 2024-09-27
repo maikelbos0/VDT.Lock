@@ -25,6 +25,15 @@ public sealed class StorageSettings : IDisposable {
         });
     }
 
+    public void Serialize(SecureByteList plainBytes) {
+        var settingsSnapshot = settings.ToArray();
+
+        foreach (var pair in settingsSnapshot) {
+            SettingsSerializer.WriteString(plainBytes, pair.Key);
+            SettingsSerializer.WriteSecureBuffer(plainBytes, pair.Value);
+        }
+    }
+
     public void Dispose() {
         foreach (var value in settings.Values) {
             value.Dispose();

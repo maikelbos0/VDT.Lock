@@ -8,14 +8,14 @@ namespace VDT.Lock.Tests;
 public class StorageSettingsTests {
     [Fact]
     public void Constructor() {
-        var settingsSpan = new ReadOnlySpan<byte>([
+        var plainSettingsSpan = new ReadOnlySpan<byte>([
             3, 0, 0, 0, 98, 97, 114,
             4, 0, 0, 0, 1, 2, 3, 4,
             3, 0, 0, 0, 102, 111, 111,
             5, 0, 0, 0, 5, 6, 7, 8, 9
         ]);
 
-        using var subject = new StorageSettings(settingsSpan);
+        using var subject = new StorageSettings(plainSettingsSpan);
 
         Assert.Equal(new ReadOnlySpan<byte>([1, 2, 3, 4]), subject.Get("bar"));
         Assert.Equal(new ReadOnlySpan<byte>([5, 6, 7, 8, 9]), subject.Get("foo"));
@@ -23,14 +23,14 @@ public class StorageSettingsTests {
 
     [Fact]
     public void SetToAddSetting() {
-        var settingsSpan = new ReadOnlySpan<byte>([
+        var plainSettingsSpan = new ReadOnlySpan<byte>([
             3, 0, 0, 0, 98, 97, 114,
             4, 0, 0, 0, 1, 2, 3, 4,
             3, 0, 0, 0, 102, 111, 111,
             5, 0, 0, 0, 5, 6, 7, 8, 9
         ]);
 
-        using var subject = new StorageSettings(settingsSpan);
+        using var subject = new StorageSettings(plainSettingsSpan);
 
         subject.Set("baz", new ReadOnlySpan<byte>([15, 15, 15]));
 
@@ -39,14 +39,14 @@ public class StorageSettingsTests {
 
     [Fact]
     public void SetToOverwriteSetting() {
-        var settingsSpan = new ReadOnlySpan<byte>([
+        var plainSettingsSpan = new ReadOnlySpan<byte>([
             3, 0, 0, 0, 98, 97, 114,
             4, 0, 0, 0, 1, 2, 3, 4,
             3, 0, 0, 0, 102, 111, 111,
             5, 0, 0, 0, 5, 6, 7, 8, 9
         ]);
 
-        using var subject = new StorageSettings(settingsSpan);
+        using var subject = new StorageSettings(plainSettingsSpan);
         
         var previousValue = GetSettings(subject)["foo"];
 
@@ -57,8 +57,26 @@ public class StorageSettingsTests {
     }
 
     [Fact]
+    public void Serialize() {
+        var plainSettingsSpan = new ReadOnlySpan<byte>([
+            3, 0, 0, 0, 98, 97, 114,
+            4, 0, 0, 0, 1, 2, 3, 4,
+            3, 0, 0, 0, 102, 111, 111,
+            5, 0, 0, 0, 5, 6, 7, 8, 9
+        ]);
+
+        using var subject = new StorageSettings(plainSettingsSpan);
+
+        using var plainSettingsBytes = new SecureByteList();
+
+        subject.Serialize(plainSettingsBytes);
+
+        Assert.Equal(plainSettingsSpan, plainSettingsBytes.GetValue());
+    }
+
+    [Fact]
     public void Dispose() {
-        var settingsSpan = new ReadOnlySpan<byte>([
+        var plainSettingsSpan = new ReadOnlySpan<byte>([
             3, 0, 0, 0, 98, 97, 114,
             4, 0, 0, 0, 1, 2, 3, 4,
             3, 0, 0, 0, 102, 111, 111,
@@ -66,7 +84,7 @@ public class StorageSettingsTests {
         ]);
         ConcurrentDictionary<string, SecureBuffer> settings;
         
-        using (var subject = new StorageSettings(settingsSpan)) {
+        using (var subject = new StorageSettings(plainSettingsSpan)) {
             settings = GetSettings(subject);
         };
 
