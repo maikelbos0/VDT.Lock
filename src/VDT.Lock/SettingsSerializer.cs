@@ -20,7 +20,7 @@ public static class SettingsSerializer {
         => Encoding.UTF8.GetString(ReadSpan(plainSettingsSpan, ref position));
 
     public static SecureBuffer ReadSecureBuffer(ReadOnlySpan<byte> plainSettingsSpan, ref int position)
-        => new SecureBuffer(ReadSpan(plainSettingsSpan, ref position).ToArray());
+        => new(ReadSpan(plainSettingsSpan, ref position).ToArray());
 
     public static void WriteInt(SecureByteList plainSettingsBytes, int value) {
         unchecked {

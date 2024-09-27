@@ -11,7 +11,8 @@ public sealed class StoreManagerFactory {
         var encryptor = new Encryptor(randomByteGenerator);
         var plainSessionKeyBuffer = new SecureBuffer(randomByteGenerator.Generate(Encryptor.KeySizeInBytes));
         var encryptedStoreKeyBuffer = await encryptor.Encrypt(storeKeyBuffer, plainSessionKeyBuffer);
+        var storageSiteFactory = new StorageSiteFactory();
 
-        return new StoreManager(encryptor, plainSessionKeyBuffer, encryptedStoreKeyBuffer);
+        return new StoreManager(encryptor, storageSiteFactory, plainSessionKeyBuffer, encryptedStoreKeyBuffer);
     }
 }
