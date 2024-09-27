@@ -67,11 +67,9 @@ public class StorageSettingsTests {
 
         using var subject = new StorageSettings(plainSettingsSpan);
 
-        using var plainSettingsBytes = new SecureByteList();
+        using var plainSettingsBuffer = subject.Serialize();
 
-        subject.Serialize(plainSettingsBytes);
-
-        Assert.Equal(plainSettingsSpan, plainSettingsBytes.GetValue());
+        Assert.Equal(plainSettingsSpan, plainSettingsBuffer.Value);
     }
 
     [Fact]

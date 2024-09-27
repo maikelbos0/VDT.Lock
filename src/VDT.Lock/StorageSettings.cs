@@ -5,6 +5,8 @@ namespace VDT.Lock;
 public sealed class StorageSettings : IDisposable {
     private readonly ConcurrentDictionary<string, SecureBuffer> settings = [];
 
+    public StorageSettings() { }
+
     public StorageSettings(ReadOnlySpan<byte> plainSettingsSpan) {
         var position = 0;
 
@@ -25,13 +27,16 @@ public sealed class StorageSettings : IDisposable {
         });
     }
 
-    public void Serialize(SecureByteList plainBytes) {
+    public SecureBuffer Serialize() {
+        var plainBytes = new SecureByteList();
         var settingsSnapshot = settings.ToArray();
 
         foreach (var pair in settingsSnapshot) {
             SettingsSerializer.WriteString(plainBytes, pair.Key);
             SettingsSerializer.WriteSecureBuffer(plainBytes, pair.Value);
         }
+
+        return plainBytes.ToBuffer();
     }
 
     public void Dispose() {
