@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using VDT.Lock.StorageSites;
 using Xunit;
 
 namespace VDT.Lock.Tests;
@@ -15,8 +16,8 @@ public class StoreManagerTests {
         await subject.LoadStorageSites(encryptedBuffer);
 
         Assert.Equal(2, subject.StorageSites.Count);
-        Assert.Equal("abc"u8, Assert.IsType<StorageSites.FileSystemStorageSite>(subject.StorageSites[0]).Location);
-        Assert.Equal("def"u8, Assert.IsType<StorageSites.FileSystemStorageSite>(subject.StorageSites[1]).Location);
+        Assert.Equal("abc"u8, Assert.IsType<FileSystemStorageSite>(subject.StorageSites[0]).Location);
+        Assert.Equal("def"u8, Assert.IsType<FileSystemStorageSite>(subject.StorageSites[1]).Location);
     }
 
     [Fact]
