@@ -7,23 +7,20 @@ public static class SettingsSerializer {
         return plainSettingsSpan[position++] | (plainSettingsSpan[position++] << 8) | (plainSettingsSpan[position++] << 16) | (plainSettingsSpan[position++] << 24);
     }
 
-    public static string ReadString(ReadOnlySpan<byte> plainSettingsSpan, ref int position) {
+    public static ReadOnlySpan<byte> ReadSpan(ReadOnlySpan<byte> plainSettingsSpan, ref int position) {
         var length = ReadInt(plainSettingsSpan, ref position);
-        var plainText = Encoding.UTF8.GetString(plainSettingsSpan.Slice(position, length));
+        var plainSpan = plainSettingsSpan.Slice(position, length);
 
         position += length;
 
-        return plainText;
+        return plainSpan;
     }
 
-    public static SecureBuffer ReadSecureBuffer(ReadOnlySpan<byte> plainSettingsSpan, ref int position) {
-        var length = ReadInt(plainSettingsSpan, ref position);
-        var plainBuffer = new SecureBuffer(plainSettingsSpan.Slice(position, length).ToArray());
+    public static string ReadString(ReadOnlySpan<byte> plainSettingsSpan, ref int position)
+        => Encoding.UTF8.GetString(ReadSpan(plainSettingsSpan, ref position));
 
-        position += length;
-
-        return plainBuffer;
-    }
+    public static SecureBuffer ReadSecureBuffer(ReadOnlySpan<byte> plainSettingsSpan, ref int position)
+        => new SecureBuffer(ReadSpan(plainSettingsSpan, ref position).ToArray());
 
     public static void WriteInt(SecureByteList plainSettingsBytes, int value) {
         unchecked {

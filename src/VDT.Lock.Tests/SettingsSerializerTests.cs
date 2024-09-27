@@ -16,6 +16,17 @@ public class SettingsSerializerTests {
     }
 
     [Fact]
+    public void ReadSpan() {
+        var plainSettingsSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 3, 0, 0, 0, 97, 98, 99, 0]);
+        var position = 4;
+
+        var result = SettingsSerializer.ReadSpan(plainSettingsSpan, ref position);
+
+        Assert.Equal(11, position);
+        Assert.Equal("abc"u8, result);
+    }
+
+    [Fact]
     public void ReadString() {
         var plainSettingsSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 3, 0, 0, 0, 97, 98, 99, 0]);
         var position = 4;
