@@ -2,19 +2,19 @@
 
 public sealed class StoreManager : IDisposable {
     private readonly IEncryptor encryptor;
-    private readonly SecureBuffer sessionKeyBuffer;
+    private readonly SecureBuffer plainSessionKeyBuffer;
     private readonly SecureBuffer encryptedStoreKeyBuffer;
 
-    public StoreManager(IEncryptor encryptor, SecureBuffer sessionKeyBuffer, SecureBuffer encryptedStoreKeyBuffer) {
+    public StoreManager(IEncryptor encryptor, SecureBuffer plainSessionKeyBuffer, SecureBuffer encryptedStoreKeyBuffer) {
         this.encryptor = encryptor;
-        this.sessionKeyBuffer = sessionKeyBuffer;
+        this.plainSessionKeyBuffer = plainSessionKeyBuffer;
         this.encryptedStoreKeyBuffer = encryptedStoreKeyBuffer;
     }
 
-    public Task<SecureBuffer> GetStoreKey() => encryptor.Decrypt(encryptedStoreKeyBuffer, sessionKeyBuffer);
+    public Task<SecureBuffer> GetPlainStoreKeyBuffer() => encryptor.Decrypt(encryptedStoreKeyBuffer, plainSessionKeyBuffer);
 
     public void Dispose() {
-        sessionKeyBuffer.Dispose();
+        plainSessionKeyBuffer.Dispose();
         encryptedStoreKeyBuffer.Dispose();
         GC.SuppressFinalize(this);
     }

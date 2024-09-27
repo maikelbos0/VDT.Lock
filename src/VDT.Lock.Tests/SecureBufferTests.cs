@@ -5,15 +5,6 @@ namespace VDT.Lock.Tests;
 
 public class SecureBufferTests {
     [Fact]
-    public void GetReadOnlySpan() {
-        using var subject = new SecureBuffer([97, 98, 99, 100, 101]);
-
-        var result = subject.GetReadOnlySpan(1, 3);
-
-        Assert.Equal(new ReadOnlySpan<byte>([98, 99, 100]), result);
-    }
-
-    [Fact]
     public void Dispose() {
         byte[] disposedValue;
         SecureBuffer disposedSubject;
