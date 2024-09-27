@@ -11,6 +11,13 @@ public abstract class StorageSiteBase : IDisposable {
 
     public abstract void Save();
 
+    public void SaveTo(SecureByteList plainBytes) {
+        using var plainSettingsBuffer = storageSettings.Serialize();
+
+        SettingsSerializer.WriteString(plainBytes, GetType().Name);
+        SettingsSerializer.WriteSecureBuffer(plainBytes, plainSettingsBuffer);
+    }
+
     public void Dispose() {
         storageSettings.Dispose();
         GC.SuppressFinalize(this);

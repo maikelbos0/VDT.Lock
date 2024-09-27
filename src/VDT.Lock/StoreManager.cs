@@ -29,6 +29,19 @@ public sealed class StoreManager : IDisposable {
         }
     }
 
+    public async Task<SecureBuffer> SaveStorageSites() {
+        using var plainStorageSettingsBytes = new SecureByteList();
+
+        foreach (var storageSite in StorageSites) {
+            storageSite.SaveTo(plainStorageSettingsBytes);
+        }
+
+        using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
+        using var plainStorageSettingsBuffer = plainStorageSettingsBytes.ToBuffer();
+
+        return await encryptor.Encrypt(plainStorageSettingsBuffer, plainStoreKeyBuffer);
+    }
+
     public Task<SecureBuffer> GetPlainStoreKeyBuffer() => encryptor.Decrypt(encryptedStoreKeyBuffer, plainSessionKeyBuffer);
 
     public void Dispose() {
