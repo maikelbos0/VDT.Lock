@@ -13,7 +13,7 @@ public class StoreManagerTests {
         var hashProvider = new HashProvider();
         using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, hashProvider);
 
-        using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManagerFactory.MasterPasswordSalt);
+        using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManager.MasterPasswordSalt);
 
         await subject.Authenticate(plainMasterPasswordBuffer);
 
@@ -39,7 +39,7 @@ public class StoreManagerTests {
         var hashProvider = new HashProvider();
         using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, hashProvider);
 
-        using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManagerFactory.MasterPasswordSalt);
+        using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManager.MasterPasswordSalt);
 
         await subject.Authenticate(plainMasterPasswordBuffer);
 
@@ -50,14 +50,21 @@ public class StoreManagerTests {
 
     [Fact]
     public async Task SaveStorageSitesAndLoadStorageSites() {
-        using var masterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
+        using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
-        using var saveSubject = await new StoreManagerFactory().Create(masterPasswordBuffer);
+        var randomByteGenerator = new RandomByteGenerator();
+        var encryptor = new Encryptor(randomByteGenerator);
+        var storageSiteFactory = new StorageSiteFactory();
+        var hashProvider = new HashProvider();
+
+        using var saveSubject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider);
         saveSubject.StorageSites.Add(new FileSystemStorageSite("abc"u8));
         saveSubject.StorageSites.Add(new FileSystemStorageSite("def"u8));
-        var encryptedSettingsBuffer = await saveSubject.SaveStorageSites();
+        await saveSubject.Authenticate(plainMasterPasswordBuffer);
+        using var encryptedSettingsBuffer = await saveSubject.SaveStorageSites();
 
-        using var loadSubject = await new StoreManagerFactory().Create(masterPasswordBuffer);
+        using var loadSubject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider);
+        await loadSubject.Authenticate(plainMasterPasswordBuffer);
         await loadSubject.LoadStorageSites(encryptedSettingsBuffer);
 
         Assert.Equal(2, loadSubject.StorageSites.Count);
@@ -66,29 +73,19 @@ public class StoreManagerTests {
     }
 
     [Fact]
-    public async Task GetPlainStoreKey() {
-        using var masterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
-        using var expectedStoreKey = new HashProvider().Provide(masterPasswordBuffer, StoreManagerFactory.MasterPasswordSalt);
-
-        using var subject = await new StoreManagerFactory().Create(masterPasswordBuffer);
-        
-        using var result = await subject.GetPlainStoreKeyBuffer();
-
-        Assert.Equal(expectedStoreKey.Value, result.Value);
-    }
-
-    [Fact]
     public async Task Dispose() {
         SecureBuffer plainSessionKeyBuffer;
         SecureBuffer encryptedStoreKeyBuffer;
 
-        using var masterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
-        using var expectedStoreKey = new HashProvider().Provide(masterPasswordBuffer, StoreManagerFactory.MasterPasswordSalt);
+        var randomByteGenerator = new RandomByteGenerator();
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+            using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
-        using (var subject = await new StoreManagerFactory().Create(masterPasswordBuffer)) {
+            await subject.Authenticate(plainMasterPasswordBuffer);
+
             plainSessionKeyBuffer = subject.GetBuffer("plainSessionKeyBuffer");
             encryptedStoreKeyBuffer = subject.GetBuffer("encryptedStoreKeyBuffer");
-        };
+        }
         
         Assert.True(plainSessionKeyBuffer.IsDisposed);
         Assert.True(encryptedStoreKeyBuffer.IsDisposed);
