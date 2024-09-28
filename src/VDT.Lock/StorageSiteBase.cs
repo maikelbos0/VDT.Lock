@@ -13,7 +13,7 @@ public abstract class StorageSiteBase : IDisposable {
 
     public abstract void Save();
 
-    public void SaveTo(SecureByteList plainBytes) {
+    public void SerializeTo(SecureByteList plainBytes) {
         plainBytes.WriteSpan(Encoding.UTF8.GetBytes(GetType().Name));
         storageSettings.SerializeTo(plainBytes);
     }

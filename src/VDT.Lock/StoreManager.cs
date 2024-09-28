@@ -59,7 +59,7 @@ public sealed class StoreManager : IDisposable {
         using var plainStorageSettingsBytes = new SecureByteList();
 
         foreach (var storageSite in StorageSites) {
-            storageSite.SaveTo(plainStorageSettingsBytes);
+            storageSite.SerializeTo(plainStorageSettingsBytes);
         }
 
         using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
