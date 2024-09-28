@@ -1,7 +1,6 @@
-﻿using System.Text;
+﻿namespace VDT.Lock;
 
-namespace VDT.Lock;
-
+// TOOD rename/split
 public static class SettingsSerializer {
     public static int ReadInt(ReadOnlySpan<byte> plainSettingsSpan, ref int position) {
         return plainSettingsSpan[position++] | (plainSettingsSpan[position++] << 8) | (plainSettingsSpan[position++] << 16) | (plainSettingsSpan[position++] << 24);
@@ -16,9 +15,6 @@ public static class SettingsSerializer {
         return plainSpan;
     }
 
-    public static string ReadString(ReadOnlySpan<byte> plainSettingsSpan, ref int position)
-        => Encoding.UTF8.GetString(ReadSpan(plainSettingsSpan, ref position));
-
     public static SecureBuffer ReadSecureBuffer(ReadOnlySpan<byte> plainSettingsSpan, ref int position)
         => new(ReadSpan(plainSettingsSpan, ref position).ToArray());
 
@@ -31,15 +27,11 @@ public static class SettingsSerializer {
         }
     }
 
-    public static void WriteString(SecureByteList plainSettingsBytes, string value) {
-        var plainBytes = Encoding.UTF8.GetBytes(value);
-
-        WriteInt(plainSettingsBytes, plainBytes.Length);
-        plainSettingsBytes.Add(new ReadOnlySpan<byte>(plainBytes));
+    public static void WriteSpan(SecureByteList plainSettingsBytes, ReadOnlySpan<byte> plainSpan) {
+        WriteInt(plainSettingsBytes, plainSpan.Length);
+        plainSettingsBytes.Add(plainSpan);
     }
 
-    public static void WriteSecureBuffer(SecureByteList plainSettingsBytes, SecureBuffer plainBuffer) {
-        WriteInt(plainSettingsBytes, plainBuffer.Value.Length);
-        plainSettingsBytes.Add(new ReadOnlySpan<byte>(plainBuffer.Value));
-    }
+    public static void WriteSecureBuffer(SecureByteList plainSettingsBytes, SecureBuffer plainBuffer)
+        => WriteSpan(plainSettingsBytes, new ReadOnlySpan<byte>(plainBuffer.Value));
 }

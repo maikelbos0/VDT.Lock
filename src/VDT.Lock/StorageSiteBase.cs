@@ -1,4 +1,6 @@
-﻿namespace VDT.Lock;
+﻿using System.Text;
+
+namespace VDT.Lock;
 
 public abstract class StorageSiteBase : IDisposable {
     protected readonly StorageSettings storageSettings;
@@ -14,7 +16,7 @@ public abstract class StorageSiteBase : IDisposable {
     public void SaveTo(SecureByteList plainBytes) {
         using var plainSettingsBuffer = storageSettings.Serialize();
 
-        SettingsSerializer.WriteString(plainBytes, GetType().Name);
+        SettingsSerializer.WriteSpan(plainBytes, Encoding.UTF8.GetBytes(GetType().Name));
         SettingsSerializer.WriteSecureBuffer(plainBytes, plainSettingsBuffer);
     }
 

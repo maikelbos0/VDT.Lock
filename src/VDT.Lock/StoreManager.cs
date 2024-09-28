@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace VDT.Lock;
 
@@ -44,7 +45,7 @@ public sealed class StoreManager : IDisposable {
         var position = 0;
 
         while (position < plainStorageSettingsBuffer.Value.Length) {
-            var storageSiteTypeName = SettingsSerializer.ReadString(plainStorageSettingsBuffer.Value, ref position);
+            var storageSiteTypeName = Encoding.UTF8.GetString(SettingsSerializer.ReadSpan(plainStorageSettingsBuffer.Value, ref position));
             var storageSettings = new StorageSettings(SettingsSerializer.ReadSpan(plainStorageSettingsBuffer.Value, ref position));
             var storageSite = storageSiteFactory.Create(storageSiteTypeName, storageSettings);
 

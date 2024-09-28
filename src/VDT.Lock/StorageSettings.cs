@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Text;
 
 namespace VDT.Lock;
 
@@ -11,7 +12,7 @@ public sealed class StorageSettings : IDisposable {
         var position = 0;
 
         while (position < plainSettingsSpan.Length) {
-            settings[SettingsSerializer.ReadString(plainSettingsSpan, ref position)] = SettingsSerializer.ReadSecureBuffer(plainSettingsSpan, ref position);
+            settings[Encoding.UTF8.GetString(SettingsSerializer.ReadSpan(plainSettingsSpan, ref position))] = SettingsSerializer.ReadSecureBuffer(plainSettingsSpan, ref position);
         }
     }
 
@@ -32,7 +33,7 @@ public sealed class StorageSettings : IDisposable {
         var settingsSnapshot = settings.ToArray();
 
         foreach (var pair in settingsSnapshot) {
-            SettingsSerializer.WriteString(plainBytes, pair.Key);
+            SettingsSerializer.WriteSpan(plainBytes, Encoding.UTF8.GetBytes(pair.Key));
             SettingsSerializer.WriteSecureBuffer(plainBytes, pair.Value);
         }
 
