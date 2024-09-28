@@ -1,6 +1,5 @@
 ﻿namespace VDT.Lock;
 
-// TOOD rename/split
 public static class SettingsSerializer {
     public static int ReadInt(ReadOnlySpan<byte> plainSettingsSpan, ref int position) {
         return plainSettingsSpan[position++] | (plainSettingsSpan[position++] << 8) | (plainSettingsSpan[position++] << 16) | (plainSettingsSpan[position++] << 24);
