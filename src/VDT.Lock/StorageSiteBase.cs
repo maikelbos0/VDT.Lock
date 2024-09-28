@@ -14,10 +14,8 @@ public abstract class StorageSiteBase : IDisposable {
     public abstract void Save();
 
     public void SaveTo(SecureByteList plainBytes) {
-        using var plainSettingsBuffer = storageSettings.Serialize();
-
-        SettingsSerializer.WriteSpan(plainBytes, Encoding.UTF8.GetBytes(GetType().Name));
-        SettingsSerializer.WriteSecureBuffer(plainBytes, plainSettingsBuffer);
+        plainBytes.WriteSpan(Encoding.UTF8.GetBytes(GetType().Name));
+        storageSettings.SerializeTo(plainBytes);
     }
 
     public void Dispose() {

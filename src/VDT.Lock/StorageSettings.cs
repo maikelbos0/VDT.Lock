@@ -28,16 +28,18 @@ public sealed class StorageSettings : IDisposable {
         });
     }
 
-    public SecureBuffer Serialize() {
-        var plainBytes = new SecureByteList();
-        var settingsSnapshot = settings.ToArray();
+    public void SerializeTo(SecureByteList plainSettingsBytes) {
+        var settingsSnapshot = settings.ToArray().Select(pair => new {
+            Name = Encoding.UTF8.GetBytes(pair.Key),
+            pair.Value
+        });
+
+        SettingsSerializer.WriteInt(plainSettingsBytes, settingsSnapshot.Sum(setting => setting.Name.Length + setting.Value.Value.Length + 8));
 
         foreach (var pair in settingsSnapshot) {
-            SettingsSerializer.WriteSpan(plainBytes, Encoding.UTF8.GetBytes(pair.Key));
-            SettingsSerializer.WriteSecureBuffer(plainBytes, pair.Value);
+            plainSettingsBytes.WriteSpan(pair.Name);
+            plainSettingsBytes.WriteSecureBuffer(pair.Value);
         }
-
-        return plainBytes.ToBuffer();
     }
 
     public void Dispose() {

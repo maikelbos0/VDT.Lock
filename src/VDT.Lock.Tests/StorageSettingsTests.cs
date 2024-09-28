@@ -57,7 +57,8 @@ public class StorageSettingsTests {
     }
 
     [Fact]
-    public void Serialize() {
+    public void SerializeTo() {
+        using var plainSettingsBytes = new SecureByteList();
         var plainSettingsSpan = new ReadOnlySpan<byte>([
             3, 0, 0, 0, 98, 97, 114,
             4, 0, 0, 0, 1, 2, 3, 4,
@@ -67,9 +68,12 @@ public class StorageSettingsTests {
 
         using var subject = new StorageSettings(plainSettingsSpan);
 
-        using var plainSettingsBuffer = subject.Serialize();
+        subject.SerializeTo(plainSettingsBytes);
 
-        Assert.Equal(plainSettingsSpan, plainSettingsBuffer.Value);
+        var result = plainSettingsBytes.GetValue();
+
+        Assert.Equal(plainSettingsSpan.Length, result[0]);
+        Assert.Equal(plainSettingsSpan, result.Slice(4));
     }
 
     [Fact]
