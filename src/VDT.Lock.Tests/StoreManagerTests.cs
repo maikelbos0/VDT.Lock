@@ -6,6 +6,49 @@ namespace VDT.Lock.Tests;
 
 public class StoreManagerTests {
     [Fact]
+    public async Task AuthenticateAndGetPlainStoreKey() {
+        using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
+
+        var randomByteGenerator = new RandomByteGenerator();
+        var hashProvider = new HashProvider();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, hashProvider);
+
+        using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManagerFactory.MasterPasswordSalt);
+
+        await subject.Authenticate(plainMasterPasswordBuffer);
+
+        using var result = await subject.GetPlainStoreKeyBuffer();
+
+        Assert.Equal(expectedStoreKey.Value, result.Value);
+    }
+
+    [Fact]
+    public void EnsureAuthenticatedThrowsWhenNotAuthenticated() {
+        var randomByteGenerator = new RandomByteGenerator();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+
+        Assert.False(subject.IsAuthenticated);
+        Assert.Throws<NotAuthenticatedException>(() => subject.EnsureAuthenticated());
+    }
+
+    [Fact]
+    public async Task EnsureAuthenticatedDoesNotThrowWhenAuthenticated() {
+        using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
+
+        var randomByteGenerator = new RandomByteGenerator();
+        var hashProvider = new HashProvider();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, hashProvider);
+
+        using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManagerFactory.MasterPasswordSalt);
+
+        await subject.Authenticate(plainMasterPasswordBuffer);
+
+        using var result = await subject.GetPlainStoreKeyBuffer();
+
+        Assert.Equal(expectedStoreKey.Value, result.Value);
+    }
+
+    [Fact]
     public async Task SaveStorageSitesAndLoadStorageSites() {
         using var masterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 

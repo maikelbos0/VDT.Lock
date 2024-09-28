@@ -13,6 +13,7 @@ public sealed class StoreManagerFactory {
         var encryptedStoreKeyBuffer = await encryptor.Encrypt(storeKeyBuffer, plainSessionKeyBuffer);
         var storageSiteFactory = new StorageSiteFactory();
 
-        return new StoreManager(encryptor, storageSiteFactory, plainSessionKeyBuffer, encryptedStoreKeyBuffer);
+        throw new NotImplementedException();
+        //return new StoreManager(encryptor, storageSiteFactory, plainSessionKeyBuffer, encryptedStoreKeyBuffer);
     }
 }
