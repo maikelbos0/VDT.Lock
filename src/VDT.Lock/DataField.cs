@@ -25,11 +25,24 @@ public sealed class DataField : IDisposable {
         }
     }
 
+    public int Length => plainNameBuffer.Value.Length + plainDataBuffer.Value.Length + 8;
+
+    public DataField(SecureBuffer plainNameBuffer, SecureBuffer plainDataBuffer) {
+        this.plainNameBuffer = plainNameBuffer;
+        this.plainDataBuffer = plainDataBuffer;
+    }
+
     public DataField(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
         plainNameBuffer = plainSpan.ReadSecureBuffer(ref position);
         plainDataBuffer = plainSpan.ReadSecureBuffer(ref position);
+    }
+
+    public void SerializeTo(SecureByteList plainBytes) {
+        plainBytes.WriteInt(Length);
+        plainBytes.WriteSecureBuffer(plainNameBuffer);
+        plainBytes.WriteSecureBuffer(plainDataBuffer);
     }
 
     public void Dispose() {
