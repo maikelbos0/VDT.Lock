@@ -4,7 +4,7 @@ using System.Text;
 namespace VDT.Lock;
 
 public sealed class StorageSettings : IDisposable {
-    private readonly ConcurrentDictionary<string, SecureBuffer> settings = [];
+    private readonly ConcurrentDictionary<string, SecureBuffer> plainSettingsBuffer = [];
 
     public StorageSettings() { }
 
@@ -12,24 +12,24 @@ public sealed class StorageSettings : IDisposable {
         var position = 0;
 
         while (position < plainSettingsSpan.Length) {
-            settings[Encoding.UTF8.GetString(plainSettingsSpan.ReadSpan(ref position))] = plainSettingsSpan.ReadSecureBuffer(ref position);
+            plainSettingsBuffer[Encoding.UTF8.GetString(plainSettingsSpan.ReadSpan(ref position))] = plainSettingsSpan.ReadSecureBuffer(ref position);
         }
     }
 
     public ReadOnlySpan<byte> Get(string key)
-        => new(settings[key].Value);
+        => new(plainSettingsBuffer[key].Value);
 
     public void Set(string key, ReadOnlySpan<byte> valueSpan) {
-        var value = new SecureBuffer(valueSpan.ToArray());
+        var plainNewValueBuffer = new SecureBuffer(valueSpan.ToArray());
 
-        settings.AddOrUpdate(key, value, (key, previousValue) => {
-            previousValue.Dispose();
-            return value;
+        plainSettingsBuffer.AddOrUpdate(key, plainNewValueBuffer, (key, plainPreviousValueBuffer) => {
+            plainPreviousValueBuffer.Dispose();
+            return plainNewValueBuffer;
         });
     }
 
     public void SerializeTo(SecureByteList plainSettingsBytes) {
-        var settingsSnapshot = settings.ToArray().Select(pair => new {
+        var settingsSnapshot = plainSettingsBuffer.ToArray().Select(pair => new {
             Name = Encoding.UTF8.GetBytes(pair.Key),
             pair.Value
         });
@@ -43,7 +43,7 @@ public sealed class StorageSettings : IDisposable {
     }
 
     public void Dispose() {
-        foreach (var value in settings.Values) {
+        foreach (var value in plainSettingsBuffer.Values) {
             value.Dispose();
         }
         GC.SuppressFinalize(this);

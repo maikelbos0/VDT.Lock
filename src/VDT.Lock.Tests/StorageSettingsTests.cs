@@ -48,12 +48,12 @@ public class StorageSettingsTests {
 
         using var subject = new StorageSettings(plainSettingsSpan);
         
-        var previousValue = GetSettings(subject)["foo"];
+        var plainPreviousValueBuffer = GetSettings(subject)["foo"];
 
         subject.Set("foo", new ReadOnlySpan<byte>([15, 15, 15]));
 
         Assert.Equal(new ReadOnlySpan<byte>([15, 15, 15]), subject.Get("foo"));
-        Assert.True(previousValue.IsDisposed);
+        Assert.True(plainPreviousValueBuffer.IsDisposed);
     }
 
     [Fact]
@@ -84,21 +84,21 @@ public class StorageSettingsTests {
             3, 0, 0, 0, 102, 111, 111,
             5, 0, 0, 0, 5, 6, 7, 8, 9
         ]);
-        ConcurrentDictionary<string, SecureBuffer> settings;
+        ConcurrentDictionary<string, SecureBuffer> plainSettingsBuffer;
         
         using (var subject = new StorageSettings(plainSettingsSpan)) {
-            settings = GetSettings(subject);
+            plainSettingsBuffer = GetSettings(subject);
         };
 
-        Assert.Equal(2, settings.Count);
+        Assert.Equal(2, plainSettingsBuffer.Count);
 
-        foreach (var buffer in settings.Values) {
+        foreach (var buffer in plainSettingsBuffer.Values) {
             Assert.True(buffer.IsDisposed);
         }
     }
 
     private static ConcurrentDictionary<string, SecureBuffer> GetSettings(StorageSettings storageSettings) {
-        var settingsField = typeof(StorageSettings).GetField("settings", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new InvalidOperationException();
+        var settingsField = typeof(StorageSettings).GetField("plainSettingsBuffer", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new InvalidOperationException();
         
         return settingsField.GetValue(storageSettings) as ConcurrentDictionary<string, SecureBuffer> ?? throw new InvalidOperationException();
     }
