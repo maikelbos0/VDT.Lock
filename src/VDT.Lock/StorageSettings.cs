@@ -12,7 +12,7 @@ public sealed class StorageSettings : IDisposable {
         var position = 0;
 
         while (position < plainSettingsSpan.Length) {
-            settings[Encoding.UTF8.GetString(SettingsSerializer.ReadSpan(plainSettingsSpan, ref position))] = SettingsSerializer.ReadSecureBuffer(plainSettingsSpan, ref position);
+            settings[Encoding.UTF8.GetString(plainSettingsSpan.ReadSpan(ref position))] = plainSettingsSpan.ReadSecureBuffer(ref position);
         }
     }
 
@@ -34,7 +34,7 @@ public sealed class StorageSettings : IDisposable {
             pair.Value
         });
 
-        SettingsSerializer.WriteInt(plainSettingsBytes, settingsSnapshot.Sum(setting => setting.Name.Length + setting.Value.Value.Length + 8));
+        plainSettingsBytes.WriteInt(settingsSnapshot.Sum(setting => setting.Name.Length + setting.Value.Value.Length + 8));
 
         foreach (var pair in settingsSnapshot) {
             plainSettingsBytes.WriteSpan(pair.Name);
