@@ -49,9 +49,7 @@ public class StorageSettingsTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        var resultValue = result.GetValue();
-
-        Assert.Equal(new ReadOnlySpan<byte>([31, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 4, 0, 0, 0, 1, 2, 3, 4, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 5, 6, 7, 8, 9]), resultValue);
+        Assert.Equal(new ReadOnlySpan<byte>([31, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 4, 0, 0, 0, 1, 2, 3, 4, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 5, 6, 7, 8, 9]), result.GetValue());
     }
 
     [Fact]

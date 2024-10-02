@@ -4,8 +4,6 @@ using System.Text;
 namespace VDT.Lock;
 
 public sealed class StorageSettings : IDisposable {
-    private readonly ConcurrentDictionary<string, SecureBuffer> plainSettingsBuffers = [];
-
     public static StorageSettings DeserializeFrom(ReadOnlySpan<byte> plainSettingsSpan) {
         var storageSettings = new StorageSettings();
         var position = 0;
@@ -16,6 +14,8 @@ public sealed class StorageSettings : IDisposable {
 
         return storageSettings;
     }
+
+    private readonly ConcurrentDictionary<string, SecureBuffer> plainSettingsBuffers = [];
 
     public StorageSettings() { }
 
