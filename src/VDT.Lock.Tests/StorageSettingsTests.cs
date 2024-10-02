@@ -7,15 +7,10 @@ namespace VDT.Lock.Tests;
 
 public class StorageSettingsTests {
     [Fact]
-    public void Constructor() {
-        var plainSettingsSpan = new ReadOnlySpan<byte>([
-            3, 0, 0, 0, 98, 97, 114,
-            4, 0, 0, 0, 1, 2, 3, 4,
-            3, 0, 0, 0, 102, 111, 111,
-            5, 0, 0, 0, 5, 6, 7, 8, 9
-        ]);
+    public void DeserializeFrom() {
+        var plainSettingsSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 4, 0, 0, 0, 1, 2, 3, 4, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 5, 6, 7, 8, 9]);
 
-        using var subject = new StorageSettings(plainSettingsSpan);
+        using var subject = StorageSettings.DeserializeFrom(plainSettingsSpan);
 
         Assert.Equal(new ReadOnlySpan<byte>([1, 2, 3, 4]), subject.Get("bar"));
         Assert.Equal(new ReadOnlySpan<byte>([5, 6, 7, 8, 9]), subject.Get("foo"));
@@ -23,31 +18,19 @@ public class StorageSettingsTests {
 
     [Fact]
     public void SetToAddSetting() {
-        var plainSettingsSpan = new ReadOnlySpan<byte>([
-            3, 0, 0, 0, 98, 97, 114,
-            4, 0, 0, 0, 1, 2, 3, 4,
-            3, 0, 0, 0, 102, 111, 111,
-            5, 0, 0, 0, 5, 6, 7, 8, 9
-        ]);
+        using var subject = new StorageSettings();
 
-        using var subject = new StorageSettings(plainSettingsSpan);
+        subject.Set("foo", new ReadOnlySpan<byte>([5, 6, 7, 8, 9]));
 
-        subject.Set("baz", new ReadOnlySpan<byte>([15, 15, 15]));
-
-        Assert.Equal(new ReadOnlySpan<byte>([15, 15, 15]), subject.Get("baz"));
+        Assert.Equal(new ReadOnlySpan<byte>([5, 6, 7, 8, 9]), subject.Get("foo"));
     }
 
     [Fact]
     public void SetToOverwriteSetting() {
-        var plainSettingsSpan = new ReadOnlySpan<byte>([
-            3, 0, 0, 0, 98, 97, 114,
-            4, 0, 0, 0, 1, 2, 3, 4,
-            3, 0, 0, 0, 102, 111, 111,
-            5, 0, 0, 0, 5, 6, 7, 8, 9
-        ]);
+        using var subject = new StorageSettings();
 
-        using var subject = new StorageSettings(plainSettingsSpan);
-        
+        subject.Set("foo", new ReadOnlySpan<byte>([5, 6, 7, 8, 9]));
+
         var plainPreviousValueBuffer = GetSettings(subject)["foo"];
 
         subject.Set("foo", new ReadOnlySpan<byte>([15, 15, 15]));
@@ -58,35 +41,27 @@ public class StorageSettingsTests {
 
     [Fact]
     public void SerializeTo() {
-        var plainSettingsSpan = new ReadOnlySpan<byte>([
-            3, 0, 0, 0, 98, 97, 114,
-            4, 0, 0, 0, 1, 2, 3, 4,
-            3, 0, 0, 0, 102, 111, 111,
-            5, 0, 0, 0, 5, 6, 7, 8, 9
-        ]);
+        using var subject = new StorageSettings();
 
-        using var subject = new StorageSettings(plainSettingsSpan);
+        subject.Set("foo", new ReadOnlySpan<byte>([5, 6, 7, 8, 9]));
+        subject.Set("bar", new ReadOnlySpan<byte>([1, 2, 3, 4]));
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
         var resultValue = result.GetValue();
 
-        Assert.Equal(plainSettingsSpan.Length, resultValue[0]);
-        Assert.Equal(plainSettingsSpan, resultValue.Slice(4));
+        Assert.Equal(new ReadOnlySpan<byte>([31, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 4, 0, 0, 0, 1, 2, 3, 4, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 5, 6, 7, 8, 9]), resultValue);
     }
 
     [Fact]
     public void Dispose() {
-        var plainSettingsSpan = new ReadOnlySpan<byte>([
-            3, 0, 0, 0, 98, 97, 114,
-            4, 0, 0, 0, 1, 2, 3, 4,
-            3, 0, 0, 0, 102, 111, 111,
-            5, 0, 0, 0, 5, 6, 7, 8, 9
-        ]);
         ConcurrentDictionary<string, SecureBuffer> plainSettingsBuffer;
-        
-        using (var subject = new StorageSettings(plainSettingsSpan)) {
+
+        using (var subject = new StorageSettings()) {
+            subject.Set("foo", new ReadOnlySpan<byte>([5, 6, 7, 8, 9]));
+            subject.Set("bar", new ReadOnlySpan<byte>([1, 2, 3, 4]));
+
             plainSettingsBuffer = GetSettings(subject);
         };
 
@@ -98,8 +73,8 @@ public class StorageSettingsTests {
     }
 
     private static ConcurrentDictionary<string, SecureBuffer> GetSettings(StorageSettings storageSettings) {
-        var settingsField = typeof(StorageSettings).GetField("plainSettingsBuffer", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new InvalidOperationException();
-        
+        var settingsField = typeof(StorageSettings).GetField("plainSettingsBuffers", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new InvalidOperationException();
+
         return settingsField.GetValue(storageSettings) as ConcurrentDictionary<string, SecureBuffer> ?? throw new InvalidOperationException();
     }
 }

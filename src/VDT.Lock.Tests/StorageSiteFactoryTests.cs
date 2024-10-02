@@ -5,12 +5,11 @@ using Xunit;
 
 namespace VDT.Lock.Tests;
 
-public class StorageSiteFactoryTests
-{
+public class StorageSiteFactoryTests {
     [Theory]
     [InlineData(nameof(FileSystemStorageSite), typeof(FileSystemStorageSite))]
     public void Create(string typeName, Type expectedType) {
-        var storageSettings = new StorageSettings([]);
+        var storageSettings = new StorageSettings();
 
         var subject = new StorageSiteFactory();
 

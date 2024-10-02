@@ -46,7 +46,7 @@ public sealed class StoreManager : IDisposable {
 
         while (position < plainStorageSettingsBuffer.Value.Length) {
             var storageSiteTypeName = Encoding.UTF8.GetString(plainStorageSettingsBuffer.ReadSpan(ref position));
-            var storageSettings = new StorageSettings(plainStorageSettingsBuffer.ReadSpan(ref position));
+            var storageSettings = StorageSettings.DeserializeFrom(plainStorageSettingsBuffer.ReadSpan(ref position));
             var storageSite = storageSiteFactory.Create(storageSiteTypeName, storageSettings);
 
             StorageSites.Add(storageSite);
