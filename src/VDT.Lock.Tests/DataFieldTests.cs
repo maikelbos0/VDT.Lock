@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using Xunit;
 
-namespace VDT.Lock.Tests; 
+namespace VDT.Lock.Tests;
 
 public class DataFieldTests {
     [Fact]
