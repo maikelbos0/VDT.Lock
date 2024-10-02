@@ -6,18 +6,14 @@ namespace VDT.Lock.Tests;
 public class DataItemTests {
     [Fact]
     public void Constructor() {
-        using var plainNameBuffer = new SecureBuffer([98, 97, 114]);
+        using var subject = new DataItem([98, 97, 114]);
 
-        using var subject = new DataItem(plainNameBuffer);
-
-        Assert.Equal(plainNameBuffer.Value, subject.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
     }
 
     [Fact]
     public void SetName() {
-        using var plainNameBuffer = new SecureBuffer([98, 97, 114]);
-
-        using var subject = new DataItem(plainNameBuffer);
+        using var subject = new DataItem([98, 97, 114]);
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainNameBuffer");
 

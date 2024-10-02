@@ -30,8 +30,8 @@ public sealed class DataItem : IDisposable {
         }
     }
 
-    public DataItem(SecureBuffer plainNameBuffer) {
-        this.plainNameBuffer = plainNameBuffer;
+    public DataItem(ReadOnlySpan<byte> plainNameSpan) {
+        plainNameBuffer = new(plainNameSpan.ToArray());
     }
 
     public void Dispose() {
