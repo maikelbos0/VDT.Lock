@@ -27,9 +27,9 @@ public sealed class DataField : IDisposable {
 
     public int Length => plainNameBuffer.Value.Length + plainDataBuffer.Value.Length + 8;
 
-    public DataField(SecureBuffer plainNameBuffer, SecureBuffer plainDataBuffer) {
-        this.plainNameBuffer = plainNameBuffer;
-        this.plainDataBuffer = plainDataBuffer;
+    public DataField(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> plainDataSpan) {
+        this.plainNameBuffer = new(plainNameSpan.ToArray());
+        this.plainDataBuffer = new(plainDataSpan.ToArray());
     }
 
     public DataField(ReadOnlySpan<byte> plainSpan) {

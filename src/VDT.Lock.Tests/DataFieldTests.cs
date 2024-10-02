@@ -19,22 +19,19 @@ public class DataFieldTests {
 
     [Fact]
     public void Constructor() {
-        using var plainNameBuffer = new SecureBuffer([98, 97, 114]);
-        using var plainDataBuffer = new SecureBuffer([5, 6, 7, 8, 9]);
+        var plainNameSpan = new ReadOnlySpan<byte>([98, 97, 114]);
+        var plainDataSpan = new ReadOnlySpan<byte>([5, 6, 7, 8, 9]);
 
-        using var subject = new DataField(plainNameBuffer, plainDataBuffer);
+        using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
 
-        Assert.Equal(plainNameBuffer.Value, subject.Name);
-        Assert.Equal(plainDataBuffer.Value, subject.Data);
+        Assert.Equal(plainNameSpan, subject.Name);
+        Assert.Equal(plainDataSpan, subject.Data);
 
     }
 
     [Fact]
     public void SetName() {
-        using var plainNameBuffer = new SecureBuffer([98, 97, 114]);
-        using var plainDataBuffer = new SecureBuffer([5, 6, 7, 8, 9]);
-
-        using var subject = new DataField(plainNameBuffer, plainDataBuffer);
+        using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainNameBuffer");
 
@@ -46,10 +43,7 @@ public class DataFieldTests {
     
     [Fact]
     public void SetData() {
-        using var plainNameBuffer = new SecureBuffer([98, 97, 114]);
-        using var plainDataBuffer = new SecureBuffer([5, 6, 7, 8, 9]);
-
-        using var subject = new DataField(plainNameBuffer, plainDataBuffer);
+        using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainDataBuffer");
 
