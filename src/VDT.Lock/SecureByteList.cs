@@ -20,13 +20,13 @@ public sealed class SecureByteList : IDisposable {
     }
 
     public SecureByteList() {
-        buffer = new(new byte[DefaultCapacity]);
+        buffer = new(DefaultCapacity);
     }
 
     public SecureByteList(Stream stream) {
         int bytesRead;
 
-        buffer = new(new byte[GetCapacity(stream.CanSeek ? (int)stream.Length + DefaultCapacity : DefaultCapacity)]);
+        buffer = new(GetCapacity(stream.CanSeek ? (int)stream.Length + DefaultCapacity : DefaultCapacity));
 
         do {
             EnsureCapacity(length + DefaultCapacity);

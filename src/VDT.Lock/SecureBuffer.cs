@@ -17,6 +17,8 @@ public sealed class SecureBuffer : IDisposable {
     }
 
     public bool IsDisposed => isDisposed;
+    
+    public SecureBuffer(int size) : this(new byte[size]) { }
 
     public SecureBuffer(byte[] buffer) {
         value = buffer;

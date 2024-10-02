@@ -21,7 +21,7 @@ public sealed class Encryptor : IEncryptor {
         using var ivBuffer = new SecureBuffer(randomByteGenerator.Generate(BlockSizeInBytes));
         using var encryptedBuffer = new SecureBuffer(await JSEncryptor.Encrypt(plainBuffer.Value, keyBuffer.Value, ivBuffer.Value) as byte[] ?? throw new InvalidOperationException());
 
-        var payloadBuffer = new SecureBuffer(new byte[ivBuffer.Value.Length + encryptedBuffer.Value.Length]);
+        var payloadBuffer = new SecureBuffer(ivBuffer.Value.Length + encryptedBuffer.Value.Length);
         Buffer.BlockCopy(ivBuffer.Value, 0, payloadBuffer.Value, 0, ivBuffer.Value.Length);
         Buffer.BlockCopy(encryptedBuffer.Value, 0, payloadBuffer.Value, ivBuffer.Value.Length, encryptedBuffer.Value.Length);
 
@@ -37,7 +37,7 @@ public sealed class Encryptor : IEncryptor {
 
         using var encryptor = aes.CreateEncryptor(keyBuffer.Value, ivBuffer.Value);
 
-        var payloadBuffer = new SecureBuffer(new byte[plainBuffer.Value.Length + 2 * BlockSizeInBytes - (plainBuffer.Value.Length % BlockSizeInBytes)]);
+        var payloadBuffer = new SecureBuffer(plainBuffer.Value.Length + 2 * BlockSizeInBytes - (plainBuffer.Value.Length % BlockSizeInBytes));
         Buffer.BlockCopy(ivBuffer.Value, 0, payloadBuffer.Value, 0, BlockSizeInBytes);
 
         using var payloadStream = new MemoryStream(payloadBuffer.Value);
@@ -56,20 +56,20 @@ public sealed class Encryptor : IEncryptor {
     public async Task<SecureBuffer> Decrypt(SecureBuffer encryptedBuffer, SecureBuffer keyBuffer) {
         await JSEncryptor.ImportModule();
 
-        using var ivBuffer = new SecureBuffer(new byte[BlockSizeInBytes]);
+        using var ivBuffer = new SecureBuffer(BlockSizeInBytes);
         Buffer.BlockCopy(encryptedBuffer.Value, 0, ivBuffer.Value, 0, BlockSizeInBytes);
 
-        using var payloadBuffer = new SecureBuffer(new byte[encryptedBuffer.Value.Length - BlockSizeInBytes]);
+        using var payloadBuffer = new SecureBuffer(encryptedBuffer.Value.Length - BlockSizeInBytes);
         Buffer.BlockCopy(encryptedBuffer.Value, BlockSizeInBytes, payloadBuffer.Value, 0, encryptedBuffer.Value.Length - BlockSizeInBytes);
 
         return new SecureBuffer(await JSEncryptor.Decrypt(payloadBuffer.Value, keyBuffer.Value, ivBuffer.Value) as byte[] ?? throw new InvalidOperationException());
     }
 #else
     public Task<SecureBuffer> Decrypt(SecureBuffer encryptedBuffer, SecureBuffer keyBuffer) {
-        using var ivBuffer = new SecureBuffer(new byte[BlockSizeInBytes]);
+        using var ivBuffer = new SecureBuffer(BlockSizeInBytes);
         Buffer.BlockCopy(encryptedBuffer.Value, 0, ivBuffer.Value, 0, BlockSizeInBytes);
 
-        using var payloadBuffer = new SecureBuffer(new byte[encryptedBuffer.Value.Length - BlockSizeInBytes]);
+        using var payloadBuffer = new SecureBuffer(encryptedBuffer.Value.Length - BlockSizeInBytes);
         Buffer.BlockCopy(encryptedBuffer.Value, BlockSizeInBytes, payloadBuffer.Value, 0, encryptedBuffer.Value.Length - BlockSizeInBytes);
 
 #pragma warning disable CA1416 // Validate platform compatibility
