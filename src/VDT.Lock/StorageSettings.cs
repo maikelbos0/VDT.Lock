@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Text;
+﻿using System.Text;
 
 namespace VDT.Lock;
 
@@ -15,7 +14,7 @@ public sealed class StorageSettings : IDisposable {
         return storageSettings;
     }
 
-    private readonly ConcurrentDictionary<string, SecureBuffer> plainSettingsBuffers = [];
+    private readonly Dictionary<string, SecureBuffer> plainSettingsBuffers = [];
 
     public StorageSettings() { }
 
@@ -23,26 +22,24 @@ public sealed class StorageSettings : IDisposable {
         => new(plainSettingsBuffers[key].Value);
 
     public void Set(string key, ReadOnlySpan<byte> valueSpan) {
-        var plainNewValueBuffer = new SecureBuffer(valueSpan.ToArray());
+        if (plainSettingsBuffers.TryGetValue(key, out var plainOldValueBuffer)) {
+            plainOldValueBuffer.Dispose();
+        }
 
-        plainSettingsBuffers.AddOrUpdate(key, plainNewValueBuffer, (key, plainPreviousValueBuffer) => {
-            plainPreviousValueBuffer.Dispose();
-            return plainNewValueBuffer;
-        });
+        plainSettingsBuffers[key] = new SecureBuffer(valueSpan.ToArray());
     }
 
     public void SerializeTo(SecureByteList plainSettingsBytes) {
-        var settingsSnapshot = plainSettingsBuffers
-            .ToArray()
+        var serializableSettings = plainSettingsBuffers
             .OrderBy(pair => pair.Key)
             .Select(pair => new {
                 Name = Encoding.UTF8.GetBytes(pair.Key),
                 pair.Value
             });
 
-        plainSettingsBytes.WriteInt(settingsSnapshot.Sum(setting => setting.Name.Length + setting.Value.Value.Length + 8));
+        plainSettingsBytes.WriteInt(serializableSettings.Sum(setting => setting.Name.Length + setting.Value.Value.Length + 8));
 
-        foreach (var pair in settingsSnapshot) {
+        foreach (var pair in serializableSettings) {
             plainSettingsBytes.WriteSpan(pair.Name);
             plainSettingsBytes.WriteSecureBuffer(pair.Value);
         }

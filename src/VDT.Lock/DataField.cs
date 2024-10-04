@@ -8,26 +8,20 @@ public sealed class DataField : IDisposable {
     }
 
     private SecureBuffer plainNameBuffer;
-    private readonly object plainNameBufferLock = new();
     private SecureBuffer plainDataBuffer;
-    private readonly object plainDataBufferLock = new();
 
     public ReadOnlySpan<byte> Name {
         get => new(plainNameBuffer.Value);
         set {
-            lock (plainNameBufferLock) {
-                plainNameBuffer.Dispose();
-                plainNameBuffer = new(value.ToArray());
-            }
+            plainNameBuffer.Dispose();
+            plainNameBuffer = new(value.ToArray());
         }
     }
     public ReadOnlySpan<byte> Data {
         get => new(plainDataBuffer.Value);
         set {
-            lock (plainDataBufferLock) {
-                plainDataBuffer.Dispose();
-                plainDataBuffer = new(value.ToArray());
-            }
+            plainDataBuffer.Dispose();
+            plainDataBuffer = new(value.ToArray());
         }
     }
 

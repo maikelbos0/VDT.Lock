@@ -5,7 +5,6 @@ namespace VDT.Lock;
 public sealed class SecureByteList : IDisposable {
     public const int DefaultCapacity = 64;
 
-    private readonly object listLock = new();
     private SecureBuffer buffer;
     private int length = 0;
 
@@ -43,18 +42,14 @@ public sealed class SecureByteList : IDisposable {
     public void Add(char c) => Add((byte)c);
 
     public void Add(byte b) {
-        lock (listLock) {
-            EnsureCapacity(length + 1);
-            buffer.Value[length++] = b;
-        }
+        EnsureCapacity(length + 1);
+        buffer.Value[length++] = b;
     }
 
     public void Add(ReadOnlySpan<byte> span) {
-        lock (listLock) {
-            EnsureCapacity(length + span.Length);
-            span.CopyTo(new Span<byte>(buffer.Value, length, span.Length));
-            length += span.Length;
-        }
+        EnsureCapacity(length + span.Length);
+        span.CopyTo(new Span<byte>(buffer.Value, length, span.Length));
+        length += span.Length;
     }
 
     public void EnsureCapacity(int requestedCapacity) {
@@ -69,16 +64,12 @@ public sealed class SecureByteList : IDisposable {
     }
 
     public void RemoveLast() {
-        lock (listLock) {
-            CryptographicOperations.ZeroMemory(new Span<byte>(buffer.Value, --length, 1));
-        }
+        CryptographicOperations.ZeroMemory(new Span<byte>(buffer.Value, --length, 1));
     }
 
     public void Clear() {
-        lock (listLock) {
-            CryptographicOperations.ZeroMemory(buffer.Value);
-            length = 0;
-        }
+        CryptographicOperations.ZeroMemory(buffer.Value);
+        length = 0;
     }
 
     public ReadOnlySpan<byte> GetValue() => new(buffer.Value, 0, length);
@@ -87,7 +78,7 @@ public sealed class SecureByteList : IDisposable {
         var bytes = new byte[length];
 
         Buffer.BlockCopy(buffer.Value, 0, bytes, 0, length);
-        
+
         return new SecureBuffer(bytes);
     }
 
