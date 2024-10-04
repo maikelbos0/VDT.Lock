@@ -33,6 +33,23 @@ public class DataCollectionTests {
     }
 
     [Fact]
+    public void Clear() {
+        var items = new List<TestDisposable>();
+        using var subject = new DataCollection<TestDisposable>();
+
+        items.Add(subject.Add());
+        items.Add(subject.Add());
+        subject.Clear();
+
+        Assert.Equal(0, subject.Count);
+        Assert.Equal(2, items.Count);
+
+        foreach (var item in items) {
+            Assert.True(item.IsDisposed);
+        }
+    }
+
+    [Fact]
     public void Dispose() {
         var items = new List<TestDisposable>();
 

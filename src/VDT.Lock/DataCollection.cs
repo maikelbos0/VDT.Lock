@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataCollection<T> : IDisposable, IEnumerable<T> where T : notnull, IDisposable, new() {
+public sealed class DataCollection<T> : IEnumerable<T>, IDisposable where T : notnull, IDisposable, new() {
     private readonly List<T> items = [];
 
     public int Count => items.Count;
@@ -13,6 +13,13 @@ public sealed class DataCollection<T> : IDisposable, IEnumerable<T> where T : no
         var item = new T();
         items.Add(item);
         return item;
+    }
+
+    public void Clear() {
+        foreach (var item in items) {
+            item.Dispose();
+        }
+        items.Clear();
     }
 
     public IEnumerator<T> GetEnumerator() => items.GetEnumerator();
