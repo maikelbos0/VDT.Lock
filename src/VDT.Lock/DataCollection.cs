@@ -15,6 +15,18 @@ public sealed class DataCollection<T> : IEnumerable<T>, IDisposable where T : no
         return item;
     }
 
+    public bool Contains(T item) => items.Contains(item);
+
+    public bool Remove(T item) {
+        var removed = items.Remove(item);
+
+        if (removed) {
+            item.Dispose();
+        }
+
+        return removed;
+    }
+
     public void Clear() {
         foreach (var item in items) {
             item.Dispose();

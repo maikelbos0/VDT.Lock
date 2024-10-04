@@ -27,9 +27,47 @@ public class DataCollectionTests {
     public void Add() {
         using var subject = new DataCollection<TestDisposable>();
 
-        var result = subject.Add();
+        var item = subject.Add();
 
-        Assert.Equal(result, Assert.Single(subject));
+        Assert.Equal(item, Assert.Single(subject));
+    }
+
+    [Fact]
+    public void ContainsWhenPresent() {
+        using var subject = new DataCollection<TestDisposable>();
+
+        var item = subject.Add();
+
+        Assert.True(subject.Contains(item));
+    }
+
+    [Fact]
+    public void ContainsWhenNotPresent() {
+        using var subject = new DataCollection<TestDisposable>();
+
+        using var item = new TestDisposable();
+
+        Assert.False(subject.Contains(item));
+    }
+
+    [Fact]
+    public void RemoveWhenPresent() {
+        using var subject = new DataCollection<TestDisposable>();
+
+        var item = subject.Add();
+
+        Assert.True(subject.Remove(item));
+        Assert.True(item.IsDisposed);
+    }
+
+    [Fact]
+    public void RemoveWhenNotPresent() {
+        using var subject = new DataCollection<TestDisposable>();
+
+        using var item = new TestDisposable();
+
+        Assert.False(subject.Remove(item));
+        Assert.False(item.IsDisposed);
     }
 
     [Fact]
