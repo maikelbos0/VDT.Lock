@@ -1,0 +1,58 @@
+﻿using System;
+using Xunit;
+
+namespace VDT.Lock.Tests;
+
+public class DataValueTests {
+    [Fact]
+    public void DeserializeFrom() {
+        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114]);
+
+        using var subject = DataValue.DeserializeFrom(plainSpan);
+
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Value);
+    }
+
+    [Fact]
+    public void Constructor() {
+        var plainValueSpan = new ReadOnlySpan<byte>([98, 97, 114]);
+
+        using var subject = new DataValue(plainValueSpan);
+
+        Assert.Equal(plainValueSpan, subject.Value);
+
+    }
+
+    [Fact]
+    public void SetValue() {
+        using var subject = new DataValue([98, 97, 114]);
+
+        var plainPreviousValueBuffer = subject.GetBuffer("plainValueBuffer");
+
+        subject.Value = new ReadOnlySpan<byte>([99, 99, 99]);
+
+        Assert.Equal(new ReadOnlySpan<byte>([99, 99, 99]), subject.Value);
+        Assert.True(plainPreviousValueBuffer.IsDisposed);
+    }
+    
+    [Fact]
+    public void SerializeTo() {
+        using var subject = new DataValue([98, 97, 114]);
+
+        using var result = new SecureByteList();
+        subject.SerializeTo(result);
+
+        Assert.Equal(new ReadOnlySpan<byte>([7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
+    }        
+
+    [Fact]
+    public void Dispose() {
+        SecureBuffer plainValueBuffer;
+
+        using (var subject = new DataValue([98, 97, 114])) {
+            plainValueBuffer = subject.GetBuffer("plainValueBuffer");
+        };
+
+        Assert.True(plainValueBuffer.IsDisposed);
+    }
+}
