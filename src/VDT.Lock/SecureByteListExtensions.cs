@@ -1,4 +1,6 @@
-﻿namespace VDT.Lock;
+﻿using System;
+
+namespace VDT.Lock;
 
 public static class SecureByteListExtensions {
     public static void WriteInt(this SecureByteList plainBytes, int value) {

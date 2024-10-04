@@ -1,4 +1,6 @@
-﻿namespace VDT.Lock;
+﻿using System;
+
+namespace VDT.Lock;
 
 public sealed class DataField : IDisposable {
     public static DataField DeserializeFrom(ReadOnlySpan<byte> plainSpan) {

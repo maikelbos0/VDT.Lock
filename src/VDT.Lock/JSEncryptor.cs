@@ -1,5 +1,6 @@
 ﻿#if BROWSER
 using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
 #endif
 
 namespace VDT.Lock;

@@ -1,3 +1,5 @@
-﻿namespace VDT.Lock;
+﻿using System;
+
+namespace VDT.Lock;
 
 public class NotAuthenticatedException : Exception { }

@@ -1,4 +1,8 @@
-﻿#if !BROWSER
+﻿using System;
+using System.Threading.Tasks;
+
+#if !BROWSER
+using System.IO;
 using System.Security.Cryptography;
 #endif
 

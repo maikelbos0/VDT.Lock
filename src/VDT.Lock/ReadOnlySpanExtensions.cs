@@ -1,4 +1,6 @@
-﻿namespace VDT.Lock;
+﻿using System;
+
+namespace VDT.Lock;
 
 public static class ReadOnlySpanExtensions {
     public static int ReadInt(this ReadOnlySpan<byte> plainSpan, ref int position) {

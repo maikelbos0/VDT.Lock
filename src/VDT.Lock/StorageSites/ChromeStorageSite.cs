@@ -1,4 +1,6 @@
 ﻿#if BROWSER
+using System;
+
 namespace VDT.Lock.StorageSites;
 
 public class ChromeStorageSite : StorageSiteBase {

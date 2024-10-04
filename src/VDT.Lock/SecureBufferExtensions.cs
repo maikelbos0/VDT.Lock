@@ -1,4 +1,6 @@
-﻿namespace VDT.Lock;
+﻿using System;
+
+namespace VDT.Lock;
 
 public static class SecureBufferExtensions {
     public static int ReadInt(this SecureBuffer plainBuffer, ref int position) {
