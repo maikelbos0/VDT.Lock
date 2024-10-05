@@ -10,42 +10,65 @@ public sealed class DataField : IDisposable {
     }
 
     private SecureBuffer plainNameBuffer;
-    private SecureBuffer plainDataBuffer;
+    private SecureBuffer plainValueBuffer;
+
+    public bool IsDisposed { get; private set; }
 
     public ReadOnlySpan<byte> Name {
-        get => new(plainNameBuffer.Value);
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return new(plainNameBuffer.Value);
+        }
         set {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
             plainNameBuffer.Dispose();
             plainNameBuffer = new(value.ToArray());
         }
     }
 
-    public ReadOnlySpan<byte> Data {
-        get => new(plainDataBuffer.Value);
+    public ReadOnlySpan<byte> Value {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return new(plainValueBuffer.Value);
+        }
         set {
-            plainDataBuffer.Dispose();
-            plainDataBuffer = new(value.ToArray());
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            plainValueBuffer.Dispose();
+            plainValueBuffer = new(value.ToArray());
         }
     }
 
-    public int Length => plainNameBuffer.Value.Length + plainDataBuffer.Value.Length + 8;
+    public int Length {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return plainNameBuffer.Value.Length + plainValueBuffer.Value.Length + 8;
+        }
+    }
 
     public DataField() : this(ReadOnlySpan<byte>.Empty, ReadOnlySpan<byte>.Empty) { }
 
     public DataField(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> plainDataSpan) {
         plainNameBuffer = new(plainNameSpan.ToArray());
-        plainDataBuffer = new(plainDataSpan.ToArray());
+        plainValueBuffer = new(plainDataSpan.ToArray());
     }
 
     public void SerializeTo(SecureByteList plainBytes) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         plainBytes.WriteInt(Length);
         plainBytes.WriteSecureBuffer(plainNameBuffer);
-        plainBytes.WriteSecureBuffer(plainDataBuffer);
+        plainBytes.WriteSecureBuffer(plainValueBuffer);
     }
 
     public void Dispose() {
         plainNameBuffer.Dispose();
-        plainDataBuffer.Dispose();
+        plainValueBuffer.Dispose();
+        IsDisposed = true;
         GC.SuppressFinalize(this);
     }
 }

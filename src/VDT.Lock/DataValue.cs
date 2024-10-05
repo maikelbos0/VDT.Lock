@@ -19,7 +19,6 @@ public sealed class DataValue : IDisposable {
 
             return new(plainValueBuffer.Value);
         }
-
         set {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
