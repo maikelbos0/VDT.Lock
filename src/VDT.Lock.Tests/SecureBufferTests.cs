@@ -26,6 +26,17 @@ public class SecureBufferTests {
             disposedSubject = subject;
         }
 
+        Assert.True(disposedSubject.IsDisposed);
+    }
+
+    [Fact]
+    public void ValueThrowsIfDisposed() {
+        SecureBuffer disposedSubject;
+
+        using (var subject = new SecureBuffer([97, 98, 99])) {
+            disposedSubject = subject;
+        }
+
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value);
     }
 }

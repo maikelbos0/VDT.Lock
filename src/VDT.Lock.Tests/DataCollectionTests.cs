@@ -102,4 +102,81 @@ public class DataCollectionTests {
             Assert.True(item.IsDisposed);
         }
     }
+
+    [Fact]
+    public void IsDisposed() {
+        DataCollection<TestDisposable> disposedSubject;
+
+        using (var subject = new DataCollection<TestDisposable>()) {
+            disposedSubject = subject;
+        };
+
+        Assert.True(disposedSubject.IsDisposed);
+    }
+
+    [Fact]
+    public void CountThrowsIfDisposed() {
+        DataCollection<TestDisposable> disposedSubject;
+
+        using (var subject = new DataCollection<TestDisposable>()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Count);
+    }
+
+    [Fact]
+    public void AddThrowsIfDisposed() {
+        DataCollection<TestDisposable> disposedSubject;
+
+        using (var subject = new DataCollection<TestDisposable>()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add());
+    }
+
+    [Fact]
+    public void ContainsThrowsIfDisposed() {
+        DataCollection<TestDisposable> disposedSubject;
+
+        using (var subject = new DataCollection<TestDisposable>()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Contains(new TestDisposable()));
+    }
+
+    [Fact]
+    public void RemoveThrowsIfDisposed() {
+        DataCollection<TestDisposable> disposedSubject;
+
+        using (var subject = new DataCollection<TestDisposable>()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Remove(new TestDisposable()));
+    }
+
+    [Fact]
+    public void ClearThrowsIfDisposed() {
+        DataCollection<TestDisposable> disposedSubject;
+
+        using (var subject = new DataCollection<TestDisposable>()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Clear());
+    }
+
+    [Fact]
+    public void GetEnumeratorThrowsIfDisposed() {
+        DataCollection<TestDisposable> disposedSubject;
+
+        using (var subject = new DataCollection<TestDisposable>()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.GetEnumerator());
+    }
 }

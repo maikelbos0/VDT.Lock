@@ -8,16 +8,16 @@ namespace VDT.Lock;
 public sealed class SecureBuffer : IDisposable {
     private readonly GCHandle handle;
     private readonly byte[] value;
-    private bool isDisposed;
+
+    public bool IsDisposed { get; private set; }
 
     public byte[] Value {
         get {
-            ObjectDisposedException.ThrowIf(isDisposed, this);
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
             return value;
         }
     }
-
-    public bool IsDisposed => isDisposed;
     
     public SecureBuffer(int size) : this(new byte[size]) { }
 
@@ -40,6 +40,6 @@ public sealed class SecureBuffer : IDisposable {
         if (handle.IsAllocated) {
             handle.Free();
         }
-        isDisposed = true;
+        IsDisposed = true;
     }
 }
