@@ -74,7 +74,6 @@ public class DataFieldTests {
         Assert.True(plainDataBuffer.IsDisposed);
     }
 
-
     [Fact]
     public void IsDisposed() {
         DataField disposedSubject;

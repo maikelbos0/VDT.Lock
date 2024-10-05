@@ -7,9 +7,6 @@ namespace VDT.Lock;
 public sealed class SecureByteList : IDisposable {
     public const int DefaultCapacity = 64;
 
-    private SecureBuffer buffer;
-    private int length = 0;
-
     public static int GetCapacity(int requestedCapacity) {
         var capacity = DefaultCapacity;
 
@@ -19,6 +16,13 @@ public sealed class SecureByteList : IDisposable {
 
         return Math.Min(capacity, Array.MaxLength);
     }
+
+    private SecureBuffer buffer;
+    private int length = 0;
+
+    public bool IsDisposed { get; private set; }
+
+    // TODO add indexer?
 
     public SecureByteList() {
         buffer = new(DefaultCapacity);
@@ -44,17 +48,23 @@ public sealed class SecureByteList : IDisposable {
     public void Add(char c) => Add((byte)c);
 
     public void Add(byte b) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         EnsureCapacity(length + 1);
         buffer.Value[length++] = b;
     }
 
     public void Add(ReadOnlySpan<byte> span) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         EnsureCapacity(length + span.Length);
         span.CopyTo(new Span<byte>(buffer.Value, length, span.Length));
         length += span.Length;
     }
 
     public void EnsureCapacity(int requestedCapacity) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         if (buffer.Value.Length < requestedCapacity && buffer.Value.Length < Array.MaxLength) {
             var capacity = GetCapacity(requestedCapacity);
             var newBytes = new byte[capacity];
@@ -66,17 +76,27 @@ public sealed class SecureByteList : IDisposable {
     }
 
     public void RemoveLast() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         CryptographicOperations.ZeroMemory(new Span<byte>(buffer.Value, --length, 1));
     }
 
     public void Clear() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         CryptographicOperations.ZeroMemory(buffer.Value);
         length = 0;
     }
 
-    public ReadOnlySpan<byte> GetValue() => new(buffer.Value, 0, length);
+    public ReadOnlySpan<byte> GetValue() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        return new(buffer.Value, 0, length);
+    }
 
     public SecureBuffer ToBuffer() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         var bytes = new byte[length];
 
         Buffer.BlockCopy(buffer.Value, 0, bytes, 0, length);
@@ -86,6 +106,7 @@ public sealed class SecureByteList : IDisposable {
 
     public void Dispose() {
         buffer.Dispose();
+        IsDisposed = true;
         GC.SuppressFinalize(this);
     }
 }

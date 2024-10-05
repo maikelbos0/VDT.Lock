@@ -176,6 +176,106 @@ public sealed class SecureByteListTests {
         Assert.True(buffer.IsDisposed);
     }
 
+    [Fact]
+    public void AddCharThrowsIfDisposed() {
+        SecureByteList disposedSubject;
+
+        using (var subject = new SecureByteList()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add('a'));
+    }
+
+    [Fact]
+    public void AddByteThrowsIfDisposed() {
+        SecureByteList disposedSubject;
+
+        using (var subject = new SecureByteList()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add(15));
+    }
+
+    [Fact]
+    public void AddReadOnlySpanThrowsIfDisposed() {
+        SecureByteList disposedSubject;
+
+        using (var subject = new SecureByteList()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add(new ReadOnlySpan<byte>([15, 15, 15])));
+    }
+
+    [Fact]
+    public void EnsureCapacityThrowsIfDisposed() {
+        SecureByteList disposedSubject;
+
+        using (var subject = new SecureByteList()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.EnsureCapacity(0));
+    }
+
+    [Fact]
+    public void RemoveLastThrowsIfDisposed() {
+        SecureByteList disposedSubject;
+
+        using (var subject = new SecureByteList()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.RemoveLast());
+    }
+
+    [Fact]
+    public void ClearThrowsIfDisposed() {
+        SecureByteList disposedSubject;
+
+        using (var subject = new SecureByteList()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Clear());
+    }
+
+    [Fact]
+    public void GetValueThrowsIfDisposed() {
+        SecureByteList disposedSubject;
+
+        using (var subject = new SecureByteList()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.GetValue());
+    }
+
+    [Fact]
+    public void ToBufferThrowsIfDisposed() {
+        SecureByteList disposedSubject;
+
+        using (var subject = new SecureByteList()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.ToBuffer());
+    }
+
+    [Fact]
+    public void IsDisposed() {
+        SecureByteList disposedSubject;
+
+        using (var subject = new SecureByteList()) {
+            disposedSubject = subject;
+        };
+
+        Assert.True(disposedSubject.IsDisposed);
+    }
+
+
     private static byte[] GetExpectedBufferValue(int length, params byte[] bytes) {
         var expectedBuffer = new byte[length];
         Buffer.BlockCopy(bytes, 0, expectedBuffer, 0, bytes.Length);
