@@ -11,15 +11,30 @@ public sealed class DataValue : IDisposable {
 
     private SecureBuffer plainValueBuffer;
 
+    public bool IsDisposed { get; private set; }
+
     public ReadOnlySpan<byte> Value {
-        get => new(plainValueBuffer.Value);
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return new(plainValueBuffer.Value);
+        }
+
         set {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
             plainValueBuffer.Dispose();
             plainValueBuffer = new(value.ToArray());
         }
     }
 
-    public int Length => plainValueBuffer.Value.Length + 4;
+    public int Length {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return plainValueBuffer.Value.Length + 4;
+        }
+    }
 
     public DataValue() : this(ReadOnlySpan<byte>.Empty) { }
 
@@ -28,12 +43,15 @@ public sealed class DataValue : IDisposable {
     }
 
     public void SerializeTo(SecureByteList plainBytes) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         plainBytes.WriteInt(Length);
         plainBytes.WriteSecureBuffer(plainValueBuffer);
     }
 
     public void Dispose() {
         plainValueBuffer.Dispose();
+        IsDisposed = true;
         GC.SuppressFinalize(this);
     }
 }

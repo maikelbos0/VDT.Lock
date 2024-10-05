@@ -55,4 +55,60 @@ public class DataValueTests {
 
         Assert.True(plainValueBuffer.IsDisposed);
     }
+
+    [Fact]
+    public void IsDisposed() {
+        DataValue disposedSubject;
+
+        using (var subject = new DataValue()) {
+            disposedSubject = subject;
+        };
+
+        Assert.True(disposedSubject.IsDisposed);
+    }
+
+    [Fact]
+    public void LengthThrowsIfDisposed() {
+        DataValue disposedSubject;
+
+        using (var subject = new DataValue()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+    }
+
+    [Fact]
+    public void GetValueThrowsIfDisposed() {
+        DataValue disposedSubject;
+
+        using (var subject = new DataValue()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Value; });
+    }
+
+    [Fact]
+    public void SetValueThrowsIfDisposed() {
+        DataValue disposedSubject;
+
+        using (var subject = new DataValue()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([15, 15, 15]));
+    }
+
+    [Fact]
+    public void SerializeToThrowsIfDisposed() {
+        DataValue disposedSubject;
+        using var plainBytes = new SecureByteList();
+
+        using (var subject = new DataValue()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+    }
 }
