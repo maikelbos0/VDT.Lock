@@ -19,12 +19,19 @@ public sealed class StorageSettings : IDisposable {
 
     private readonly Dictionary<string, SecureBuffer> plainSettingsBuffers = [];
 
+    public bool IsDisposed { get; private set; }
+
     public StorageSettings() { }
 
-    public ReadOnlySpan<byte> Get(string key)
-        => new(plainSettingsBuffers[key].Value);
+    public ReadOnlySpan<byte> Get(string key) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        return new(plainSettingsBuffers[key].Value);
+    }
 
     public void Set(string key, ReadOnlySpan<byte> valueSpan) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         if (plainSettingsBuffers.TryGetValue(key, out var plainOldValueBuffer)) {
             plainOldValueBuffer.Dispose();
         }
@@ -33,6 +40,8 @@ public sealed class StorageSettings : IDisposable {
     }
 
     public void SerializeTo(SecureByteList plainSettingsBytes) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         var serializableSettings = plainSettingsBuffers
             .OrderBy(pair => pair.Key)
             .Select(pair => new {
@@ -52,6 +61,7 @@ public sealed class StorageSettings : IDisposable {
         foreach (var value in plainSettingsBuffers.Values) {
             value.Dispose();
         }
+        IsDisposed = true;
         GC.SuppressFinalize(this);
     }
 }

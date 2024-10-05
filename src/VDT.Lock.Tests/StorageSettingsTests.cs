@@ -70,6 +70,51 @@ public class StorageSettingsTests {
         }
     }
 
+    [Fact]
+    public void IsDisposed() {
+        StorageSettings disposedSubject;
+
+        using (var subject = new StorageSettings()) {
+            disposedSubject = subject;
+        };
+
+        Assert.True(disposedSubject.IsDisposed);
+    }
+
+    [Fact]
+    public void GetThrowsIfDisposed() {
+        StorageSettings disposedSubject;
+
+        using (var subject = new StorageSettings()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Get("foo"));
+    }
+
+    [Fact]
+    public void SetThrowsIfDisposed() {
+        StorageSettings disposedSubject;
+
+        using (var subject = new StorageSettings()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Set("foo", new ReadOnlySpan<byte>([])));
+    }
+
+    [Fact]
+    public void SerializeToThrowsIfDisposed() {
+        StorageSettings disposedSubject;
+        using var plainBytes = new SecureByteList();
+
+        using (var subject = new StorageSettings()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+    }
+
     private static Dictionary<string, SecureBuffer> GetSettings(StorageSettings storageSettings) {
         var settingsField = typeof(StorageSettings).GetField("plainSettingsBuffers", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new InvalidOperationException();
 
