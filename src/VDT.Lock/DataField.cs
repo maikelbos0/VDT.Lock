@@ -19,6 +19,7 @@ public sealed class DataField : IDisposable {
             plainNameBuffer = new(value.ToArray());
         }
     }
+
     public ReadOnlySpan<byte> Data {
         get => new(plainDataBuffer.Value);
         set {
@@ -28,6 +29,8 @@ public sealed class DataField : IDisposable {
     }
 
     public int Length => plainNameBuffer.Value.Length + plainDataBuffer.Value.Length + 8;
+
+    public DataField() : this(ReadOnlySpan<byte>.Empty, ReadOnlySpan<byte>.Empty) { }
 
     public DataField(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> plainDataSpan) {
         plainNameBuffer = new(plainNameSpan.ToArray());

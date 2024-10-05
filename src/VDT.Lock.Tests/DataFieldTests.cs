@@ -19,7 +19,7 @@ public class DataFieldTests {
         var plainNameSpan = new ReadOnlySpan<byte>([98, 97, 114]);
         var plainDataSpan = new ReadOnlySpan<byte>([5, 6, 7, 8, 9]);
 
-        using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
+        using var subject = new DataField(plainNameSpan, plainDataSpan);
 
         Assert.Equal(plainNameSpan, subject.Name);
         Assert.Equal(plainDataSpan, subject.Data);
