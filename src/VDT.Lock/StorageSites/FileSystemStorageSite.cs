@@ -1,5 +1,6 @@
 ﻿#if !BROWSER
 using System;
+using System.Threading.Tasks;
 
 namespace VDT.Lock.StorageSites;
 
@@ -15,11 +16,11 @@ public class FileSystemStorageSite : StorageSiteBase {
         set => storageSettings.Set(nameof(Location), value);
     }
 
-    public override SecureBuffer Load() {
+    protected override Task<SecureBuffer> ExecuteLoad() {
         throw new NotImplementedException();
     }
 
-    public override void Save() {
+    protected override Task ExecuteSave(ReadOnlySpan<byte> encryptedData) {
         throw new NotImplementedException();
     }
 }

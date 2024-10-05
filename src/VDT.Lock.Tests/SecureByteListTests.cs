@@ -177,6 +177,17 @@ public sealed class SecureByteListTests {
     }
 
     [Fact]
+    public void IsDisposed() {
+        SecureByteList disposedSubject;
+
+        using (var subject = new SecureByteList()) {
+            disposedSubject = subject;
+        };
+
+        Assert.True(disposedSubject.IsDisposed);
+    }
+
+    [Fact]
     public void AddCharThrowsIfDisposed() {
         SecureByteList disposedSubject;
 
@@ -263,18 +274,6 @@ public sealed class SecureByteListTests {
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.ToBuffer());
     }
-
-    [Fact]
-    public void IsDisposed() {
-        SecureByteList disposedSubject;
-
-        using (var subject = new SecureByteList()) {
-            disposedSubject = subject;
-        };
-
-        Assert.True(disposedSubject.IsDisposed);
-    }
-
 
     private static byte[] GetExpectedBufferValue(int length, params byte[] bytes) {
         var expectedBuffer = new byte[length];
