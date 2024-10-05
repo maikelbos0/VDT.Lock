@@ -17,9 +17,12 @@ public sealed class StoreManager : IDisposable {
     private SecureBuffer? plainSessionKeyBuffer;
     private SecureBuffer? encryptedStoreKeyBuffer;
 
+    public bool IsDisposed { get; private set; }
+
     [MemberNotNullWhen(true, nameof(plainSessionKeyBuffer), nameof(encryptedStoreKeyBuffer))]
     public bool IsAuthenticated => encryptedStoreKeyBuffer != null;
 
+    // TODO should be DisposingList
     public IList<StorageSiteBase> StorageSites { get; } = [];
 
     public StoreManager(IEncryptor encryptor, IStorageSiteFactory storageSiteFactory, IRandomByteGenerator randomByteGenerator, IHashProvider hashProvider) {
@@ -30,6 +33,8 @@ public sealed class StoreManager : IDisposable {
     }
 
     public async Task Authenticate(SecureBuffer plainMasterPasswordBuffer) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+        
         if (IsAuthenticated) {
             plainSessionKeyBuffer.Dispose();
             encryptedStoreKeyBuffer.Dispose();
@@ -41,6 +46,8 @@ public sealed class StoreManager : IDisposable {
     }
 
     public async Task LoadStorageSites(SecureBuffer encryptedStorageSettingsBuffer) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         EnsureAuthenticated();
 
         using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
@@ -57,6 +64,8 @@ public sealed class StoreManager : IDisposable {
     }
 
     public async Task<SecureBuffer> SaveStorageSites() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+        
         EnsureAuthenticated();
 
         using var plainStorageSettingsBytes = new SecureByteList();
@@ -72,6 +81,8 @@ public sealed class StoreManager : IDisposable {
     }
 
     public Task<SecureBuffer> GetPlainStoreKeyBuffer() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         EnsureAuthenticated();
 
         return encryptor.Decrypt(encryptedStoreKeyBuffer, plainSessionKeyBuffer);
@@ -79,6 +90,8 @@ public sealed class StoreManager : IDisposable {
 
     [MemberNotNull(nameof(plainSessionKeyBuffer), nameof(encryptedStoreKeyBuffer))]
     public void EnsureAuthenticated() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+        
         if (!IsAuthenticated) {
             throw new NotAuthenticatedException();
         }
@@ -87,6 +100,7 @@ public sealed class StoreManager : IDisposable {
     public void Dispose() {
         plainSessionKeyBuffer?.Dispose();
         encryptedStoreKeyBuffer?.Dispose();
+        IsDisposed = true;
         GC.SuppressFinalize(this);
     }
 }
