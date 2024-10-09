@@ -111,7 +111,7 @@ public sealed class StoreManager : IDisposable {
     public void Dispose() {
         plainSessionKeyBuffer?.Dispose();
         encryptedStoreKeyBuffer?.Dispose();
-        StorageSites.Dispose();
+        storageSites.Dispose();
         IsDisposed = true;
         GC.SuppressFinalize(this);
     }

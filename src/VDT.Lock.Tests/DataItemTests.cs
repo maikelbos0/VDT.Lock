@@ -27,16 +27,21 @@ public class DataItemTests {
     public void Dispose() {
         SecureBuffer plainNameBuffer;
         DataCollection<DataField> fields;
+        DataCollection<DataValue> labels;
+        DataCollection<DataValue> locations;
 
         using (var subject = new DataItem()) {
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             fields = subject.Fields;
+            labels = subject.Labels;
+            locations = subject.Locations;
         }
 
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(fields.IsDisposed);
+        Assert.True(labels.IsDisposed);
+        Assert.True(locations.IsDisposed);
     }
-
 
     [Fact]
     public void GetNameThrowsIfDisposed() {
@@ -58,6 +63,28 @@ public class DataItemTests {
         };
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
+    }
+
+    [Fact]
+    public void LabelsThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Labels);
+    }
+
+    [Fact]
+    public void LocationsThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Locations);
     }
 
     [Fact]

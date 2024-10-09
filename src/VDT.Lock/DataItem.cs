@@ -5,6 +5,8 @@ namespace VDT.Lock;
 public sealed class DataItem : IDisposable {
     private SecureBuffer plainNameBuffer;
     private readonly DataCollection<DataField> fields = [];
+    private readonly DataCollection<DataValue> labels = [];
+    private readonly DataCollection<DataValue> locations = [];
 
     public bool IsDisposed { get; private set; }
 
@@ -30,6 +32,22 @@ public sealed class DataItem : IDisposable {
         }
     }
 
+    public DataCollection<DataValue> Labels {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return labels;
+        }
+    }
+
+    public DataCollection<DataValue> Locations {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return locations;
+        }
+    }
+
     public DataItem() : this(ReadOnlySpan<byte>.Empty) { }
 
     public DataItem(ReadOnlySpan<byte> plainNameSpan) {
@@ -38,7 +56,9 @@ public sealed class DataItem : IDisposable {
 
     public void Dispose() {
         plainNameBuffer.Dispose();
-        Fields.Dispose();
+        fields.Dispose();
+        labels.Dispose();
+        locations.Dispose();
         IsDisposed = true;
         GC.SuppressFinalize(this);
     }
