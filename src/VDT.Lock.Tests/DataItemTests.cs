@@ -13,7 +13,7 @@ public class DataItemTests {
 
     [Fact]
     public void SetName() {
-        using var subject = new DataItem([98, 97, 114]);
+        using var subject = new DataItem();
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainNameBuffer");
 
@@ -21,5 +21,19 @@ public class DataItemTests {
 
         Assert.Equal(new ReadOnlySpan<byte>([99, 99, 99]), subject.Name);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
+    }
+
+    [Fact]
+    public void Dispose() {
+        SecureBuffer plainNameBuffer;
+        DataCollection<DataField> fields;
+
+        using (var subject = new DataItem()) {
+            plainNameBuffer = subject.GetBuffer("plainNameBuffer");
+            fields = subject.Fields;
+        }
+
+        Assert.True(plainNameBuffer.IsDisposed);
+        Assert.True(fields.IsDisposed);
     }
 }

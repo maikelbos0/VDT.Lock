@@ -15,6 +15,7 @@ public sealed class DataItem : IDisposable {
 
     public DataCollection<DataField> Fields { get; } = new();
 
+    public DataItem() : this(ReadOnlySpan<byte>.Empty) { }
 
     public DataItem(ReadOnlySpan<byte> plainNameSpan) {
         plainNameBuffer = new(plainNameSpan.ToArray());
