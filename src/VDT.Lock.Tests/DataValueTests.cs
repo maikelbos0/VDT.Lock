@@ -5,15 +5,6 @@ namespace VDT.Lock.Tests;
 
 public class DataValueTests {
     [Fact]
-    public void DeserializeFrom() {
-        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114]);
-
-        using var subject = DataValue.DeserializeFrom(plainSpan);
-
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Value);
-    }
-
-    [Fact]
     public void Constructor() {
         var plainValueSpan = new ReadOnlySpan<byte>([98, 97, 114]);
 
@@ -35,16 +26,6 @@ public class DataValueTests {
         Assert.True(plainPreviousValueBuffer.IsDisposed);
     }
     
-    [Fact]
-    public void SerializeTo() {
-        using var subject = new DataValue([98, 97, 114]);
-
-        using var result = new SecureByteList();
-        subject.SerializeTo(result);
-
-        Assert.Equal(new ReadOnlySpan<byte>([7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
-    }        
-
     [Fact]
     public void Dispose() {
         SecureBuffer plainValueBuffer;
@@ -98,17 +79,5 @@ public class DataValueTests {
         };
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([15, 15, 15]));
-    }
-
-    [Fact]
-    public void SerializeToThrowsIfDisposed() {
-        DataValue disposedSubject;
-        using var plainBytes = new SecureByteList();
-
-        using (var subject = new DataValue()) {
-            disposedSubject = subject;
-        };
-
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
     }
 }

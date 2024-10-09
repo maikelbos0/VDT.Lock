@@ -3,12 +3,6 @@
 namespace VDT.Lock;
 
 public sealed class DataValue : IDisposable {
-    public static DataValue DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
-        var position = 0;
-
-        return new(plainSpan.ReadSpan(ref position));
-    }
-
     private SecureBuffer plainValueBuffer;
 
     public bool IsDisposed { get; private set; }
@@ -39,13 +33,6 @@ public sealed class DataValue : IDisposable {
 
     public DataValue(ReadOnlySpan<byte> plainValueSpan) {
         plainValueBuffer = new(plainValueSpan.ToArray());
-    }
-
-    public void SerializeTo(SecureByteList plainBytes) {
-        ObjectDisposedException.ThrowIf(IsDisposed, this);
-
-        plainBytes.WriteInt(Length);
-        plainBytes.WriteSecureBuffer(plainValueBuffer);
     }
 
     public void Dispose() {
