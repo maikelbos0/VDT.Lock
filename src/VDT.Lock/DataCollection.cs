@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataCollection<T> : IEnumerable<T>, IDisposable where T : notnull, IDisposable, new() {
+public sealed class DataCollection<T> : ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IDisposable {
     private readonly List<T> items = [];
 
     public bool IsDisposed { get; private set; }
@@ -17,12 +17,18 @@ public sealed class DataCollection<T> : IEnumerable<T>, IDisposable where T : no
         }
     }
 
-    public T Add() {
+    public bool IsReadOnly {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return false;
+        }
+    }
+
+    public void Add(T item) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        var item = new T();
         items.Add(item);
-        return item;
     }
 
     public bool Contains(T item) {
@@ -59,6 +65,10 @@ public sealed class DataCollection<T> : IEnumerable<T>, IDisposable where T : no
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public void CopyTo(T[] array, int arrayIndex) {
+        throw new NotSupportedException();
+    }
 
     public void Dispose() {
         foreach (var item in items) {

@@ -69,8 +69,8 @@ public class StoreManagerTests {
         await loadSubject.LoadStorageSites(encryptedSettingsBuffer);
 
         Assert.Equal(2, loadSubject.StorageSites.Count);
-        Assert.Equal("abc"u8, Assert.IsType<FileSystemStorageSite>(loadSubject.StorageSites[0]).Location);
-        Assert.Equal("def"u8, Assert.IsType<FileSystemStorageSite>(loadSubject.StorageSites[1]).Location);
+        Assert.Contains(loadSubject.StorageSites, storageSite => storageSite is FileSystemStorageSite fileSystemStorageSite && fileSystemStorageSite.Location.SequenceEqual("abc"u8));
+        Assert.Contains(loadSubject.StorageSites, storageSite => storageSite is FileSystemStorageSite fileSystemStorageSite && fileSystemStorageSite.Location.SequenceEqual("def"u8));
     }
 
     [Fact]

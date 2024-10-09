@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace VDT.Lock.Tests;
@@ -15,53 +14,70 @@ public class DataCollectionTests {
     }
 
     [Fact]
-    public void Count() {
+    public void IsReadOnly() {
         using var subject = new DataCollection<TestDisposable>();
 
-        subject.Add();
+        Assert.False(subject.IsReadOnly);
+    }
 
+    [Fact]
+    public void Count() {
+        using var subject = new DataCollection<TestDisposable> {
+            new()
+        };
+
+#pragma warning disable xUnit2013 // Do not use equality check to check for collection size.
         Assert.Equal(1, subject.Count);
+#pragma warning restore xUnit2013 // Do not use equality check to check for collection size.
     }
 
     [Fact]
     public void Add() {
         using var subject = new DataCollection<TestDisposable>();
+        var item = new TestDisposable();
 
-        var item = subject.Add();
+        subject.Add(item);
 
         Assert.Equal(item, Assert.Single(subject));
     }
 
     [Fact]
-    public void ContainsWhenPresent() {
+    public void ContainsIsTrueWhenPresent() {
         using var subject = new DataCollection<TestDisposable>();
+        var item = new TestDisposable();
 
-        var item = subject.Add();
+        subject.Add(item);
 
+#pragma warning disable xUnit2017 // Do not use Contains() to check if a value exists in a collection
         Assert.True(subject.Contains(item));
+#pragma warning restore xUnit2017 // Do not use Contains() to check if a value exists in a collection
     }
 
     [Fact]
-    public void ContainsWhenNotPresent() {
+    public void ContainsIsFalseWhenNotPresent() {
         using var subject = new DataCollection<TestDisposable>();
 
         using var item = new TestDisposable();
 
+#pragma warning disable xUnit2017 // Do not use Contains() to check if a value exists in a collection
         Assert.False(subject.Contains(item));
+#pragma warning restore xUnit2017 // Do not use Contains() to check if a value exists in a collection
     }
 
     [Fact]
-    public void RemoveWhenPresent() {
+    public void RemoveRemovesWhenPresent() {
         using var subject = new DataCollection<TestDisposable>();
+        var item = new TestDisposable();
 
-        var item = subject.Add();
+        subject.Add(item);
 
         Assert.True(subject.Remove(item));
+        Assert.Empty(subject);
         Assert.True(item.IsDisposed);
     }
 
     [Fact]
-    public void RemoveWhenNotPresent() {
+    public void RemoveDoesNotRemoveWhenNotPresent() {
         using var subject = new DataCollection<TestDisposable>();
 
         using var item = new TestDisposable();
@@ -72,35 +88,33 @@ public class DataCollectionTests {
 
     [Fact]
     public void Clear() {
-        var items = new List<TestDisposable>();
         using var subject = new DataCollection<TestDisposable>();
 
-        items.Add(subject.Add());
-        items.Add(subject.Add());
+        var item = new TestDisposable();
+        subject.Add(item);
+
         subject.Clear();
 
-        Assert.Equal(0, subject.Count);
-        Assert.Equal(2, items.Count);
+        Assert.Empty(subject);
+        Assert.True(item.IsDisposed);
+    }
 
-        foreach (var item in items) {
-            Assert.True(item.IsDisposed);
-        }
+    [Fact]
+    public void CopyToThrows() {
+        using var subject = new DataCollection<TestDisposable>();
+
+        Assert.Throws<NotSupportedException>(() => subject.CopyTo([], 0));
     }
 
     [Fact]
     public void Dispose() {
-        var items = new List<TestDisposable>();
+        var item = new TestDisposable();
 
         using (var subject = new DataCollection<TestDisposable>()) {
-            items.Add(subject.Add());
-            items.Add(subject.Add());
+            subject.Add(item);
         };
 
-        Assert.Equal(2, items.Count);
-
-        foreach (var item in items) {
-            Assert.True(item.IsDisposed);
-        }
+        Assert.True(item.IsDisposed);
     }
 
     [Fact]
@@ -126,14 +140,26 @@ public class DataCollectionTests {
     }
 
     [Fact]
-    public void AddThrowsIfDisposed() {
+    public void IsReadOnlyThrowsIfDisposed() {
         DataCollection<TestDisposable> disposedSubject;
 
         using (var subject = new DataCollection<TestDisposable>()) {
             disposedSubject = subject;
         }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add());
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.IsReadOnly);
+    }
+
+    [Fact]
+    public void AddThrowsIfDisposed() {
+        DataCollection<TestDisposable> disposedSubject;
+        using var item = new TestDisposable();
+
+        using (var subject = new DataCollection<TestDisposable>()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add(item));
     }
 
     [Fact]

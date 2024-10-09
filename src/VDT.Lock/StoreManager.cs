@@ -22,8 +22,7 @@ public sealed class StoreManager : IDisposable {
     [MemberNotNullWhen(true, nameof(plainSessionKeyBuffer), nameof(encryptedStoreKeyBuffer))]
     public bool IsAuthenticated => encryptedStoreKeyBuffer != null;
 
-    // TODO should be DisposingList
-    public IList<StorageSiteBase> StorageSites { get; } = [];
+    public DataCollection<StorageSiteBase> StorageSites { get; } = [];
 
     public StoreManager(IEncryptor encryptor, IStorageSiteFactory storageSiteFactory, IRandomByteGenerator randomByteGenerator, IHashProvider hashProvider) {
         this.encryptor = encryptor;
