@@ -36,4 +36,38 @@ public class DataItemTests {
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(fields.IsDisposed);
     }
+
+
+    [Fact]
+    public void GetNameThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
+    }
+
+    [Fact]
+    public void SetNameThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
+    }
+
+    [Fact]
+    public void FieldsThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Fields);
+    }
 }
