@@ -108,6 +108,32 @@ public class StoreManagerTests {
     }
 
     [Fact]
+    public void IsAuthenticatedThrowsIfDisposed() {
+        StoreManager disposedSubject;
+        var plainMasterPasswordBuffer = new SecureBuffer(0);
+
+        var randomByteGenerator = new RandomByteGenerator();
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.IsAuthenticated);
+    }
+
+    [Fact]
+    public void StorageSitesThrowsIfDisposed() {
+        StoreManager disposedSubject;
+        var plainMasterPasswordBuffer = new SecureBuffer(0);
+
+        var randomByteGenerator = new RandomByteGenerator();
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.StorageSites);
+    }
+
+    [Fact]
     public async Task AuthenticateThrowsIfDisposed() {
         StoreManager disposedSubject;
         var plainMasterPasswordBuffer = new SecureBuffer(0);
