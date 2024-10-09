@@ -25,7 +25,7 @@ public class DataValueTests {
 
     [Fact]
     public void SetValue() {
-        using var subject = new DataValue([98, 97, 114]);
+        using var subject = new DataValue();
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainValueBuffer");
 
@@ -49,7 +49,7 @@ public class DataValueTests {
     public void Dispose() {
         SecureBuffer plainValueBuffer;
 
-        using (var subject = new DataValue([98, 97, 114])) {
+        using (var subject = new DataValue()) {
             plainValueBuffer = subject.GetBuffer("plainValueBuffer");
         };
 

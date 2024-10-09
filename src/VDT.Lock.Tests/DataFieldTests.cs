@@ -28,7 +28,7 @@ public class DataFieldTests {
 
     [Fact]
     public void SetName() {
-        using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
+        using var subject = new DataField();
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainNameBuffer");
 
@@ -40,7 +40,7 @@ public class DataFieldTests {
     
     [Fact]
     public void SetValue() {
-        using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
+        using var subject = new DataField();
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainValueBuffer");
 
@@ -65,7 +65,7 @@ public class DataFieldTests {
         SecureBuffer plainNameBuffer;
         SecureBuffer plainDataBuffer;
 
-        using (var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9])) {
+        using (var subject = new DataField()) {
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             plainDataBuffer = subject.GetBuffer("plainValueBuffer");
         };
