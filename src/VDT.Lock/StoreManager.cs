@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
@@ -99,6 +98,7 @@ public sealed class StoreManager : IDisposable {
     public void Dispose() {
         plainSessionKeyBuffer?.Dispose();
         encryptedStoreKeyBuffer?.Dispose();
+        StorageSites.Dispose();
         IsDisposed = true;
         GC.SuppressFinalize(this);
     }

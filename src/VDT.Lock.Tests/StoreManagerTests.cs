@@ -77,6 +77,7 @@ public class StoreManagerTests {
     public async Task Dispose() {
         SecureBuffer plainSessionKeyBuffer;
         SecureBuffer encryptedStoreKeyBuffer;
+        DataCollection<StorageSiteBase> storageSites;
 
         var randomByteGenerator = new RandomByteGenerator();
         using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
@@ -86,10 +87,12 @@ public class StoreManagerTests {
 
             plainSessionKeyBuffer = subject.GetBuffer("plainSessionKeyBuffer");
             encryptedStoreKeyBuffer = subject.GetBuffer("encryptedStoreKeyBuffer");
+            storageSites = subject.StorageSites;
         }
         
         Assert.True(plainSessionKeyBuffer.IsDisposed);
         Assert.True(encryptedStoreKeyBuffer.IsDisposed);
+        Assert.True(storageSites.IsDisposed);
     }
 
     [Fact]
