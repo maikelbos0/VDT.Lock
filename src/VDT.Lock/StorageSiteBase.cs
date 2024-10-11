@@ -43,6 +43,7 @@ public abstract class StorageSiteBase : IDisposable {
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
+        plainBytes.WriteInt(Length);
         plainBytes.WriteSpan(Encoding.UTF8.GetBytes(GetType().Name));
         storageSettings.SerializeTo(plainBytes);
     }

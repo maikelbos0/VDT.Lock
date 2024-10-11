@@ -56,22 +56,26 @@ public sealed class StoreManager : IDisposable {
         encryptedStoreKeyBuffer = await encryptor.Encrypt(storeKeyBuffer, plainSessionKeyBuffer);
     }
 
-    public async Task LoadStorageSites(SecureBuffer encryptedStorageSettingsBuffer) {
+    public async Task LoadStorageSites(SecureBuffer encryptedBuffer) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         EnsureAuthenticated();
 
         using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
-        using var plainStorageSettingsBuffer = await encryptor.Decrypt(encryptedStorageSettingsBuffer, plainStoreKeyBuffer);
+        using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
         var position = 0;
 
-        while (position < plainStorageSettingsBuffer.Value.Length) {
-            var storageSiteTypeName = Encoding.UTF8.GetString(plainStorageSettingsBuffer.ReadSpan(ref position));
-            var storageSettings = StorageSettings.DeserializeFrom(plainStorageSettingsBuffer.ReadSpan(ref position));
-            var storageSite = storageSiteFactory.Create(storageSiteTypeName, storageSettings);
+        while (position < plainBuffer.Value.Length) {
+            StorageSites.Add(LoadStorageSite(plainBuffer.ReadSpan(ref position)));
+        }
+    }
 
             StorageSites.Add(storageSite);
-        }
+    private StorageSiteBase LoadStorageSite(ReadOnlySpan<byte> plainSpan) {
+        var position = 0;
+        var storageSiteTypeName = Encoding.UTF8.GetString(plainSpan.ReadSpan(ref position));
+        var storageSettings = StorageSettings.DeserializeFrom(plainSpan.ReadSpan(ref position));
+        return storageSiteFactory.Create(storageSiteTypeName, storageSettings);
     }
 
     public async Task<SecureBuffer> SaveStorageSites() {
