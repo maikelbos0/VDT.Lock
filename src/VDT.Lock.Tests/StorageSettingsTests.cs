@@ -17,6 +17,16 @@ public class StorageSettingsTests {
     }
 
     [Fact]
+    public void Length() {
+        using var subject = new StorageSettings();
+
+        subject.Set("foo", new ReadOnlySpan<byte>([5, 6, 7, 8, 9]));
+        subject.Set("bar", new ReadOnlySpan<byte>([1, 2, 3, 4, 5]));
+
+        Assert.Equal(32, subject.Length);
+    }
+
+    [Fact]
     public void SetToAddSetting() {
         using var subject = new StorageSettings();
 
@@ -79,6 +89,17 @@ public class StorageSettingsTests {
         };
 
         Assert.True(disposedSubject.IsDisposed);
+    }
+
+    [Fact]
+    public void LengthThrowsIfDisposed() {
+        StorageSettings disposedSubject;
+
+        using (var subject = new StorageSettings()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
     }
 
     [Fact]

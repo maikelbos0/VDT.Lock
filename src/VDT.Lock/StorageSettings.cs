@@ -21,6 +21,14 @@ public sealed class StorageSettings : IDisposable {
 
     public bool IsDisposed { get; private set; }
 
+    public int Length {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return plainSettingsBuffers.Sum(pair => Encoding.UTF8.GetByteCount(pair.Key) + pair.Value.Value.Length + 8);
+        }
+    }
+
     public StorageSettings() { }
 
     public ReadOnlySpan<byte> Get(string key) {
@@ -42,17 +50,10 @@ public sealed class StorageSettings : IDisposable {
     public void SerializeTo(SecureByteList plainSettingsBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        var serializableSettings = plainSettingsBuffers
-            .OrderBy(pair => pair.Key)
-            .Select(pair => new {
-                Name = Encoding.UTF8.GetBytes(pair.Key),
-                pair.Value
-            });
+        plainSettingsBytes.WriteInt(Length);
 
-        plainSettingsBytes.WriteInt(serializableSettings.Sum(setting => setting.Name.Length + setting.Value.Value.Length + 8));
-
-        foreach (var pair in serializableSettings) {
-            plainSettingsBytes.WriteSpan(pair.Name);
+        foreach (var pair in plainSettingsBuffers.OrderBy(pair => pair.Key)) {
+            plainSettingsBytes.WriteSpan(Encoding.UTF8.GetBytes(pair.Key));
             plainSettingsBytes.WriteSecureBuffer(pair.Value);
         }
     }
