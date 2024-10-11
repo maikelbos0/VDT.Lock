@@ -5,6 +5,48 @@ namespace VDT.Lock.Tests;
 
 public class DataItemTests {
     [Fact]
+    public void DeserializeFromDeserializesName() {
+        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+        using var subject = DataItem.DeserializeFrom(plainSpan);
+
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
+    }
+
+    [Fact]
+    public void DeserializeFromDeserializesFields() {
+        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 40, 0, 0, 0, 16, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 1, 2, 3, 4, 5, 16, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+        using var subject = DataItem.DeserializeFrom(plainSpan);
+
+        Assert.Equal(2, subject.Fields.Count);
+        Assert.Contains(subject.Fields, field => field.Name.SequenceEqual(new ReadOnlySpan<byte>([98, 97, 114])) && field.Value.SequenceEqual(new ReadOnlySpan<byte>([1, 2, 3, 4, 5])));
+        Assert.Contains(subject.Fields, field => field.Name.SequenceEqual(new ReadOnlySpan<byte>([102, 111, 111])) && field.Value.SequenceEqual(new ReadOnlySpan<byte>([5, 6, 7, 8, 9])));
+    }
+
+    [Fact]
+    public void DeserializeFromDeserializesLabels() {
+        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0]);
+
+        using var subject = DataItem.DeserializeFrom(plainSpan);
+
+        Assert.Equal(2, subject.Labels.Count);
+        Assert.Contains(subject.Labels, label => label.Value.SequenceEqual(new ReadOnlySpan<byte>([98, 97, 114])));
+        Assert.Contains(subject.Labels, label => label.Value.SequenceEqual(new ReadOnlySpan<byte>([1, 2, 3, 4, 5])));
+    }
+
+    [Fact]
+    public void DeserializeFromDeserializesLocations() {
+        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 1, 2, 3, 4, 5]);
+
+        using var subject = DataItem.DeserializeFrom(plainSpan);
+
+        Assert.Equal(2, subject.Locations.Count);
+        Assert.Contains(subject.Locations, location => location.Value.SequenceEqual(new ReadOnlySpan<byte>([98, 97, 114])));
+        Assert.Contains(subject.Locations, location => location.Value.SequenceEqual(new ReadOnlySpan<byte>([1, 2, 3, 4, 5])));
+    }
+
+    [Fact]
     public void Constructor() {
         using var subject = new DataItem([98, 97, 114]);
 

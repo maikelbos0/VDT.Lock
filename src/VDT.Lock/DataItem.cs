@@ -3,6 +3,31 @@
 namespace VDT.Lock;
 
 public sealed class DataItem : IDisposable {
+    public static DataItem DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+        var position = 0;
+        var dataItem = new DataItem(plainSpan.ReadSpan(ref position));
+        var plainFieldsSpan = plainSpan.ReadSpan(ref position);
+        var plainLabelsSpan = plainSpan.ReadSpan(ref position);
+        var plainLocationsSpan = plainSpan.ReadSpan(ref position);
+
+        position = 0;
+        while (position < plainFieldsSpan.Length) {
+            dataItem.Fields.Add(DataField.DeserializeFrom(plainFieldsSpan.ReadSpan(ref position)));
+        }
+
+        position = 0;
+        while (position < plainLabelsSpan.Length) {
+            dataItem.labels.Add(new DataValue(plainLabelsSpan.ReadSpan(ref position)));
+        }
+
+        position = 0;
+        while (position < plainLocationsSpan.Length) {
+            dataItem.Locations.Add(new DataValue(plainLocationsSpan.ReadSpan(ref position)));
+        }
+
+        return dataItem;
+    }
+
     private SecureBuffer plainNameBuffer;
     private readonly DataCollection<DataField> fields = [];
     private readonly DataCollection<DataValue> labels = [];
