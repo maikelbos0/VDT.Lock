@@ -9,6 +9,17 @@ public abstract class StorageSiteBase : IDisposable {
 
     public bool IsDisposed { get; private set; }
 
+    public int Length {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return Encoding.UTF8.GetByteCount(GetType().Name)
+                + storageSettings.Length
+                + 8;
+        }
+    }
+
+
     public StorageSiteBase(StorageSettings storageSettings) {
         this.storageSettings = storageSettings;
     }

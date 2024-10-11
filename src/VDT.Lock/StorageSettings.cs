@@ -47,14 +47,14 @@ public sealed class StorageSettings : IDisposable {
         plainSettingsBuffers[key] = new SecureBuffer(valueSpan.ToArray());
     }
 
-    public void SerializeTo(SecureByteList plainSettingsBytes) {
+    public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainSettingsBytes.WriteInt(Length);
+        plainBytes.WriteInt(Length);
 
         foreach (var pair in plainSettingsBuffers.OrderBy(pair => pair.Key)) {
-            plainSettingsBytes.WriteSpan(Encoding.UTF8.GetBytes(pair.Key));
-            plainSettingsBytes.WriteSecureBuffer(pair.Value);
+            plainBytes.WriteSpan(Encoding.UTF8.GetBytes(pair.Key));
+            plainBytes.WriteSecureBuffer(pair.Value);
         }
     }
 

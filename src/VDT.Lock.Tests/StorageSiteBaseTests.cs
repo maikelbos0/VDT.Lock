@@ -18,6 +18,16 @@ public class StorageSiteBaseTests {
     }
 
     [Fact]
+    public void Length() {
+        var storageSettings = new StorageSettings();
+        storageSettings.Set("foo", new ReadOnlySpan<byte>([5, 6, 7, 8, 9]));
+
+        using var subject = new TestStorageSite(storageSettings);
+
+        Assert.Equal(39, subject.Length);
+    }
+
+    [Fact]
     public async Task Load() {
         using var subject = new TestStorageSite(new StorageSettings());
 
@@ -50,6 +60,17 @@ public class StorageSiteBaseTests {
         };
 
         Assert.True(disposedSubject.IsDisposed);
+    }
+
+    [Fact]
+    public void LengthThrowsIfDisposed() {
+        TestStorageSite disposedSubject;
+
+        using (var subject = new TestStorageSite(new StorageSettings())) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
     }
 
     [Fact]
