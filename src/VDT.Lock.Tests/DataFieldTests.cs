@@ -51,6 +51,13 @@ public class DataFieldTests {
     }
 
     [Fact]
+    public void Length() {
+        using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
+
+        Assert.Equal(16, subject.Length);
+    }
+
+    [Fact]
     public void SerializeTo() {
         using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
 

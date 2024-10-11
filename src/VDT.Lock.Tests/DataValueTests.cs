@@ -25,6 +25,13 @@ public class DataValueTests {
         Assert.Equal(new ReadOnlySpan<byte>([99, 99, 99]), subject.Value);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
     }
+
+    [Fact]
+    public void Length() {
+        using var subject = new DataValue([98, 97, 114]);
+
+        Assert.Equal(7, subject.Length);
+    }
     
     [Fact]
     public void Dispose() {
