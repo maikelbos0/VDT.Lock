@@ -35,6 +35,13 @@ public sealed class DataValue : IData, IDisposable {
         plainValueBuffer = new(plainValueSpan.ToArray());
     }
 
+    public void SerializeTo(SecureByteList plainBytes) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        plainBytes.WriteInt(Length);
+        plainBytes.WriteSecureBuffer(plainValueBuffer);
+    }
+
     public void Dispose() {
         plainValueBuffer.Dispose();
         IsDisposed = true;
