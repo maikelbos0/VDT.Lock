@@ -5,7 +5,7 @@ using System.Text;
 
 namespace VDT.Lock;
 
-public sealed class StorageSettings : IDisposable {
+public sealed class StorageSettings : IData, IDisposable {
     public static StorageSettings DeserializeFrom(ReadOnlySpan<byte> plainSettingsSpan) {
         var storageSettings = new StorageSettings();
         var position = 0;

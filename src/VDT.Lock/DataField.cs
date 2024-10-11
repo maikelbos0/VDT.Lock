@@ -2,7 +2,7 @@
 
 namespace VDT.Lock;
 
-public sealed class DataField : IDisposable {
+public sealed class DataField : IData, IDisposable {
     public static DataField DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 

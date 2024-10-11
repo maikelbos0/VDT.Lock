@@ -2,7 +2,7 @@
 
 namespace VDT.Lock;
 
-public sealed class DataValue : IDisposable {
+public sealed class DataValue : IData, IDisposable {
     private SecureBuffer plainValueBuffer;
 
     public bool IsDisposed { get; private set; }
