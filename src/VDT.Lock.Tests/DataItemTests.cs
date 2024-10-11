@@ -66,6 +66,19 @@ public class DataItemTests {
     }
 
     [Fact]
+    public void Length() {
+        using var subject = new DataItem([98, 97, 114]);
+        subject.Fields.Add(new([102, 111, 111], [1, 2, 3, 4, 5]));
+        subject.Fields.Add(new([98, 97, 114], [5, 6, 7, 8, 9]));
+        subject.Labels.Add(new([102,111,11]));
+        subject.Labels.Add(new([98, 97, 114]));
+        subject.Locations.Add(new([102,111,11]));
+        subject.Locations.Add(new([98, 97, 114]));
+
+        Assert.Equal(79, subject.Length);
+    }
+
+    [Fact]
     public void Dispose() {
         SecureBuffer plainNameBuffer;
         DataCollection<DataField> fields;
@@ -138,5 +151,16 @@ public class DataItemTests {
         }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Fields);
+    }
+
+    [Fact]
+    public void LengthThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
     }
 }

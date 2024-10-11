@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace VDT.Lock;
 
@@ -70,6 +71,18 @@ public sealed class DataItem : IDisposable {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
             return locations;
+        }
+    }
+
+    public int Length {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return plainNameBuffer.Value.Length
+                + fields.Sum(static field => field.Length)
+                + labels.Sum(static label => label.Length)
+                + locations.Sum(static location => location.Length)
+                + 16;
         }
     }
 
