@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace VDT.Lock;
 
-public sealed class DataCollection<T> : ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData, IDisposable {
+public sealed class DataCollection<T> : IData, ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData, IDisposable {
     private readonly List<T> items = [];
 
     public bool IsDisposed { get; private set; }
@@ -74,6 +74,16 @@ public sealed class DataCollection<T> : ICollection<T>, IEnumerable<T>, IDisposa
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public void SerializeTo(SecureByteList plainBytes) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        plainBytes.WriteInt(Length);
+
+        foreach (var item in items) {
+            item.SerializeTo(plainBytes);
+        }
+    }
 
     public void CopyTo(T[] array, int arrayIndex) {
         throw new NotSupportedException();

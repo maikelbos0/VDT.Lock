@@ -116,6 +116,19 @@ public class DataCollectionTests {
     }
 
     [Fact]
+    public void SerializeTo() {
+        using var subject = new DataCollection<TestDataItem>() {
+            new(),
+            new()
+        };
+
+        using var result = new SecureByteList();
+        subject.SerializeTo(result);
+
+        Assert.Equal(new ReadOnlySpan<byte>([8, 0, 0, 0, 15, 0, 0, 0, 15, 0, 0, 0]), result.GetValue());
+    }
+
+    [Fact]
     public void CopyToThrows() {
         using var subject = new DataCollection<TestDataItem>();
 
@@ -231,5 +244,17 @@ public class DataCollectionTests {
         }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.GetEnumerator());
+    }
+
+    [Fact]
+    public void SerializeToThrowsIfDisposed() {
+        DataCollection<TestDataItem> disposedSubject;
+        using var plainBytes = new SecureByteList();
+
+        using (var subject = new DataCollection<TestDataItem>()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
     }
 }
