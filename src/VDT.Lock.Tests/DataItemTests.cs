@@ -26,7 +26,7 @@ public class DataItemTests {
 
     [Fact]
     public void DeserializeFromDeserializesLabels() {
-        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0]);
+        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0]);
 
         using var subject = DataItem.DeserializeFrom(plainSpan);
 
@@ -37,7 +37,7 @@ public class DataItemTests {
 
     [Fact]
     public void DeserializeFromDeserializesLocations() {
-        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 1, 2, 3, 4, 5]);
+        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5]);
 
         using var subject = DataItem.DeserializeFrom(plainSpan);
 
@@ -70,12 +70,12 @@ public class DataItemTests {
         using var subject = new DataItem([98, 97, 114]);
         subject.Fields.Add(new([102, 111, 111], [1, 2, 3, 4, 5]));
         subject.Fields.Add(new([98, 97, 114], [5, 6, 7, 8, 9]));
-        subject.Labels.Add(new([102,111,11]));
+        subject.Labels.Add(new([102, 111, 111]));
         subject.Labels.Add(new([98, 97, 114]));
-        subject.Locations.Add(new([102,111,11]));
+        subject.Locations.Add(new([102, 111, 111]));
         subject.Locations.Add(new([98, 97, 114]));
 
-        Assert.Equal(79, subject.Length);
+        Assert.Equal(103, subject.Length);
     }
 
     [Fact]

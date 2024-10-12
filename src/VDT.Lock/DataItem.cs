@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace VDT.Lock;
 
@@ -18,12 +17,12 @@ public sealed class DataItem : IData, IDisposable {
 
         position = 0;
         while (position < plainLabelsSpan.Length) {
-            dataItem.labels.Add(new DataValue(plainLabelsSpan.ReadSpan(ref position)));
+            dataItem.labels.Add(DataValue.DeserializeFrom(plainLabelsSpan.ReadSpan(ref position)));
         }
 
         position = 0;
         while (position < plainLocationsSpan.Length) {
-            dataItem.Locations.Add(new DataValue(plainLocationsSpan.ReadSpan(ref position)));
+            dataItem.Locations.Add(DataValue.DeserializeFrom(plainLocationsSpan.ReadSpan(ref position)));
         }
 
         return dataItem;
@@ -79,9 +78,9 @@ public sealed class DataItem : IData, IDisposable {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
             return plainNameBuffer.Value.Length
-                + fields.Sum(static field => field.Length)
-                + labels.Sum(static label => label.Length)
-                + locations.Sum(static location => location.Length)
+                + fields.Length
+                + labels.Length
+                + locations.Length
                 + 16;
         }
     }
