@@ -91,6 +91,16 @@ public sealed class DataItem : IData, IDisposable {
         plainNameBuffer = new(plainNameSpan.ToArray());
     }
 
+    public void SerializeTo(SecureByteList plainBytes) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        plainBytes.WriteInt(Length);
+        plainBytes.WriteSecureBuffer(plainNameBuffer);
+        fields.SerializeTo(plainBytes);
+        labels.SerializeTo(plainBytes);
+        locations.SerializeTo(plainBytes);
+    }
+
     public void Dispose() {
         plainNameBuffer.Dispose();
         fields.Dispose();

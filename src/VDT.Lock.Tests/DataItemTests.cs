@@ -79,6 +79,22 @@ public class DataItemTests {
     }
 
     [Fact]
+    public void SerializeTo() {
+        using var subject = new DataItem([98, 97, 114]);
+        subject.Fields.Add(new([102, 111, 111], [1, 2, 3, 4, 5]));
+        subject.Fields.Add(new([98, 97, 114], [5, 6, 7, 8, 9]));
+        subject.Labels.Add(new([102, 111, 111]));
+        subject.Labels.Add(new([98, 97, 114]));
+        subject.Locations.Add(new([102, 111, 111]));
+        subject.Locations.Add(new([98, 97, 114]));
+
+        using var result = new SecureByteList();
+        subject.SerializeTo(result);
+
+        Assert.Equal(new ReadOnlySpan<byte>([103, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 40, 0, 0, 0, 16, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 1, 2, 3, 4, 5, 16, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 22, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 22, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
+    }
+
+    [Fact]
     public void Dispose() {
         SecureBuffer plainNameBuffer;
         DataCollection<DataField> fields;
@@ -162,5 +178,17 @@ public class DataItemTests {
         };
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+    }
+
+    [Fact]
+    public void SerializeToThrowsIfDisposed() {
+        DataItem disposedSubject;
+        using var plainBytes = new SecureByteList();
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
     }
 }
