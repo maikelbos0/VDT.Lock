@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace VDT.Lock;
 
-public abstract class StorageSiteBase : IDisposable {
+public abstract class StorageSiteBase : IData, IDisposable {
     protected readonly StorageSettings storageSettings;
 
     public bool IsDisposed { get; private set; }

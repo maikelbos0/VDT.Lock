@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VDT.Lock;
 
-public sealed class DataCollection<T> : ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IDisposable {
+public sealed class DataCollection<T> : ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData, IDisposable {
     private readonly List<T> items = [];
 
     public bool IsDisposed { get; private set; }
@@ -22,6 +23,14 @@ public sealed class DataCollection<T> : ICollection<T>, IEnumerable<T>, IDisposa
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
             return false;
+        }
+    }
+
+    public int Length {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return items.Sum(static item => item.Length);
         }
     }
 
