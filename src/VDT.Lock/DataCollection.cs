@@ -30,7 +30,7 @@ public sealed class DataCollection<T> : IData, ICollection<T>, IEnumerable<T>, I
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return items.Sum(static item => item.Length);
+            return items.Sum(static item => item.Length + 4);
         }
     }
 

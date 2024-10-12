@@ -15,7 +15,7 @@ public class DataCollectionTests {
         }
 
         public void SerializeTo(SecureByteList plainBytes) {
-            plainBytes.WriteInt(15);
+            plainBytes.WriteSpan([15, 0, 0, 0]);
         }
     }
 
@@ -44,7 +44,7 @@ public class DataCollectionTests {
             new()
         };
 
-        Assert.Equal(8, subject.Length);
+        Assert.Equal(16, subject.Length);
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class DataCollectionTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([8, 0, 0, 0, 15, 0, 0, 0, 15, 0, 0, 0]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([16, 0, 0, 0, 4, 0, 0, 0, 15, 0, 0, 0, 4, 0, 0, 0, 15, 0, 0, 0]), result.GetValue());
     }
 
     [Fact]
