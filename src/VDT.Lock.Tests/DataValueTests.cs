@@ -5,6 +5,15 @@ namespace VDT.Lock.Tests;
 
 public class DataValueTests {
     [Fact]
+    public void DeserializeFrom() {
+        var plainSpan = new ReadOnlySpan<byte>([5, 0, 0, 0, 5, 6, 7, 8, 9]);
+
+        using var subject = DataValue.DeserializeFrom(plainSpan);
+
+        Assert.Equal(new ReadOnlySpan<byte>([5, 6, 7, 8, 9]), subject.Value);
+    }
+
+    [Fact]
     public void Constructor() {
         var plainValueSpan = new ReadOnlySpan<byte>([98, 97, 114]);
 

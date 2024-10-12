@@ -3,6 +3,12 @@
 namespace VDT.Lock;
 
 public sealed class DataValue : IData, IDisposable {
+    public static DataValue DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+        var position = 0;
+
+        return new(plainSpan.ReadSpan(ref position));
+    }
+
     private SecureBuffer plainValueBuffer;
 
     public bool IsDisposed { get; private set; }
