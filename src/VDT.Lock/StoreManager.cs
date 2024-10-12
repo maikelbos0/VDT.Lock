@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace VDT.Lock;
@@ -66,16 +65,8 @@ public sealed class StoreManager : IDisposable {
         var position = 0;
 
         while (position < plainBuffer.Value.Length) {
-            StorageSites.Add(LoadStorageSite(plainBuffer.ReadSpan(ref position)));
+            StorageSites.Add(storageSiteFactory.DeserializeFrom(plainBuffer.ReadSpan(ref position)));
         }
-    }
-
-            StorageSites.Add(storageSite);
-    private StorageSiteBase LoadStorageSite(ReadOnlySpan<byte> plainSpan) {
-        var position = 0;
-        var storageSiteTypeName = Encoding.UTF8.GetString(plainSpan.ReadSpan(ref position));
-        var storageSettings = StorageSettings.DeserializeFrom(plainSpan.ReadSpan(ref position));
-        return storageSiteFactory.Create(storageSiteTypeName, storageSettings);
     }
 
     public async Task<SecureBuffer> SaveStorageSites() {

@@ -1,5 +1,7 @@
-﻿namespace VDT.Lock;
+﻿using System;
+
+namespace VDT.Lock;
 
 public interface IStorageSiteFactory {
-    StorageSiteBase Create(string typeName, StorageSettings settings);
+    StorageSiteBase DeserializeFrom(ReadOnlySpan<byte> plainSpan);
 }
