@@ -47,7 +47,11 @@ public sealed class DataStore : IData, IDisposable {
     }
 
     public void SerializeTo(SecureByteList plainBytes) {
-        throw new NotImplementedException();
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        plainBytes.WriteInt(Length);
+        plainBytes.WriteSecureBuffer(plainNameBuffer);
+        items.SerializeTo(plainBytes);
     }
 
     public void Dispose() {
