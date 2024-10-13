@@ -3,6 +3,19 @@
 namespace VDT.Lock;
 
 public sealed class DataStore : IData, IDisposable {
+    public static DataStore DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+        var position = 0;
+        var dataStore = new DataStore(plainSpan.ReadSpan(ref position));
+        var plainItemsSpan = plainSpan.ReadSpan(ref position);
+
+        position = 0;
+        while (position < plainItemsSpan.Length) {
+            dataStore.Items.Add(DataItem.DeserializeFrom(plainItemsSpan.ReadSpan(ref position)));
+        }
+
+        return dataStore;
+    }
+
     private SecureBuffer plainNameBuffer;
     private readonly DataCollection<DataItem> items = [];
 

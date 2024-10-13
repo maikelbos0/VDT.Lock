@@ -5,6 +5,26 @@ namespace VDT.Lock.Tests;
 
 public class DataStoreTests {
     [Fact]
+    public void DeserializeFromDeserializesName() {
+        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 0, 0, 0, 0]);
+
+        using var subject = DataStore.DeserializeFrom(plainSpan);
+
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
+    }
+
+    [Fact]
+    public void DeserializeFromDeserializesItems() {
+        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 46, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+        using var subject = DataStore.DeserializeFrom(plainSpan);
+
+        Assert.Equal(2, subject.Items.Count);
+        Assert.Contains(subject.Items, item => item.Name.SequenceEqual(new ReadOnlySpan<byte>([98, 97, 114])));
+        Assert.Contains(subject.Items, item => item.Name.SequenceEqual(new ReadOnlySpan<byte>([102, 111, 111])));
+    }
+
+    [Fact]
     public void Constructor() {
         using var subject = new DataStore([98, 97, 114]);
 
