@@ -60,12 +60,22 @@ public sealed class StoreManager : IDisposable {
 
         EnsureAuthenticated();
 
-        using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
-        using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
-        var position = 0;
+        try {
+            using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
+            using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
+            var position = 0;
+            var length = plainBuffer.ReadInt(ref position);
 
-        while (position < plainBuffer.Value.Length) {
-            StorageSites.Add(storageSiteFactory.DeserializeFrom(plainBuffer.ReadSpan(ref position)));
+            if (plainBuffer.Value.Length != length + 4) {
+                throw new InvalidAuthenticationException("Invalid buffer length.");
+            }
+
+            while (position < plainBuffer.Value.Length) {
+                StorageSites.Add(storageSiteFactory.DeserializeFrom(plainBuffer.ReadSpan(ref position)));
+            }
+        }
+        catch (Exception ex) {
+            throw new InvalidAuthenticationException("Deserializing buffer failed.", ex);
         }
     }
 
@@ -76,9 +86,7 @@ public sealed class StoreManager : IDisposable {
 
         using var plainStorageSettingsBytes = new SecureByteList();
 
-        foreach (var storageSite in StorageSites) {
-            storageSite.SerializeTo(plainStorageSettingsBytes);
-        }
+        storageSites.SerializeTo(plainStorageSettingsBytes);
 
         using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
         using var plainStorageSettingsBuffer = plainStorageSettingsBytes.ToBuffer();
@@ -99,7 +107,7 @@ public sealed class StoreManager : IDisposable {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         if (!IsAuthenticated) {
-            throw new NotAuthenticatedException();
+            throw new NotAuthenticatedException("This method requires authentication.");
         }
     }
 

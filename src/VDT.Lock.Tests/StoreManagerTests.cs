@@ -62,15 +62,30 @@ public class StoreManagerTests {
         saveSubject.StorageSites.Add(new FileSystemStorageSite("abc"u8));
         saveSubject.StorageSites.Add(new FileSystemStorageSite("def"u8));
         await saveSubject.Authenticate(plainMasterPasswordBuffer);
-        using var encryptedSettingsBuffer = await saveSubject.SaveStorageSites();
+        using var encryptedBuffer = await saveSubject.SaveStorageSites();
 
         using var loadSubject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider);
         await loadSubject.Authenticate(plainMasterPasswordBuffer);
-        await loadSubject.LoadStorageSites(encryptedSettingsBuffer);
+        await loadSubject.LoadStorageSites(encryptedBuffer);
 
         Assert.Equal(2, loadSubject.StorageSites.Count);
         Assert.Contains(loadSubject.StorageSites, storageSite => storageSite is FileSystemStorageSite fileSystemStorageSite && fileSystemStorageSite.Location.SequenceEqual("abc"u8));
         Assert.Contains(loadSubject.StorageSites, storageSite => storageSite is FileSystemStorageSite fileSystemStorageSite && fileSystemStorageSite.Location.SequenceEqual("def"u8));
+    }
+
+    [Fact]
+    public async Task LoadStorageSitesThrowsForInvalidBuffer() {
+        using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
+        using var invalidEncryptedBuffer = new SecureBuffer([0, 0, 0, 0]);
+
+        var randomByteGenerator = new RandomByteGenerator();
+        var encryptor = new Encryptor(randomByteGenerator);
+        var storageSiteFactory = new StorageSiteFactory();
+        var hashProvider = new HashProvider();
+
+        using var subject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider);
+        await subject.Authenticate(plainMasterPasswordBuffer);
+        await Assert.ThrowsAsync<InvalidAuthenticationException>(() => subject.LoadStorageSites(invalidEncryptedBuffer));
     }
 
     [Fact]
