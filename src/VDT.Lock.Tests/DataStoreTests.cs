@@ -24,6 +24,15 @@ public class DataStoreTests {
     }
 
     [Fact]
+    public void Length() {
+        using var subject = new DataStore([98, 97, 114]);
+        subject.Items.Add(new DataItem([102, 111, 111]));
+        subject.Items.Add(new DataItem([5, 6, 7, 8, 9]));
+
+        Assert.Equal(59, subject.Length);
+    }
+
+    [Fact]
     public void Dispose() {
         SecureBuffer plainNameBuffer;
         DataCollection<DataItem> items;
@@ -68,5 +77,16 @@ public class DataStoreTests {
         }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Items);
+    }
+
+    [Fact]
+    public void LengthThrowsIfDisposed() {
+        DataStore disposedSubject;
+
+        using (var subject = new DataStore()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
     }
 }

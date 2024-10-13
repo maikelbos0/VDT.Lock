@@ -30,7 +30,15 @@ public sealed class DataStore : IData, IDisposable {
         }
     }
 
-    public int Length => throw new NotImplementedException();
+    public int Length {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return plainNameBuffer.Value.Length
+                + items.Length
+                + 8;
+        }
+    }
 
     public DataStore() : this(ReadOnlySpan<byte>.Empty) { }
 
