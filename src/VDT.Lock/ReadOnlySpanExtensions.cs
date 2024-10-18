@@ -15,7 +15,4 @@ public static class ReadOnlySpanExtensions {
 
         return value;
     }
-
-    public static SecureBuffer ReadSecureBuffer(this ReadOnlySpan<byte> plainSpan, ref int position)
-        => new(ReadSpan(plainSpan, ref position).ToArray());
 }

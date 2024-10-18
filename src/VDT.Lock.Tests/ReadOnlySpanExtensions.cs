@@ -25,15 +25,4 @@ public class ReadOnlySpanExtensions {
         Assert.Equal(11, position);
         Assert.Equal(new ReadOnlySpan<byte>([97, 98, 99]), result);
     }
-
-    [Fact]
-    public void ReadSecureBuffer() {
-        var subject = new ReadOnlySpan<byte>([0, 0, 0, 0, 3, 0, 0, 0, 97, 98, 99, 0]);
-        var position = 4;
-
-        using var result = subject.ReadSecureBuffer(ref position);
-
-        Assert.Equal(11, position);
-        Assert.Equal([97, 98, 99], result.Value);
-    }
 }

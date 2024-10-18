@@ -15,7 +15,4 @@ public static class SecureBufferExtensions {
 
         return value;
     }
-
-    public static SecureBuffer ReadSecureBuffer(this SecureBuffer plainBuffer, ref int position)
-        => new(ReadSpan(plainBuffer, ref position).ToArray());
 }
