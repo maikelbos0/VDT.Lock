@@ -93,17 +93,6 @@ public class DataFieldTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
-        DataField disposedSubject;
-
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        };
-
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
-    }
-
-    [Fact]
     public void GetNameThrowsIfDisposed() {
         DataField disposedSubject;
 
@@ -145,6 +134,17 @@ public class DataFieldTests {
         };
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([15, 15, 15]));
+    }
+
+    [Fact]
+    public void LengthThrowsIfDisposed() {
+        DataField disposedSubject;
+
+        using (var subject = new DataField()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
     }
 
     [Fact]

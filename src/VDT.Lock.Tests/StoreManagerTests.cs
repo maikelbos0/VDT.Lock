@@ -109,29 +109,25 @@ public class StoreManagerTests {
     }
 
     [Fact]
+    public async Task EnsureAuthenticatedDoesNotThrowIfAuthenticated() {
+        using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
+
+        var randomByteGenerator = new RandomByteGenerator();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+
+        await subject.Authenticate(plainMasterPasswordBuffer);
+
+        Assert.True(subject.IsAuthenticated);
+        subject.EnsureAuthenticated();
+    }
+
+    [Fact]
     public void EnsureAuthenticatedThrowsIfNotAuthenticated() {
         var randomByteGenerator = new RandomByteGenerator();
         using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
 
         Assert.False(subject.IsAuthenticated);
         Assert.Throws<NotAuthenticatedException>(() => subject.EnsureAuthenticated());
-    }
-
-    [Fact]
-    public async Task EnsureAuthenticatedDoesNotThrowIfAuthenticated() {
-        using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
-
-        var randomByteGenerator = new RandomByteGenerator();
-        var hashProvider = new HashProvider();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, hashProvider);
-
-        using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManager.MasterPasswordSalt);
-
-        await subject.Authenticate(plainMasterPasswordBuffer);
-
-        using var result = await subject.GetPlainStoreKeyBuffer();
-
-        Assert.Equal(expectedStoreKey.Value, result.Value);
     }
 
     [Fact]
@@ -213,7 +209,6 @@ public class StoreManagerTests {
     [Fact]
     public void IsAuthenticatedThrowsIfDisposed() {
         StoreManager disposedSubject;
-        var plainMasterPasswordBuffer = new SecureBuffer(0);
 
         var randomByteGenerator = new RandomByteGenerator();
         using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
@@ -226,7 +221,6 @@ public class StoreManagerTests {
     [Fact]
     public void StorageSitesThrowsIfDisposed() {
         StoreManager disposedSubject;
-        var plainMasterPasswordBuffer = new SecureBuffer(0);
 
         var randomByteGenerator = new RandomByteGenerator();
         using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
@@ -302,11 +296,9 @@ public class StoreManagerTests {
     [Fact]
     public async Task GetPlainStoreKeyBufferThrowsIfDisposed() {
         StoreManager disposedSubject;
-        using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
         var randomByteGenerator = new RandomByteGenerator();
         using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
-            await subject.Authenticate(plainMasterPasswordBuffer);
             disposedSubject = subject;
         }
 

@@ -124,7 +124,21 @@ public sealed class SecureByteListTests {
     }
 
     [Fact]
-    public void AddEnsuresCapacity() {
+    public void AddCharEnsuresCapacity() {
+        using var subject = new SecureByteList();
+
+        for (var i = 0; i < SecureByteList.DefaultCapacity + 1; i++) {
+            subject.Add('a');
+        }
+
+        var expectedValue = Enumerable.Repeat((byte)'a', SecureByteList.DefaultCapacity + 1).ToArray();
+
+        Assert.Equal(expectedValue, subject.GetValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity * 2, expectedValue), subject.GetBuffer().Value);
+    }
+
+    [Fact]
+    public void AddByteEnsuresCapacity() {
         using var subject = new SecureByteList();
 
         for (var i = 0; i < SecureByteList.DefaultCapacity + 1; i++) {
@@ -166,10 +180,6 @@ public sealed class SecureByteListTests {
         SecureBuffer buffer;
 
         using (var subject = new SecureByteList()) {
-            subject.Add(97);
-            subject.Add(98);
-            subject.Add(99);
-
             buffer = subject.GetBuffer();
         }
 

@@ -20,7 +20,6 @@ public class DataValueTests {
         using var subject = new DataValue(plainValueSpan);
 
         Assert.Equal(plainValueSpan, subject.Value);
-
     }
 
     [Fact]
@@ -75,17 +74,6 @@ public class DataValueTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
-        DataValue disposedSubject;
-
-        using (var subject = new DataValue()) {
-            disposedSubject = subject;
-        };
-
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
-    }
-
-    [Fact]
     public void GetValueThrowsIfDisposed() {
         DataValue disposedSubject;
 
@@ -105,6 +93,17 @@ public class DataValueTests {
         };
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([15, 15, 15]));
+    }
+
+    [Fact]
+    public void LengthThrowsIfDisposed() {
+        DataValue disposedSubject;
+
+        using (var subject = new DataValue()) {
+            disposedSubject = subject;
+        };
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
     }
 
     [Fact]

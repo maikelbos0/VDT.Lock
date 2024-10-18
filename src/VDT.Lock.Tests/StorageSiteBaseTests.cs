@@ -45,8 +45,7 @@ public class StorageSiteBaseTests {
     public void Dispose() {
         using var storageSettings = new StorageSettings();
 
-        using (var subject = new TestStorageSite(storageSettings)) {
-        };
+        using (var subject = new TestStorageSite(storageSettings)) { };
 
         Assert.True(storageSettings.IsDisposed);
     }

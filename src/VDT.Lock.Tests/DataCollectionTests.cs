@@ -72,7 +72,6 @@ public class DataCollectionTests {
     [Fact]
     public void ContainsIsFalseWhenNotPresent() {
         using var subject = new DataCollection<TestDataItem>();
-
         using var item = new TestDataItem();
 
 #pragma warning disable xUnit2017 // Do not use Contains() to check if a value exists in a collection
@@ -95,7 +94,6 @@ public class DataCollectionTests {
     [Fact]
     public void RemoveDoesNotRemoveWhenNotPresent() {
         using var subject = new DataCollection<TestDataItem>();
-
         using var item = new TestDataItem();
 
         Assert.False(subject.Remove(item));
@@ -105,7 +103,6 @@ public class DataCollectionTests {
     [Fact]
     public void Clear() {
         using var subject = new DataCollection<TestDataItem>();
-
         var item = new TestDataItem();
         subject.Add(item);
 
