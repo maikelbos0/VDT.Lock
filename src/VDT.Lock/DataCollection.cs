@@ -64,6 +64,7 @@ public sealed class DataCollection<T> : IData, ICollection<T>, IEnumerable<T>, I
         foreach (var item in items) {
             item.Dispose();
         }
+
         items.Clear();
     }
 

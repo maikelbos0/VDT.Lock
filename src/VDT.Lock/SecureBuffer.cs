@@ -28,6 +28,7 @@ public sealed class SecureBuffer : IDisposable {
 
     public void Dispose() {
         Dispose(true);
+        IsDisposed = true;
         GC.SuppressFinalize(this);
     }
 
@@ -40,6 +41,5 @@ public sealed class SecureBuffer : IDisposable {
         if (handle.IsAllocated) {
             handle.Free();
         }
-        IsDisposed = true;
     }
 }

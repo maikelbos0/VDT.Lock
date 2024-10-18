@@ -19,7 +19,6 @@ public abstract class StorageSiteBase : IData, IDisposable {
         }
     }
 
-
     public StorageSiteBase(StorageSettings storageSettings) {
         this.storageSettings = storageSettings;
     }
@@ -49,14 +48,8 @@ public abstract class StorageSiteBase : IData, IDisposable {
     }
 
     public void Dispose() {
-        Dispose(true);
+        storageSettings.Dispose();
+        IsDisposed = true;
         GC.SuppressFinalize(this);
-    }
-
-    protected void Dispose(bool isDisposing) {
-        if (isDisposing) {
-            storageSettings.Dispose();
-            IsDisposed = true;
-        }
     }
 }

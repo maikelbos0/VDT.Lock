@@ -1,10 +1,9 @@
 ﻿#if BROWSER
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
-#endif
 
 namespace VDT.Lock;
-#if BROWSER
+
 public static partial class JSEncryptor {
     public static Task ImportModule() => JSHost.ImportAsync("Encryptor", "../encryptor.js");
 
