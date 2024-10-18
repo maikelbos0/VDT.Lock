@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace VDT.Lock;
@@ -14,6 +15,8 @@ public sealed class StoreManager : IDisposable {
 
     private SecureBuffer? plainSessionKeyBuffer;
     private SecureBuffer? encryptedStoreKeyBuffer;
+
+    // TODO should these be encrypted in any way? We have the technology.
     private readonly DataCollection<StorageSiteBase> storageSites = [];
 
     public bool IsDisposed { get; private set; }
@@ -92,6 +95,50 @@ public sealed class StoreManager : IDisposable {
         using var plainStorageSettingsBuffer = plainStorageSettingsBytes.ToBuffer();
 
         return await encryptor.Encrypt(plainStorageSettingsBuffer, plainStoreKeyBuffer);
+    }
+
+    public async Task<DataStore> LoadDataStore() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        EnsureAuthenticated();
+
+        if (storageSites.Count == 0) {
+            return new DataStore();
+        }
+        else if (storageSites.Count == 1) {
+            try {
+                using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
+                using var encryptedBuffer = await storageSites.Single().Load();
+                using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
+                var position = 0;
+
+                return DataStore.DeserializeFrom(plainBuffer.ReadSpan(ref position));
+            }
+            catch (Exception ex) {
+                throw new InvalidAuthenticationException("Deserializing buffer failed.", ex);
+            }
+        }
+        else {
+            throw new InvalidOperationException("Retrieving data store from multiple sites is not yet supported.");
+        }
+    }
+
+    public async Task SaveDataStore(DataStore dataStore) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        EnsureAuthenticated();
+
+        using var plainBytes = new SecureByteList();
+
+        dataStore.SerializeTo(plainBytes);
+
+        using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
+        using var plainBuffer = plainBytes.ToBuffer();
+        using var encryptedBuffer = await encryptor.Encrypt(plainBuffer, plainStoreKeyBuffer);
+
+        foreach (var storageSite in storageSites) {
+            await storageSite.Save(encryptedBuffer.Value);
+        }
     }
 
     public Task<SecureBuffer> GetPlainStoreKeyBuffer() {

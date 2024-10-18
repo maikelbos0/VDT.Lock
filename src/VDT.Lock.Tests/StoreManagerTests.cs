@@ -6,6 +6,22 @@ using Xunit;
 namespace VDT.Lock.Tests;
 
 public class StoreManagerTests {
+    public class TestStorageSite : StorageSiteBase {
+        private byte[] encryptedData = [];
+
+        public TestStorageSite(StorageSettings storageSettings) : base(storageSettings) { }
+
+        protected override Task<SecureBuffer> ExecuteLoad() {
+            return Task.FromResult(new SecureBuffer(encryptedData));
+        }
+
+        protected override Task ExecuteSave(ReadOnlySpan<byte> encryptedData) {
+            this.encryptedData = encryptedData.ToArray();
+
+            return Task.CompletedTask;
+        }
+    }
+
     [Fact]
     public async Task AuthenticateAndGetPlainStoreKey() {
         using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
@@ -89,6 +105,36 @@ public class StoreManagerTests {
     }
 
     [Fact]
+    public async Task SaveDataStoreAndLoadDataStore() {
+        using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
+
+        var randomByteGenerator = new RandomByteGenerator();
+        var encryptor = new Encryptor(randomByteGenerator);
+        var storageSiteFactory = new StorageSiteFactory();
+        var hashProvider = new HashProvider();
+
+        using var subject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider) { 
+            StorageSites = {
+                new TestStorageSite(new StorageSettings())
+            }
+        };
+
+        using var dataStore = new DataStore([102, 111, 111]) {
+            Items = {
+                new([98, 97, 114])
+            }
+        };
+
+        await subject.Authenticate(plainMasterPasswordBuffer);
+        await subject.SaveDataStore(dataStore);
+
+        var result = await subject.LoadDataStore();
+
+        Assert.Equal(new ReadOnlySpan<byte>([102, 111, 111]), result.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), Assert.Single(result.Items).Name);
+    }
+
+    [Fact]
     public async Task Dispose() {
         SecureBuffer plainSessionKeyBuffer;
         SecureBuffer encryptedStoreKeyBuffer;
@@ -104,7 +150,7 @@ public class StoreManagerTests {
             encryptedStoreKeyBuffer = subject.GetBuffer("encryptedStoreKeyBuffer");
             storageSites = subject.StorageSites;
         }
-        
+
         Assert.True(plainSessionKeyBuffer.IsDisposed);
         Assert.True(encryptedStoreKeyBuffer.IsDisposed);
         Assert.True(storageSites.IsDisposed);
