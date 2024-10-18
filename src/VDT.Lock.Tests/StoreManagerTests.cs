@@ -40,32 +40,6 @@ public class StoreManagerTests {
     }
 
     [Fact]
-    public void EnsureAuthenticatedThrowsWhenNotAuthenticated() {
-        var randomByteGenerator = new RandomByteGenerator();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
-
-        Assert.False(subject.IsAuthenticated);
-        Assert.Throws<NotAuthenticatedException>(() => subject.EnsureAuthenticated());
-    }
-
-    [Fact]
-    public async Task EnsureAuthenticatedDoesNotThrowWhenAuthenticated() {
-        using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
-
-        var randomByteGenerator = new RandomByteGenerator();
-        var hashProvider = new HashProvider();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, hashProvider);
-
-        using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManager.MasterPasswordSalt);
-
-        await subject.Authenticate(plainMasterPasswordBuffer);
-
-        using var result = await subject.GetPlainStoreKeyBuffer();
-
-        Assert.Equal(expectedStoreKey.Value, result.Value);
-    }
-
-    [Fact]
     public async Task SaveStorageSitesAndLoadStorageSites() {
         using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
@@ -113,7 +87,7 @@ public class StoreManagerTests {
         var storageSiteFactory = new StorageSiteFactory();
         var hashProvider = new HashProvider();
 
-        using var subject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider) { 
+        using var subject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider) {
             StorageSites = {
                 new TestStorageSite(new StorageSettings())
             }
@@ -132,6 +106,74 @@ public class StoreManagerTests {
 
         Assert.Equal(new ReadOnlySpan<byte>([102, 111, 111]), result.Name);
         Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), Assert.Single(result.Items).Name);
+    }
+
+    [Fact]
+    public void EnsureAuthenticatedThrowsIfNotAuthenticated() {
+        var randomByteGenerator = new RandomByteGenerator();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+
+        Assert.False(subject.IsAuthenticated);
+        Assert.Throws<NotAuthenticatedException>(() => subject.EnsureAuthenticated());
+    }
+
+    [Fact]
+    public async Task EnsureAuthenticatedDoesNotThrowIfAuthenticated() {
+        using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
+
+        var randomByteGenerator = new RandomByteGenerator();
+        var hashProvider = new HashProvider();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, hashProvider);
+
+        using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManager.MasterPasswordSalt);
+
+        await subject.Authenticate(plainMasterPasswordBuffer);
+
+        using var result = await subject.GetPlainStoreKeyBuffer();
+
+        Assert.Equal(expectedStoreKey.Value, result.Value);
+    }
+
+    [Fact]
+    public async Task SaveStorageSitesThrowsIfNotAuthenticated() {
+        var randomByteGenerator = new RandomByteGenerator();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+
+        await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.SaveStorageSites());
+    }
+
+    [Fact]
+    public async Task LoadStorageSitesThrowsIfNotAuthenticated() {
+        var randomByteGenerator = new RandomByteGenerator();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+        using var encryptedBuffer = new SecureBuffer([]);
+
+        await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.LoadStorageSites(encryptedBuffer));
+    }
+
+    [Fact]
+    public async Task SaveDataStoreThrowsIfNotAuthenticated() {
+        var randomByteGenerator = new RandomByteGenerator();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+        using var dataStore = new DataStore();
+
+        await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.SaveDataStore(dataStore));
+    }
+
+    [Fact]
+    public async Task LoadDataStoreThrowsIfNotAuthenticated() {
+        var randomByteGenerator = new RandomByteGenerator();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+
+        await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.LoadDataStore());
+    }
+
+    [Fact]
+    public async Task GetPlainStoreKeyBufferThrowsIfNotAuthenticated() {
+        var randomByteGenerator = new RandomByteGenerator();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+
+        await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.GetPlainStoreKeyBuffer());
     }
 
     [Fact]
@@ -230,6 +272,31 @@ public class StoreManagerTests {
         }
 
         await Assert.ThrowsAsync<ObjectDisposedException>(async () => await disposedSubject.SaveStorageSites());
+    }
+
+    [Fact]
+    public async Task LoadDataStoreThrowsIfDisposed() {
+        StoreManager disposedSubject;
+
+        var randomByteGenerator = new RandomByteGenerator();
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+            disposedSubject = subject;
+        }
+
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await disposedSubject.LoadDataStore());
+    }
+
+    [Fact]
+    public async Task SaveDataStoreThrowsIfDisposed() {
+        StoreManager disposedSubject;
+        using var dataStore = new DataStore();
+
+        var randomByteGenerator = new RandomByteGenerator();
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+            disposedSubject = subject;
+        }
+
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await disposedSubject.SaveDataStore(dataStore));
     }
 
     [Fact]
