@@ -17,6 +17,7 @@ public static class SecureByteListExtensions {
         plainBytes.Add(plainSpan);
     }
 
+    // TODO might it make sense to SerializeTo a SecureBuffer?
     public static void WriteSecureBuffer(this SecureByteList plainBytes, SecureBuffer plainBuffer)
         => WriteSpan(plainBytes, new ReadOnlySpan<byte>(plainBuffer.Value));
 }

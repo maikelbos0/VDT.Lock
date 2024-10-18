@@ -16,6 +16,6 @@ So, in an attempt to understand them better, instead of reviewing the code of an
 
 - The main library will be written in C# and compiled to IL for .NET MAUI and to WASM for browser extensions
 - While storage sites should be able to verify the identity of the data store, it should not have access to either the master password or the data contents
-- Sensitive fields should be encrypted in memory and only be accessible for reading via streams to prevent the strings being accessible in memory
+- Sensitive fields should be encrypted for longer storage in memory and only plain for short durations, ensuring memory will get reset after
 - Personal data stores are stores that have a master password and belong to a user
 - Shared data stores are stores that can be shared between many users while maintaining the integrity of the individual user identities for verification

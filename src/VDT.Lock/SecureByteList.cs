@@ -45,6 +45,7 @@ public sealed class SecureByteList : IDisposable {
         length = bytes.Length;
     }
 
+    // TODO deal with encoding
     public void Add(char c) => Add((byte)c);
 
     public void Add(byte b) {

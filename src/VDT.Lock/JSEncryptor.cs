@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 namespace VDT.Lock;
 
 public static partial class JSEncryptor {
+    // TODO this could be encapsulated better by having external and internal methods
     public static Task ImportModule() => JSHost.ImportAsync("Encryptor", "../encryptor.js");
 
     [JSImport("Encrypt", "Encryptor")]

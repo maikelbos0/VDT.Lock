@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 
 namespace VDT.Lock;
 
-// TODO: while instances of this class and its implementations may be short-lived, ideally it should still be prevented from being swapped to disk
+// TODO while instances of this class and its implementations may be short-lived, ideally it should still be prevented from being swapped to disk
 public sealed class SecureBuffer : IDisposable {
     private readonly GCHandle handle;
     private readonly byte[] value;
