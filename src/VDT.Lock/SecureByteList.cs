@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace VDT.Lock;
 
@@ -45,8 +46,7 @@ public sealed class SecureByteList : IDisposable {
         length = bytes.Length;
     }
 
-    // TODO deal with encoding
-    public void Add(char c) => Add((byte)c);
+    public void Add(char c) => Add(Encoding.UTF8.GetBytes([c]));
 
     public void Add(byte b) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);

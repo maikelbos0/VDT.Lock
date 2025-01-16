@@ -48,12 +48,12 @@ public sealed class SecureByteListTests {
     public void AddChar() {
         using var subject = new SecureByteList();
 
-        subject.Add('a');
+        subject.Add('â');
         subject.Add('b');
-        subject.Add('c');
+        subject.Add('ç');
 
-        Assert.Equal("abc"u8.ToArray(), subject.GetValue());
-        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, "abc"u8.ToArray()), subject.GetBuffer().Value);
+        Assert.Equal("âbç"u8.ToArray(), subject.GetValue());
+        Assert.Equal(GetExpectedBufferValue(SecureByteList.DefaultCapacity, "âbç"u8.ToArray()), subject.GetBuffer().Value);
     }
 
     [Fact]
