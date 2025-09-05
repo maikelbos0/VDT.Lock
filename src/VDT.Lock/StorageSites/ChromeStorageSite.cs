@@ -10,7 +10,7 @@ public class ChromeStorageSite : StorageSiteBase {
         throw new NotImplementedException();
     }
 
-    protected override Task ExecuteSave(ReadOnlySpan<byte> encryptedData) {
+    protected override Task ExecuteSave(ReadOnlySpan<byte> encryptedSpan) {
         throw new NotImplementedException();
     }
 }
