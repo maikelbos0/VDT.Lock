@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace VDT.Lock.StorageSites;
@@ -24,6 +25,10 @@ public class FileSystemStorageSite : StorageSiteBase {
     }
 
     protected override Task ExecuteSave(ReadOnlySpan<byte> encryptedSpan) {
-        throw new NotImplementedException();
+        using var fileStream = File.Create(Encoding.UTF8.GetString(Location));
+
+        fileStream.Write(encryptedSpan);
+
+        return Task.CompletedTask;
     }
 }
