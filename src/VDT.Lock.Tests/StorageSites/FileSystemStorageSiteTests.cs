@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+using System.Threading.Tasks;
 using VDT.Lock.StorageSites;
 using Xunit;
 
@@ -11,5 +13,17 @@ public class FileSystemStorageSiteTests {
 
         Assert.Equal(new byte[] { 102, 111, 111  }, subject.Name);
         Assert.Equal(new byte[] { 97, 98, 99 }, subject.Location);
+    }
+
+    [Fact]
+    public async Task ExecuteLoad() {
+        const string fileName = "FileSystemStorage_ExecuteLoad.data";
+        
+        using var subject = new FileSystemStorageSite(Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
+
+        var result = await subject.Load();
+        var expectedResult = ContentProvider.GetFileContents(fileName);
+
+        Assert.Equal(expectedResult, result.Value);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace VDT.Lock.StorageSites;
@@ -16,7 +17,10 @@ public class FileSystemStorageSite : StorageSiteBase {
     }
 
     protected override Task<SecureBuffer> ExecuteLoad() {
-        throw new NotImplementedException();
+        using var fileStream = File.OpenRead(Encoding.UTF8.GetString(Location));
+        using var encryptedBytes = new SecureByteList(fileStream);
+
+        return Task.FromResult(encryptedBytes.ToBuffer());
     }
 
     protected override Task ExecuteSave(ReadOnlySpan<byte> encryptedSpan) {
