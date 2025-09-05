@@ -19,7 +19,7 @@ public sealed class SecureBuffer : IData, IDisposable {
         }
     }
 
-    public int Length => value.Length + 4;
+    public int Length => value.Length;
 
     public SecureBuffer(int size) : this(new byte[size]) { }
 

@@ -2,7 +2,7 @@
 
 namespace VDT.Lock;
 
-public sealed class DataField : IData, IDisposable {
+public sealed class DataField : BaseData, IDisposable {
     public static DataField DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
@@ -42,11 +42,11 @@ public sealed class DataField : IData, IDisposable {
         }
     }
 
-    public int Length {
+    public override int[] FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return plainNameBuffer.Value.Length + plainValueBuffer.Value.Length + 8;
+            return [Name.Length, Value.Length];
         }
     }
 
@@ -57,12 +57,12 @@ public sealed class DataField : IData, IDisposable {
         plainValueBuffer = new(plainDataSpan.ToArray());
     }
 
-    public void SerializeTo(SecureByteList plainBytes) {
+    public override void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(Length);
-        plainBytes.WriteSecureBuffer(plainNameBuffer);
-        plainBytes.WriteSecureBuffer(plainValueBuffer);
+        plainNameBuffer.SerializeTo(plainBytes);
+        plainValueBuffer.SerializeTo(plainBytes);
     }
 
     public void Dispose() {

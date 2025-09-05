@@ -8,7 +8,7 @@ public class SecureBufferTests {
     public void Length() {
         using var subject = new SecureBuffer([97, 98, 99]);
 
-        Assert.Equal(subject.Value.Length + 4, subject.Length);
+        Assert.Equal(subject.Value.Length, subject.Length);
     }
 
     [Fact]
@@ -18,7 +18,7 @@ public class SecureBufferTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([7, 0, 0, 0, 97, 98, 99]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([3, 0, 0, 0, 97, 98, 99]), result.GetValue());
     }
 
     [Fact]
