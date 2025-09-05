@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 namespace VDT.Lock;
 
 // TODO while instances of this class and its implementations may be short-lived, ideally it should still be prevented from being swapped to disk
-public sealed class SecureBuffer : IDisposable {
+public sealed class SecureBuffer : IData, IDisposable {
     private readonly GCHandle handle;
     private readonly byte[] value;
 
@@ -18,12 +18,19 @@ public sealed class SecureBuffer : IDisposable {
             return value;
         }
     }
-    
+
+    public int Length => value.Length + 4;
+
     public SecureBuffer(int size) : this(new byte[size]) { }
 
     public SecureBuffer(byte[] buffer) {
         value = buffer;
         handle = GCHandle.Alloc(Value, GCHandleType.Pinned);
+    }
+
+    public void SerializeTo(SecureByteList plainBytes) {
+        plainBytes.WriteInt(Length);
+        plainBytes.Add(value);
     }
 
     public void Dispose() {
