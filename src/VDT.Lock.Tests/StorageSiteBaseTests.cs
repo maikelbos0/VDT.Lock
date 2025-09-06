@@ -24,7 +24,7 @@ public class StorageSiteBaseTests {
 
         using var subject = new TestStorageSite(storageSettings);
 
-        Assert.Equal([3, 28], subject.FieldLengths);
+        Assert.Equal([15, 16], subject.FieldLengths);
     }
 
     [Fact]

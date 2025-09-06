@@ -10,6 +10,7 @@ public class StorageSiteFactory : IStorageSiteFactory {
         var typeName = Encoding.UTF8.GetString(plainSpan.ReadSpan(ref position));
         var storageSettings = StorageSettings.DeserializeFrom(plainSpan.ReadSpan(ref position));
 
+        // TODO if we can create a static interface method, perhaps we don't need the switch
         return typeName switch {
 #if !BROWSER
             nameof(FileSystemStorageSite) => new FileSystemStorageSite(storageSettings),

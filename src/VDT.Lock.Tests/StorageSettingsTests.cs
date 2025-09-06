@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
@@ -17,13 +18,13 @@ public class StorageSettingsTests {
     }
 
     [Fact]
-    public void Length() {
+    public void FieldLengths() {
         using var subject = new StorageSettings();
 
         subject.Set("foo", new ReadOnlySpan<byte>([5, 6, 7, 8, 9]));
         subject.Set("bar", new ReadOnlySpan<byte>([1, 2, 3, 4, 5]));
 
-        Assert.Equal(32, subject.Length);
+        Assert.Equal([3, 5, 3, 5], subject.FieldLengths);
     }
 
     [Fact]
@@ -92,14 +93,15 @@ public class StorageSettingsTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
+    public void FieldLengthsThrowsIfDisposed() {
         StorageSettings disposedSubject;
 
         using (var subject = new StorageSettings()) {
             disposedSubject = subject;
         };
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+        // The enumerable is lazily evaluated here so we need to materialize it
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths.ToList());
     }
 
     [Fact]
