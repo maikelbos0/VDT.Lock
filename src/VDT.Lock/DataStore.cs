@@ -48,7 +48,7 @@ public sealed class DataStore : BaseData, IDisposable {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [plainNameBuffer.Value.Length, items.Length];
+            return [plainNameBuffer.Length, items.Length];
         }
     }
 

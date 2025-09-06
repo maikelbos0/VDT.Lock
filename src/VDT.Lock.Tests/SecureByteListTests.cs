@@ -192,7 +192,7 @@ public sealed class SecureByteListTests {
 
         using (var subject = new SecureByteList()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.True(disposedSubject.IsDisposed);
     }
@@ -203,7 +203,7 @@ public sealed class SecureByteListTests {
 
         using (var subject = new SecureByteList()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add('a'));
     }
@@ -214,7 +214,7 @@ public sealed class SecureByteListTests {
 
         using (var subject = new SecureByteList()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add(15));
     }
@@ -225,7 +225,7 @@ public sealed class SecureByteListTests {
 
         using (var subject = new SecureByteList()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add(new ReadOnlySpan<byte>([15, 15, 15])));
     }
@@ -236,7 +236,7 @@ public sealed class SecureByteListTests {
 
         using (var subject = new SecureByteList()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.EnsureCapacity(0));
     }
@@ -247,7 +247,7 @@ public sealed class SecureByteListTests {
 
         using (var subject = new SecureByteList()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.RemoveLast());
     }
@@ -258,7 +258,7 @@ public sealed class SecureByteListTests {
 
         using (var subject = new SecureByteList()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Clear());
     }
@@ -269,7 +269,7 @@ public sealed class SecureByteListTests {
 
         using (var subject = new SecureByteList()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.GetValue());
     }
@@ -280,7 +280,7 @@ public sealed class SecureByteListTests {
 
         using (var subject = new SecureByteList()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.ToBuffer());
     }

@@ -49,7 +49,7 @@ public class DataStoreTests {
         subject.Items.Add(new DataItem([102, 111, 111]));
         subject.Items.Add(new DataItem([5, 6, 7, 8, 9]));
 
-        Assert.Equal([3, 19, 19], subject.FieldLengths);
+        Assert.Equal([3, 48], subject.FieldLengths);
     }
 
     [Fact]
