@@ -1,21 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace VDT.Lock;
 
-public abstract class StorageSiteBase : IData, IDisposable {
+public abstract class StorageSiteBase : BaseData, IDisposable {
     protected readonly StorageSettings storageSettings;
 
     public bool IsDisposed { get; private set; }
 
-    public int Length {
+    public override IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return Encoding.UTF8.GetByteCount(GetType().Name)
-                + storageSettings.Length
-                + 8;
+            return [Encoding.UTF8.GetByteCount(GetType().Name), storageSettings.Length];
         }
     }
 
@@ -39,7 +38,7 @@ public abstract class StorageSiteBase : IData, IDisposable {
 
     protected abstract Task ExecuteSave(ReadOnlySpan<byte> encryptedData);
 
-    public void SerializeTo(SecureByteList plainBytes) {
+    public override void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(Length);

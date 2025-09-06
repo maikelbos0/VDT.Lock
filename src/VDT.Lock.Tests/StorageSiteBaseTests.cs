@@ -18,13 +18,13 @@ public class StorageSiteBaseTests {
     }
 
     [Fact]
-    public void Length() {
+    public void FieldLengths() {
         var storageSettings = new StorageSettings();
         storageSettings.Set("foo", new ReadOnlySpan<byte>([5, 6, 7, 8, 9]));
 
         using var subject = new TestStorageSite(storageSettings);
 
-        Assert.Equal(39, subject.Length);
+        Assert.Equal([3, 28], subject.FieldLengths);
     }
 
     [Fact]
@@ -62,14 +62,14 @@ public class StorageSiteBaseTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
+    public void FieldLengthsThrowsIfDisposed() {
         TestStorageSite disposedSubject;
 
         using (var subject = new TestStorageSite(new StorageSettings())) {
             disposedSubject = subject;
         };
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
 
     [Fact]
