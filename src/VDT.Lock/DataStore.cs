@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataStore : BaseData, IDisposable {
+public sealed class DataStore : IData, IDisposable {
     public static DataStore DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
         var dataStore = new DataStore(plainSpan.ReadSpan(ref position));
@@ -44,11 +44,11 @@ public sealed class DataStore : BaseData, IDisposable {
         }
     }
 
-    public override IEnumerable<int> FieldLengths {
+    public IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [plainNameBuffer.Length, items.Length];
+            return [plainNameBuffer.Length, items.GetLength()];
         }
     }
 
@@ -58,10 +58,10 @@ public sealed class DataStore : BaseData, IDisposable {
         plainNameBuffer = new(plainValueSpan.ToArray());
     }
 
-    public override void SerializeTo(SecureByteList plainBytes) {
+    public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(Length);
+        plainBytes.WriteInt(this.GetLength());
         plainBytes.WriteSecureBuffer(plainNameBuffer);
         items.SerializeTo(plainBytes);
     }

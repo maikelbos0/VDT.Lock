@@ -5,7 +5,7 @@ using System.Text;
 
 namespace VDT.Lock;
 
-public sealed class StorageSettings : BaseData, IDisposable {
+public sealed class StorageSettings : IData, IDisposable {
     public static StorageSettings DeserializeFrom(ReadOnlySpan<byte> plainSettingsSpan) {
         var storageSettings = new StorageSettings();
         var position = 0;
@@ -21,7 +21,7 @@ public sealed class StorageSettings : BaseData, IDisposable {
 
     public bool IsDisposed { get; private set; }
 
-    public override IEnumerable<int> FieldLengths {
+    public IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
@@ -50,10 +50,10 @@ public sealed class StorageSettings : BaseData, IDisposable {
         plainSettingsBuffers[key] = new SecureBuffer(valueSpan.ToArray());
     }
 
-    public override void SerializeTo(SecureByteList plainBytes) {
+    public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(Length);
+        plainBytes.WriteInt(this.GetLength());
 
         foreach (var pair in plainSettingsBuffers.OrderBy(pair => pair.Key)) {
             plainBytes.WriteSpan(Encoding.UTF8.GetBytes(pair.Key));

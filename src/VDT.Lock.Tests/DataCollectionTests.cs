@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace VDT.Lock.Tests;
@@ -7,7 +8,7 @@ public class DataCollectionTests {
     public class TestDataItem : IData, IDisposable {
         public bool IsDisposed { get; private set; }
 
-        public int Length => 4;
+        public IEnumerable<int> FieldLengths => [0];
 
         public void Dispose() {
             IsDisposed = true;
@@ -15,7 +16,7 @@ public class DataCollectionTests {
         }
 
         public void SerializeTo(SecureByteList plainBytes) {
-            plainBytes.WriteSpan([15, 0, 0, 0]);
+            plainBytes.WriteSpan([0, 0, 0, 0]);
         }
     }
 
@@ -122,7 +123,7 @@ public class DataCollectionTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([16, 0, 0, 0, 4, 0, 0, 0, 15, 0, 0, 0, 4, 0, 0, 0, 15, 0, 0, 0]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([16, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0]), result.GetValue());
     }
 
     [Fact]

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataField : BaseData, IDisposable {
+public sealed class DataField : IData, IDisposable {
     public static DataField DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
@@ -43,7 +43,7 @@ public sealed class DataField : BaseData, IDisposable {
         }
     }
 
-    public override IEnumerable<int> FieldLengths {
+    public IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
@@ -58,10 +58,10 @@ public sealed class DataField : BaseData, IDisposable {
         plainValueBuffer = new(plainDataSpan.ToArray());
     }
 
-    public override void SerializeTo(SecureByteList plainBytes) {
+    public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(Length);
+        plainBytes.WriteInt(this.GetLength());
         plainNameBuffer.SerializeTo(plainBytes);
         plainValueBuffer.SerializeTo(plainBytes);
     }

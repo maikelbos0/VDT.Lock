@@ -5,16 +5,16 @@ using System.Threading.Tasks;
 
 namespace VDT.Lock;
 
-public abstract class StorageSiteBase : BaseData, IDisposable {
+public abstract class StorageSiteBase : IData, IDisposable {
     protected readonly StorageSettings storageSettings;
 
     public bool IsDisposed { get; private set; }
 
-    public override IEnumerable<int> FieldLengths {
+    public IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [Encoding.UTF8.GetByteCount(GetType().Name), storageSettings.Length];
+            return [Encoding.UTF8.GetByteCount(GetType().Name), storageSettings.GetLength()];
         }
     }
 
@@ -38,10 +38,10 @@ public abstract class StorageSiteBase : BaseData, IDisposable {
 
     protected abstract Task ExecuteSave(ReadOnlySpan<byte> encryptedData);
 
-    public override void SerializeTo(SecureByteList plainBytes) {
+    public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(Length);
+        plainBytes.WriteInt(this.GetLength());
         plainBytes.WriteSpan(Encoding.UTF8.GetBytes(GetType().Name));
         storageSettings.SerializeTo(plainBytes);
     }
