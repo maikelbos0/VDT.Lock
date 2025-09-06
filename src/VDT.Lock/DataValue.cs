@@ -36,7 +36,7 @@ public sealed class DataValue : IData, IDisposable {
         }
     }
 
-    public DataValue() : this(ReadOnlySpan<byte>.Empty) { }
+    public DataValue() : this([]) { }
 
     public DataValue(ReadOnlySpan<byte> plainValueSpan) {
         plainValueBuffer = new(plainValueSpan.ToArray());

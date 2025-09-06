@@ -83,7 +83,7 @@ public sealed class DataItem : IData, IDisposable {
         }
     }
 
-    public DataItem() : this(ReadOnlySpan<byte>.Empty) { }
+    public DataItem() : this([]) { }
 
     public DataItem(ReadOnlySpan<byte> plainNameSpan) {
         plainNameBuffer = new(plainNameSpan.ToArray());

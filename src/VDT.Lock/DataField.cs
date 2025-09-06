@@ -51,7 +51,7 @@ public sealed class DataField : IData, IDisposable {
         }
     }
 
-    public DataField() : this(ReadOnlySpan<byte>.Empty, ReadOnlySpan<byte>.Empty) { }
+    public DataField() : this([], []) { }
 
     public DataField(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> plainDataSpan) {
         plainNameBuffer = new(plainNameSpan.ToArray());

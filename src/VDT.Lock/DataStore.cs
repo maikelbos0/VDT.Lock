@@ -52,7 +52,7 @@ public sealed class DataStore : IData, IDisposable {
         }
     }
 
-    public DataStore() : this(ReadOnlySpan<byte>.Empty) { }
+    public DataStore() : this([]) { }
 
     public DataStore(ReadOnlySpan<byte> plainValueSpan) {
         plainNameBuffer = new(plainValueSpan.ToArray());
