@@ -5,7 +5,12 @@ using System.Threading.Tasks;
 
 namespace VDT.Lock;
 
-public abstract class StorageSiteBase : IData, IDisposable {
+public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
+    // TODO figure out what to do with this, can we use it when we remove the switch?
+    public static StorageSiteBase DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+        throw new NotImplementedException();
+    }
+
     protected readonly StorageSettings storageSettings;
 
     public bool IsDisposed { get; private set; }

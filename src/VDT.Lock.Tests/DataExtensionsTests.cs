@@ -1,15 +1,12 @@
-﻿using NSubstitute;
-using Xunit;
+﻿using Xunit;
 
 namespace VDT.Lock.Tests;
 
 public class DataExtensionsTests {
     [Fact]
     public void GetLength() {
-        var data = Substitute.For<IData>();
+        var dataField = new DataField([97, 98, 99], [1, 2, 3, 4, 5]);
 
-        data.FieldLengths.Returns([3, 4, 5, 6]);
-
-        Assert.Equal(34, data.GetLength());
+        Assert.Equal(16, dataField.GetLength());
     }
 }

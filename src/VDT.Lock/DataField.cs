@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataField : IData, IDisposable {
+public sealed class DataField : IData<DataField>, IDisposable {
     public static DataField DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 

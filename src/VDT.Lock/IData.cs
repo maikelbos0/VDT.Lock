@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-// TODO: rewrite all implementations to not depend on magic numbers - use BaseData
-public interface IData {
-    // TODO deserialize could be also static interface method in latest C#
+public interface IData<TSelf> where TSelf : IData<TSelf> {
+    static abstract TSelf DeserializeFrom(ReadOnlySpan<byte> plainSpan);
 
     IEnumerable<int> FieldLengths { get; }
 

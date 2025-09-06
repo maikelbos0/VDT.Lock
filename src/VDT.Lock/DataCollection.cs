@@ -5,8 +5,18 @@ using System.Linq;
 
 namespace VDT.Lock;
 
-// TODO add deserializefrom
-public sealed class DataCollection<T> : IData, ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData, IDisposable {
+public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData<T>, IDisposable {
+    public static DataCollection<T> DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+        var position = 0;
+        var collection = new DataCollection<T>();
+
+        while (position < plainSpan.Length) {
+            collection.Add(T.DeserializeFrom(plainSpan.ReadSpan(ref position)));
+        }
+
+        return collection;
+    }
+
     private readonly List<T> items = [];
 
     public bool IsDisposed { get; private set; }
