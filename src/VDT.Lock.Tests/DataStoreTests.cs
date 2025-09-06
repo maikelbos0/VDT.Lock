@@ -44,12 +44,12 @@ public class DataStoreTests {
     }
 
     [Fact]
-    public void Length() {
+    public void FieldLengths() {
         using var subject = new DataStore([98, 97, 114]);
         subject.Items.Add(new DataItem([102, 111, 111]));
         subject.Items.Add(new DataItem([5, 6, 7, 8, 9]));
 
-        Assert.Equal(59, subject.Length);
+        Assert.Equal([3, 19, 19], subject.FieldLengths);
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public class DataStoreTests {
 
         using (var subject = new DataStore()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
     }
@@ -95,7 +95,7 @@ public class DataStoreTests {
 
         using (var subject = new DataStore()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
     }
@@ -112,14 +112,14 @@ public class DataStoreTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
+    public void FieldLengthsThrowsIfDisposed() {
         DataStore disposedSubject;
 
         using (var subject = new DataStore()) {
             disposedSubject = subject;
-        };
+        }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
 
     [Fact]
