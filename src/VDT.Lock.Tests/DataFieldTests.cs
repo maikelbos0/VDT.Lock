@@ -37,7 +37,7 @@ public class DataFieldTests {
         Assert.Equal(new ReadOnlySpan<byte>([99, 99, 99]), subject.Name);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
     }
-    
+
     [Fact]
     public void SetValue() {
         using var subject = new DataField();
@@ -65,7 +65,7 @@ public class DataFieldTests {
         subject.SerializeTo(result);
 
         Assert.Equal(new ReadOnlySpan<byte>([16, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9]), result.GetValue());
-    }        
+    }
 
     [Fact]
     public void Dispose() {
@@ -75,7 +75,7 @@ public class DataFieldTests {
         using (var subject = new DataField()) {
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             plainDataBuffer = subject.GetBuffer("plainValueBuffer");
-        };
+        }
 
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(plainDataBuffer.IsDisposed);
@@ -87,7 +87,7 @@ public class DataFieldTests {
 
         using (var subject = new DataField()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.True(disposedSubject.IsDisposed);
     }
@@ -98,7 +98,7 @@ public class DataFieldTests {
 
         using (var subject = new DataField()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
     }
@@ -109,7 +109,7 @@ public class DataFieldTests {
 
         using (var subject = new DataField()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
     }
@@ -120,7 +120,7 @@ public class DataFieldTests {
 
         using (var subject = new DataField()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Value; });
     }
@@ -131,7 +131,7 @@ public class DataFieldTests {
 
         using (var subject = new DataField()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([15, 15, 15]));
     }
@@ -142,7 +142,7 @@ public class DataFieldTests {
 
         using (var subject = new DataField()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
@@ -154,7 +154,7 @@ public class DataFieldTests {
 
         using (var subject = new DataField()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
     }

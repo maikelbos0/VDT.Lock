@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataItem : IData, IDisposable {
+public sealed class DataItem : BaseData, IDisposable {
     public static DataItem DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
         var dataItem = new DataItem(plainSpan.ReadSpan(ref position));
@@ -10,6 +11,7 @@ public sealed class DataItem : IData, IDisposable {
         var plainLabelsSpan = plainSpan.ReadSpan(ref position);
         var plainLocationsSpan = plainSpan.ReadSpan(ref position);
 
+        // TODO add collection deserialize
         position = 0;
         while (position < plainFieldsSpan.Length) {
             dataItem.Fields.Add(DataField.DeserializeFrom(plainFieldsSpan.ReadSpan(ref position)));
@@ -73,15 +75,11 @@ public sealed class DataItem : IData, IDisposable {
         }
     }
 
-    public int Length {
+    public override IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return plainNameBuffer.Value.Length
-                + fields.Length
-                + labels.Length
-                + locations.Length
-                + 16;
+            return [plainNameBuffer.Length, fields.Length, labels.Length, locations.Length];
         }
     }
 
@@ -91,7 +89,7 @@ public sealed class DataItem : IData, IDisposable {
         plainNameBuffer = new(plainNameSpan.ToArray());
     }
 
-    public void SerializeTo(SecureByteList plainBytes) {
+    public override void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(Length);

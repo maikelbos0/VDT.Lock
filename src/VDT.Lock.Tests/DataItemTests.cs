@@ -66,7 +66,7 @@ public class DataItemTests {
     }
 
     [Fact]
-    public void Length() {
+    public void FieldLengths() {
         using var subject = new DataItem([98, 97, 114]);
         subject.Fields.Add(new([102, 111, 111], [1, 2, 3, 4, 5]));
         subject.Fields.Add(new([98, 97, 114], [5, 6, 7, 8, 9]));
@@ -75,7 +75,7 @@ public class DataItemTests {
         subject.Locations.Add(new([102, 111, 111]));
         subject.Locations.Add(new([98, 97, 114]));
 
-        Assert.Equal(103, subject.Length);
+        Assert.Equal([3, 40, 22, 22], subject.FieldLengths);
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public class DataItemTests {
 
         using (var subject = new DataItem()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
     }
@@ -131,7 +131,7 @@ public class DataItemTests {
 
         using (var subject = new DataItem()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
     }
@@ -170,14 +170,14 @@ public class DataItemTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
+    public void FieldLengthsThrowsIfDisposed() {
         DataItem disposedSubject;
 
         using (var subject = new DataItem()) {
             disposedSubject = subject;
-        };
+        }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
 
     [Fact]
