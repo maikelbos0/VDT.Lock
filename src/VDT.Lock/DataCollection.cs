@@ -5,7 +5,8 @@ using System.Linq;
 
 namespace VDT.Lock;
 
-public sealed class DataCollection<T> : IData, ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData, IDisposable {
+// TODO add deserializefrom
+public sealed class DataCollection<T> : BaseData, ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData, IDisposable {
     private readonly List<T> items = [];
 
     public bool IsDisposed { get; private set; }
@@ -26,11 +27,11 @@ public sealed class DataCollection<T> : IData, ICollection<T>, IEnumerable<T>, I
         }
     }
 
-    public int Length {
+    public override IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return items.Sum(static item => item.Length + 4);
+            return items.Select(static item => item.Length);
         }
     }
 
@@ -76,7 +77,7 @@ public sealed class DataCollection<T> : IData, ICollection<T>, IEnumerable<T>, I
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public void SerializeTo(SecureByteList plainBytes) {
+    public override void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(Length);

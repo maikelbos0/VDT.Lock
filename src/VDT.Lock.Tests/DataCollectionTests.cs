@@ -38,13 +38,13 @@ public class DataCollectionTests {
     }
 
     [Fact]
-    public void Length() {
+    public void FieldLengths() {
         using var subject = new DataCollection<TestDataItem>() {
             new(),
             new()
         };
 
-        Assert.Equal(16, subject.Length);
+        Assert.Equal([4, 4], subject.FieldLengths);
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public class DataCollectionTests {
 
         using (var subject = new DataCollection<TestDataItem>()) {
             subject.Add(item);
-        };
+        }
 
         Assert.True(item.IsDisposed);
     }
@@ -149,7 +149,7 @@ public class DataCollectionTests {
 
         using (var subject = new DataCollection<TestDataItem>()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.True(disposedSubject.IsDisposed);
     }
@@ -177,14 +177,14 @@ public class DataCollectionTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
+    public void FieldLengthsThrowsIfDisposed() {
         DataCollection<TestDataItem> disposedSubject;
 
         using (var subject = new DataCollection<TestDataItem>()) {
             disposedSubject = subject;
         }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
 
     [Fact]

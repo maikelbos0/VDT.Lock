@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace VDT.Lock;
 
@@ -42,7 +43,7 @@ public sealed class DataField : BaseData, IDisposable {
         }
     }
 
-    public override int[] FieldLengths {
+    public override IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 

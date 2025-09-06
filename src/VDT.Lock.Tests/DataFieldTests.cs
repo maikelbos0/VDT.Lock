@@ -51,10 +51,10 @@ public class DataFieldTests {
     }
 
     [Fact]
-    public void Length() {
+    public void FieldLengths() {
         using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
 
-        Assert.Equal(16, subject.Length);
+        Assert.Equal([3, 5], subject.FieldLengths);
     }
 
     [Fact]
@@ -137,14 +137,14 @@ public class DataFieldTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
+    public void FieldLengthsThrowsIfDisposed() {
         DataField disposedSubject;
 
         using (var subject = new DataField()) {
             disposedSubject = subject;
         };
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
 
     [Fact]
