@@ -16,8 +16,7 @@ public sealed class StoreManager : IDisposable {
     private SecureBuffer? encryptedStoreKeyBuffer;
 
     // TODO should these be encrypted in any way? We have the technology.
-    // TODO use collection deserialization
-    private readonly DataCollection<StorageSiteBase> storageSites = [];
+    private DataCollection<StorageSiteBase> storageSites = [];
 
     public bool IsDisposed { get; private set; }
 
@@ -35,6 +34,12 @@ public sealed class StoreManager : IDisposable {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
             return storageSites;
+        }
+        set {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            storageSites.Dispose();
+            storageSites = value;
         }
     }
 
@@ -66,15 +71,8 @@ public sealed class StoreManager : IDisposable {
             using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
             using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
             var position = 0;
-            var length = plainBuffer.ReadInt(ref position);
 
-            if (plainBuffer.Value.Length != length + 4) {
-                throw new InvalidAuthenticationException("Invalid buffer length.");
-            }
-
-            while (position < plainBuffer.Value.Length) {
-                StorageSites.Add(StorageSiteBase.DeserializeFrom(plainBuffer.ReadSpan(ref position)));
-            }
+            StorageSites = DataCollection<StorageSiteBase>.DeserializeFrom(plainBuffer.ReadSpan(ref position));
         }
         catch (Exception ex) {
             throw new InvalidAuthenticationException("Deserializing buffer failed.", ex);

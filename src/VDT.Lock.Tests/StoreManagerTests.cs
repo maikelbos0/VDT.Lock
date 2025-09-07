@@ -23,6 +23,20 @@ public class StoreManagerTests {
     }
 
     [Fact]
+    public void SetStorageSites() {
+        var randomByteGenerator = new RandomByteGenerator();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider());
+
+        var previousStorageSites = subject.StorageSites;
+        var newStorageSites = new DataCollection<StorageSiteBase>();
+
+        subject.StorageSites = newStorageSites;
+
+        Assert.Same(newStorageSites, subject.StorageSites);
+        Assert.True(previousStorageSites.IsDisposed);
+    }
+
+    [Fact]
     public async Task AuthenticateAndGetPlainStoreKey() {
         using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
@@ -216,7 +230,7 @@ public class StoreManagerTests {
     }
 
     [Fact]
-    public void StorageSitesThrowsIfDisposed() {
+    public void GetStorageSitesThrowsIfDisposed() {
         StoreManager disposedSubject;
 
         var randomByteGenerator = new RandomByteGenerator();
@@ -225,6 +239,18 @@ public class StoreManagerTests {
         }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.StorageSites);
+    }
+
+    [Fact]
+    public void SetStorageSitesThrowsIfDisposed() {
+        StoreManager disposedSubject;
+
+        var randomByteGenerator = new RandomByteGenerator();
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.StorageSites = []);
     }
 
     [Fact]
