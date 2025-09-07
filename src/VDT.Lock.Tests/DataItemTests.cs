@@ -66,6 +66,45 @@ public class DataItemTests {
     }
 
     [Fact]
+    public void SetFields() {
+        using var subject = new DataItem();
+
+        var previousFields = subject.Fields;
+        var newFields = new DataCollection<DataField>();
+
+        subject.Fields = newFields;
+
+        Assert.Same(newFields, subject.Fields);
+        Assert.True(previousFields.IsDisposed);
+    }
+
+    [Fact]
+    public void SetLabels() {
+        using var subject = new DataItem();
+
+        var previousLabels = subject.Labels;
+        var newLabels = new DataCollection<DataValue>();
+
+        subject.Labels = newLabels;
+
+        Assert.Same(newLabels, subject.Labels);
+        Assert.True(previousLabels.IsDisposed);
+    }
+
+    [Fact]
+    public void SetLocations() {
+        using var subject = new DataItem();
+
+        var previousLocations = subject.Locations;
+        var newLocations = new DataCollection<DataValue>();
+
+        subject.Locations = newLocations;
+
+        Assert.Same(newLocations, subject.Locations);
+        Assert.True(previousLocations.IsDisposed);
+    }
+
+    [Fact]
     public void FieldLengths() {
         using var subject = new DataItem([98, 97, 114]);
         subject.Fields.Add(new([102, 111, 111], [1, 2, 3, 4, 5]));
@@ -137,7 +176,7 @@ public class DataItemTests {
     }
 
     [Fact]
-    public void FieldsThrowsIfDisposed() {
+    public void GetFieldsThrowsIfDisposed() {
         DataItem disposedSubject;
 
         using (var subject = new DataItem()) {
@@ -148,7 +187,18 @@ public class DataItemTests {
     }
 
     [Fact]
-    public void LabelsThrowsIfDisposed() {
+    public void SetFieldsThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Fields = []);
+    }
+
+    [Fact]
+    public void GetLabelsThrowsIfDisposed() {
         DataItem disposedSubject;
 
         using (var subject = new DataItem()) {
@@ -159,7 +209,18 @@ public class DataItemTests {
     }
 
     [Fact]
-    public void LocationsThrowsIfDisposed() {
+    public void SetLabelsThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Labels = []);
+    }
+
+    [Fact]
+    public void GetLocationsThrowsIfDisposed() {
         DataItem disposedSubject;
 
         using (var subject = new DataItem()) {
@@ -167,6 +228,17 @@ public class DataItemTests {
         }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Locations);
+    }
+
+    [Fact]
+    public void SetLocationsThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Locations = []);
     }
 
     [Fact]

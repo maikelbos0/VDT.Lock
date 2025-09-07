@@ -31,9 +31,9 @@ public sealed class DataItem : IData<DataItem>, IDisposable {
     }
 
     private SecureBuffer plainNameBuffer;
-    private readonly DataCollection<DataField> fields = [];
-    private readonly DataCollection<DataValue> labels = [];
-    private readonly DataCollection<DataValue> locations = [];
+    private DataCollection<DataField> fields = [];
+    private DataCollection<DataValue> labels = [];
+    private DataCollection<DataValue> locations = [];
 
     public bool IsDisposed { get; private set; }
 
@@ -57,6 +57,12 @@ public sealed class DataItem : IData<DataItem>, IDisposable {
 
             return fields;
         }
+        set {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            fields.Dispose();
+            fields = value;
+        }
     }
 
     public DataCollection<DataValue> Labels {
@@ -65,6 +71,12 @@ public sealed class DataItem : IData<DataItem>, IDisposable {
 
             return labels;
         }
+        set {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            labels.Dispose();
+            labels = value;
+    }
     }
 
     public DataCollection<DataValue> Locations {
@@ -72,6 +84,12 @@ public sealed class DataItem : IData<DataItem>, IDisposable {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
             return locations;
+        }
+        set {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            locations.Dispose();
+            locations = value;
         }
     }
 
