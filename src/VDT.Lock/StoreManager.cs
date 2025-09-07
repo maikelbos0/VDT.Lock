@@ -9,7 +9,6 @@ public sealed class StoreManager : IDisposable {
     public static byte[] MasterPasswordSalt => [66, 6, 86, 3, 238, 211, 38, 177, 32, 98, 112, 223, 115, 234, 230, 103];
 
     private readonly IEncryptor encryptor;
-    private readonly IStorageSiteFactory storageSiteFactory;
     private readonly IRandomByteGenerator randomByteGenerator;
     private readonly IHashProvider hashProvider;
 
@@ -38,9 +37,8 @@ public sealed class StoreManager : IDisposable {
         }
     }
 
-    public StoreManager(IEncryptor encryptor, IStorageSiteFactory storageSiteFactory, IRandomByteGenerator randomByteGenerator, IHashProvider hashProvider) {
+    public StoreManager(IEncryptor encryptor, IRandomByteGenerator randomByteGenerator, IHashProvider hashProvider) {
         this.encryptor = encryptor;
-        this.storageSiteFactory = storageSiteFactory;
         this.randomByteGenerator = randomByteGenerator;
         this.hashProvider = hashProvider;
     }
@@ -74,7 +72,7 @@ public sealed class StoreManager : IDisposable {
             }
 
             while (position < plainBuffer.Value.Length) {
-                StorageSites.Add(storageSiteFactory.DeserializeFrom(plainBuffer.ReadSpan(ref position)));
+                StorageSites.Add(StorageSiteBase.DeserializeFrom(plainBuffer.ReadSpan(ref position)));
             }
         }
         catch (Exception ex) {

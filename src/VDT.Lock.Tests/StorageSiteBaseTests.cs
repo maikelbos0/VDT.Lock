@@ -39,7 +39,6 @@ public class StorageSiteBaseTests {
         Assert.Equal(new ReadOnlySpan<byte>([1, 2, 3, 4, 5]), Assert.IsType<FileSystemStorageSite>(result).Location);
     }
 
-    // TODO can we use a substitute here?
     [Fact]
     public void FieldLengths() {
         var storageSettings = new StorageSettings();
