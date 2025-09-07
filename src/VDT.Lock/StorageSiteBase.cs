@@ -2,13 +2,21 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using VDT.Lock.StorageSites;
 
 namespace VDT.Lock;
 
 public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
-    // TODO figure out what to do with this, can we use it when we remove the switch?
     public static StorageSiteBase DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
-        throw new NotImplementedException();
+        var position = 0;
+        var typeName = Encoding.UTF8.GetString(plainSpan.ReadSpan(ref position));
+        var storageSettings = StorageSettings.DeserializeFrom(plainSpan.ReadSpan(ref position));
+
+        return typeName switch {
+            nameof(FileSystemStorageSite) => new FileSystemStorageSite(storageSettings),
+            nameof(ChromeStorageSite) => new ChromeStorageSite(storageSettings),
+            _ => throw new NotImplementedException($"No implementation found for '{typeName}'.")
+        };
     }
 
     protected readonly StorageSettings storageSettings;

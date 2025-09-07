@@ -1,5 +1,4 @@
-﻿#if BROWSER
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace VDT.Lock.StorageSites;
@@ -15,4 +14,3 @@ public class ChromeStorageSite : StorageSiteBase {
         throw new NotImplementedException();
     }
 }
-#endif
