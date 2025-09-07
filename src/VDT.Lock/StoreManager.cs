@@ -16,6 +16,7 @@ public sealed class StoreManager : IDisposable {
     private SecureBuffer? encryptedStoreKeyBuffer;
 
     // TODO should these be encrypted in any way? We have the technology.
+    // TODO use collection deserialization
     private readonly DataCollection<StorageSiteBase> storageSites = [];
 
     public bool IsDisposed { get; private set; }

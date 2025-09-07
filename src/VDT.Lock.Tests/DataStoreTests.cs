@@ -44,6 +44,19 @@ public class DataStoreTests {
     }
 
     [Fact]
+    public void SetItems() {
+        using var subject = new DataStore();
+
+        var previousItems = subject.Items;
+        var newItems = new DataCollection<DataItem>();
+
+        subject.Items = newItems;
+
+        Assert.Same(newItems, subject.Items);
+        Assert.True(previousItems.IsDisposed);
+    }
+
+    [Fact]
     public void FieldLengths() {
         using var subject = new DataStore([98, 97, 114]);
         subject.Items.Add(new DataItem([102, 111, 111]));
@@ -101,7 +114,7 @@ public class DataStoreTests {
     }
 
     [Fact]
-    public void ItemsThrowsIfDisposed() {
+    public void GetItemsThrowsIfDisposed() {
         DataStore disposedSubject;
 
         using (var subject = new DataStore()) {
@@ -109,6 +122,17 @@ public class DataStoreTests {
         }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Items);
+    }
+
+    [Fact]
+    public void SetItemsThrowsIfDisposed() {
+        DataStore disposedSubject;
+
+        using (var subject = new DataStore()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Items = []);
     }
 
     [Fact]
