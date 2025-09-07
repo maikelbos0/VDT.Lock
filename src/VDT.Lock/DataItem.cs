@@ -6,28 +6,12 @@ namespace VDT.Lock;
 public sealed class DataItem : IData<DataItem>, IDisposable {
     public static DataItem DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
-        var dataItem = new DataItem(plainSpan.ReadSpan(ref position));
-        var plainFieldsSpan = plainSpan.ReadSpan(ref position);
-        var plainLabelsSpan = plainSpan.ReadSpan(ref position);
-        var plainLocationsSpan = plainSpan.ReadSpan(ref position);
-
-        // TODO add collection deserialize
-        position = 0;
-        while (position < plainFieldsSpan.Length) {
-            dataItem.Fields.Add(DataField.DeserializeFrom(plainFieldsSpan.ReadSpan(ref position)));
-        }
-
-        position = 0;
-        while (position < plainLabelsSpan.Length) {
-            dataItem.labels.Add(DataValue.DeserializeFrom(plainLabelsSpan.ReadSpan(ref position)));
-        }
-
-        position = 0;
-        while (position < plainLocationsSpan.Length) {
-            dataItem.Locations.Add(DataValue.DeserializeFrom(plainLocationsSpan.ReadSpan(ref position)));
-        }
-
-        return dataItem;
+        
+        return new DataItem(plainSpan.ReadSpan(ref position)) {
+            Fields = DataCollection<DataField>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
+            Labels = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
+            Locations = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
+        };
     }
 
     private SecureBuffer plainNameBuffer;
@@ -76,7 +60,7 @@ public sealed class DataItem : IData<DataItem>, IDisposable {
 
             labels.Dispose();
             labels = value;
-    }
+        }
     }
 
     public DataCollection<DataValue> Locations {
