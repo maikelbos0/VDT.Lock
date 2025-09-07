@@ -48,7 +48,7 @@ public sealed class DataStore : IData<DataStore>, IDisposable {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [plainNameBuffer.Length, items.GetLength()];
+            return [plainNameBuffer.Value.Length, items.GetLength()];
         }
     }
 

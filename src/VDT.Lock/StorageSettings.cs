@@ -27,7 +27,7 @@ public sealed class StorageSettings : IData<StorageSettings>, IDisposable {
 
             foreach (var plainSettingsBuffer in plainSettingsBuffers) {
                 yield return Encoding.UTF8.GetByteCount(plainSettingsBuffer.Key);
-                yield return plainSettingsBuffer.Value.Length;
+                yield return plainSettingsBuffer.Value.Value.Length;
             }
         }
     }

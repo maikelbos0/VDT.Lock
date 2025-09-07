@@ -32,7 +32,7 @@ public sealed class DataValue : IData<DataValue>, IDisposable {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [plainValueBuffer.Length];
+            return [plainValueBuffer.Value.Length];
         }
     }
 

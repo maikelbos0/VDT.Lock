@@ -79,7 +79,7 @@ public sealed class DataItem : IData<DataItem>, IDisposable {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [plainNameBuffer.Length, fields.GetLength(), labels.GetLength(), locations.GetLength()];
+            return [plainNameBuffer.Value.Length, fields.GetLength(), labels.GetLength(), locations.GetLength()];
         }
     }
 

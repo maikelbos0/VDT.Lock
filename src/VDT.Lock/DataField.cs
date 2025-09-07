@@ -62,8 +62,8 @@ public sealed class DataField : IData<DataField>, IDisposable {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(this.GetLength());
-        plainNameBuffer.SerializeTo(plainBytes);
-        plainValueBuffer.SerializeTo(plainBytes);
+        plainBytes.WriteSpan(plainNameBuffer.Value);
+        plainBytes.WriteSpan(plainValueBuffer.Value);
     }
 
     public void Dispose() {

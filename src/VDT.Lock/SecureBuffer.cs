@@ -19,20 +19,11 @@ public sealed class SecureBuffer : IDisposable {
         }
     }
 
-    // TOOD figure out if it is a good idea to have this
-    public int Length => value.Length;
-
     public SecureBuffer(int size) : this(new byte[size]) { }
 
     public SecureBuffer(byte[] buffer) {
         value = buffer;
         handle = GCHandle.Alloc(Value, GCHandleType.Pinned);
-    }
-
-    // TOOD figure out if it is a good idea to have this
-    public void SerializeTo(SecureByteList plainBytes) {
-        plainBytes.WriteInt(Length);
-        plainBytes.Add(value);
     }
 
     public void Dispose() {
