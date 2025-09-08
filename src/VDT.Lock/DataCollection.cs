@@ -87,10 +87,14 @@ public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public void SerializeTo(SecureByteList plainBytes) {
+    public void SerializeTo(SecureByteList plainBytes) => SerializeTo(plainBytes, true);
+
+    public void SerializeTo(SecureByteList plainBytes, bool includeLength) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(this.GetLength());
+        if (includeLength) {
+            plainBytes.WriteInt(this.GetLength());
+        }
 
         foreach (var item in items) {
             item.SerializeTo(plainBytes);

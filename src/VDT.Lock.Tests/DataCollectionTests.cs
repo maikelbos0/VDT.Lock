@@ -108,17 +108,19 @@ public class DataCollectionTests {
         Assert.True(item.IsDisposed);
     }
 
-    [Fact]
-    public void SerializeTo() {
+    [Theory]
+    [InlineData(true, new byte[] { 24, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5 })]
+    [InlineData(false, new byte[] { 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5 })]
+    public void SerializeTo(bool includeLength, byte[] expectedResult) {
         using var subject = new DataCollection<DataValue>() {
             new([102, 111, 111]),
             new([1, 2, 3, 4, 5])
         };
 
         using var result = new SecureByteList();
-        subject.SerializeTo(result);
+        subject.SerializeTo(result, includeLength);
 
-        Assert.Equal(new ReadOnlySpan<byte>([24, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5]), result.GetValue());
+        Assert.Equal(expectedResult, result.GetValue());
     }
 
     [Fact]

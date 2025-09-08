@@ -72,7 +72,7 @@ public sealed class StoreManager : IDisposable {
             using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
             var position = 0;
 
-            StorageSites = DataCollection<StorageSiteBase>.DeserializeFrom(plainBuffer.ReadSpan(ref position));
+            StorageSites = DataCollection<StorageSiteBase>.DeserializeFrom(plainBuffer);
         }
         catch (Exception ex) {
             throw new InvalidAuthenticationException("Deserializing buffer failed.", ex);
@@ -86,7 +86,7 @@ public sealed class StoreManager : IDisposable {
 
         using var plainStorageSettingsBytes = new SecureByteList();
 
-        storageSites.SerializeTo(plainStorageSettingsBytes);
+        storageSites.SerializeTo(plainStorageSettingsBytes, false);
 
         using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
         using var plainStorageSettingsBuffer = plainStorageSettingsBytes.ToBuffer();

@@ -14,6 +14,8 @@ public sealed class DataField : IData<DataField>, IDisposable {
     private SecureBuffer plainValueBuffer;
 
     public bool IsDisposed { get; private set; }
+    
+    // TODO this should have a selector also
 
     public ReadOnlySpan<byte> Name {
         get {
@@ -62,8 +64,8 @@ public sealed class DataField : IData<DataField>, IDisposable {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(this.GetLength());
-        plainBytes.WriteSpan(plainNameBuffer.Value);
-        plainBytes.WriteSpan(plainValueBuffer.Value);
+        plainBytes.WriteSecureBuffer(plainNameBuffer);
+        plainBytes.WriteSecureBuffer(plainValueBuffer);
     }
 
     public void Dispose() {

@@ -6,6 +6,8 @@ namespace VDT.Lock;
 
 // TODO while instances of this class and its implementations may be short-lived, ideally it should still be prevented from being swapped to disk
 public sealed class SecureBuffer : IDisposable {
+    public static implicit operator ReadOnlySpan<byte>(SecureBuffer buffer) => buffer.value;
+
     private readonly GCHandle handle;
     private readonly byte[] value;
 
