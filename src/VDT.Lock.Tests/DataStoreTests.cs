@@ -74,7 +74,7 @@ public class DataStoreTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([59, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 48, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 48, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), result.GetValue());
     }
 
     [Fact]

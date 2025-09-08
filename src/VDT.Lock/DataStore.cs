@@ -62,7 +62,7 @@ public sealed class DataStore : IData<DataStore>, IDisposable {
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(this.GetLength());
+        // We don't include the length since we're always going to deserialize the entire buffer
         plainBytes.WriteSecureBuffer(plainNameBuffer);
         items.SerializeTo(plainBytes);
     }
