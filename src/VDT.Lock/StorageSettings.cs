@@ -56,7 +56,7 @@ public sealed class StorageSettings : IData<StorageSettings>, IDisposable {
         plainBytes.WriteInt(this.GetLength());
 
         foreach (var pair in plainSettingsBuffers.OrderBy(pair => pair.Key)) {
-            plainBytes.WriteSpan(Encoding.UTF8.GetBytes(pair.Key));
+            plainBytes.WriteString(pair.Key);
             plainBytes.WriteSecureBuffer(pair.Value);
         }
     }

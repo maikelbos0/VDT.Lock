@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace VDT.Lock;
 
@@ -17,7 +18,9 @@ public static class SecureByteListExtensions {
         plainBytes.Add(plainSpan);
     }
 
-    // TODO might it make sense to SerializeTo a SecureBuffer?
     public static void WriteSecureBuffer(this SecureByteList plainBytes, SecureBuffer plainBuffer)
         => WriteSpan(plainBytes, new ReadOnlySpan<byte>(plainBuffer.Value));
+
+    public static void WriteString(this SecureByteList plainBytes, string value)
+        => WriteSpan(plainBytes, Encoding.UTF8.GetBytes(value));
 }

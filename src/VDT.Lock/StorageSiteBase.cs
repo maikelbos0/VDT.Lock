@@ -55,7 +55,7 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(this.GetLength());
-        plainBytes.WriteSpan(Encoding.UTF8.GetBytes(GetType().Name));
+        plainBytes.WriteString(GetType().Name);
         storageSettings.SerializeTo(plainBytes);
     }
 
