@@ -3,7 +3,7 @@ using Xunit;
 
 namespace VDT.Lock.Tests;
 
-public class ReadOnlySpanExtensions {
+public class ReadOnlySpanExtensionsTests {
     [Fact]
     public void ReadInt() {
         var subject = new ReadOnlySpan<byte>([0, 0, 0, 0, 8, 4, 2, 1, 0, 0, 0, 0]);
