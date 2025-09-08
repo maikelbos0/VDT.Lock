@@ -25,4 +25,15 @@ public class ReadOnlySpanExtensionsTests {
         Assert.Equal(11, position);
         Assert.Equal(new ReadOnlySpan<byte>([97, 98, 99]), result);
     }
+
+    [Fact]
+    public void ReadString() {
+        var subject = new ReadOnlySpan<byte>([0, 0, 0, 0, 3, 0, 0, 0, 70, 111, 111, 0]);
+        var position = 4;
+
+        var result = subject.ReadString(ref position);
+
+        Assert.Equal(11, position);
+        Assert.Equal("Foo", result);
+    }
 }

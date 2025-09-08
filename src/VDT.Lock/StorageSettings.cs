@@ -11,7 +11,7 @@ public sealed class StorageSettings : IData<StorageSettings>, IDisposable {
         var position = 0;
 
         while (position < plainSettingsSpan.Length) {
-            storageSettings.plainSettingsBuffers[Encoding.UTF8.GetString(plainSettingsSpan.ReadSpan(ref position))] = new SecureBuffer(plainSettingsSpan.ReadSpan(ref position).ToArray());
+            storageSettings.plainSettingsBuffers[plainSettingsSpan.ReadString(ref position)] = new SecureBuffer(plainSettingsSpan.ReadSpan(ref position).ToArray());
         }
 
         return storageSettings;

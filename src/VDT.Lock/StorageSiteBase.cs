@@ -9,7 +9,7 @@ namespace VDT.Lock;
 public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
     public static StorageSiteBase DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
-        var typeName = Encoding.UTF8.GetString(plainSpan.ReadSpan(ref position));
+        var typeName = plainSpan.ReadString(ref position);
         var storageSettings = StorageSettings.DeserializeFrom(plainSpan.ReadSpan(ref position));
 
         return typeName switch {
