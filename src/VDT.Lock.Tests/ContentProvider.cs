@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace VDT.Lock.Tests.StorageSites;
+namespace VDT.Lock.Tests;
 
 public static class ContentProvider {
     private static readonly string contentLocation = Path.Combine(
