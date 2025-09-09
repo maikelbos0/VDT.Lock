@@ -66,7 +66,46 @@ public class DataItemTests {
     }
 
     [Fact]
-    public void Length() {
+    public void SetFields() {
+        using var subject = new DataItem();
+
+        var previousFields = subject.Fields;
+        var newFields = new DataCollection<DataField>();
+
+        subject.Fields = newFields;
+
+        Assert.Same(newFields, subject.Fields);
+        Assert.True(previousFields.IsDisposed);
+    }
+
+    [Fact]
+    public void SetLabels() {
+        using var subject = new DataItem();
+
+        var previousLabels = subject.Labels;
+        var newLabels = new DataCollection<DataValue>();
+
+        subject.Labels = newLabels;
+
+        Assert.Same(newLabels, subject.Labels);
+        Assert.True(previousLabels.IsDisposed);
+    }
+
+    [Fact]
+    public void SetLocations() {
+        using var subject = new DataItem();
+
+        var previousLocations = subject.Locations;
+        var newLocations = new DataCollection<DataValue>();
+
+        subject.Locations = newLocations;
+
+        Assert.Same(newLocations, subject.Locations);
+        Assert.True(previousLocations.IsDisposed);
+    }
+
+    [Fact]
+    public void FieldLengths() {
         using var subject = new DataItem([98, 97, 114]);
         subject.Fields.Add(new([102, 111, 111], [1, 2, 3, 4, 5]));
         subject.Fields.Add(new([98, 97, 114], [5, 6, 7, 8, 9]));
@@ -75,7 +114,7 @@ public class DataItemTests {
         subject.Locations.Add(new([102, 111, 111]));
         subject.Locations.Add(new([98, 97, 114]));
 
-        Assert.Equal(103, subject.Length);
+        Assert.Equal([3, 40, 22, 22], subject.FieldLengths);
     }
 
     [Fact]
@@ -120,7 +159,7 @@ public class DataItemTests {
 
         using (var subject = new DataItem()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
     }
@@ -131,13 +170,13 @@ public class DataItemTests {
 
         using (var subject = new DataItem()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
     }
 
     [Fact]
-    public void FieldsThrowsIfDisposed() {
+    public void GetFieldsThrowsIfDisposed() {
         DataItem disposedSubject;
 
         using (var subject = new DataItem()) {
@@ -148,7 +187,18 @@ public class DataItemTests {
     }
 
     [Fact]
-    public void LabelsThrowsIfDisposed() {
+    public void SetFieldsThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Fields = []);
+    }
+
+    [Fact]
+    public void GetLabelsThrowsIfDisposed() {
         DataItem disposedSubject;
 
         using (var subject = new DataItem()) {
@@ -159,7 +209,18 @@ public class DataItemTests {
     }
 
     [Fact]
-    public void LocationsThrowsIfDisposed() {
+    public void SetLabelsThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Labels = []);
+    }
+
+    [Fact]
+    public void GetLocationsThrowsIfDisposed() {
         DataItem disposedSubject;
 
         using (var subject = new DataItem()) {
@@ -170,14 +231,25 @@ public class DataItemTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
+    public void SetLocationsThrowsIfDisposed() {
         DataItem disposedSubject;
 
         using (var subject = new DataItem()) {
             disposedSubject = subject;
-        };
+        }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Locations = []);
+    }
+
+    [Fact]
+    public void FieldLengthsThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
 
     [Fact]

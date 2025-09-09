@@ -35,10 +35,10 @@ public class DataValueTests {
     }
 
     [Fact]
-    public void Length() {
+    public void FieldLengths() {
         using var subject = new DataValue([98, 97, 114]);
 
-        Assert.Equal(7, subject.Length);
+        Assert.Equal([3], subject.FieldLengths);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class DataValueTests {
 
         using (var subject = new DataValue()) {
             plainValueBuffer = subject.GetBuffer("plainValueBuffer");
-        };
+        }
 
         Assert.True(plainValueBuffer.IsDisposed);
     }
@@ -68,7 +68,7 @@ public class DataValueTests {
 
         using (var subject = new DataValue()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.True(disposedSubject.IsDisposed);
     }
@@ -79,7 +79,7 @@ public class DataValueTests {
 
         using (var subject = new DataValue()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Value; });
     }
@@ -90,20 +90,20 @@ public class DataValueTests {
 
         using (var subject = new DataValue()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([15, 15, 15]));
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
+    public void FieldLengthsThrowsIfDisposed() {
         DataValue disposedSubject;
 
         using (var subject = new DataValue()) {
             disposedSubject = subject;
-        };
+        }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class DataValueTests {
 
         using (var subject = new DataValue()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
     }

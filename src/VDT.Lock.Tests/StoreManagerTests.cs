@@ -23,12 +23,26 @@ public class StoreManagerTests {
     }
 
     [Fact]
+    public void SetStorageSites() {
+        var randomByteGenerator = new RandomByteGenerator();
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider());
+
+        var previousStorageSites = subject.StorageSites;
+        var newStorageSites = new DataCollection<StorageSiteBase>();
+
+        subject.StorageSites = newStorageSites;
+
+        Assert.Same(newStorageSites, subject.StorageSites);
+        Assert.True(previousStorageSites.IsDisposed);
+    }
+
+    [Fact]
     public async Task AuthenticateAndGetPlainStoreKey() {
         using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
         var randomByteGenerator = new RandomByteGenerator();
         var hashProvider = new HashProvider();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, hashProvider);
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, hashProvider);
 
         using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManager.MasterPasswordSalt);
 
@@ -45,16 +59,15 @@ public class StoreManagerTests {
 
         var randomByteGenerator = new RandomByteGenerator();
         var encryptor = new Encryptor(randomByteGenerator);
-        var storageSiteFactory = new StorageSiteFactory();
         var hashProvider = new HashProvider();
 
-        using var saveSubject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider);
+        using var saveSubject = new StoreManager(encryptor, randomByteGenerator, hashProvider);
         saveSubject.StorageSites.Add(new FileSystemStorageSite("abc"u8));
         saveSubject.StorageSites.Add(new FileSystemStorageSite("def"u8));
         await saveSubject.Authenticate(plainMasterPasswordBuffer);
         using var encryptedBuffer = await saveSubject.SaveStorageSites();
 
-        using var loadSubject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider);
+        using var loadSubject = new StoreManager(encryptor, randomByteGenerator, hashProvider);
         await loadSubject.Authenticate(plainMasterPasswordBuffer);
         await loadSubject.LoadStorageSites(encryptedBuffer);
 
@@ -70,10 +83,9 @@ public class StoreManagerTests {
 
         var randomByteGenerator = new RandomByteGenerator();
         var encryptor = new Encryptor(randomByteGenerator);
-        var storageSiteFactory = new StorageSiteFactory();
         var hashProvider = new HashProvider();
 
-        using var subject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider);
+        using var subject = new StoreManager(encryptor, randomByteGenerator, hashProvider);
         await subject.Authenticate(plainMasterPasswordBuffer);
         await Assert.ThrowsAsync<InvalidAuthenticationException>(() => subject.LoadStorageSites(invalidEncryptedBuffer));
     }
@@ -84,10 +96,9 @@ public class StoreManagerTests {
 
         var randomByteGenerator = new RandomByteGenerator();
         var encryptor = new Encryptor(randomByteGenerator);
-        var storageSiteFactory = new StorageSiteFactory();
         var hashProvider = new HashProvider();
 
-        using var subject = new StoreManager(encryptor, storageSiteFactory, randomByteGenerator, hashProvider) {
+        using var subject = new StoreManager(encryptor, randomByteGenerator, hashProvider) {
             StorageSites = {
                 new TestStorageSite(new StorageSettings())
             }
@@ -113,7 +124,7 @@ public class StoreManagerTests {
         using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
         var randomByteGenerator = new RandomByteGenerator();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider());
 
         await subject.Authenticate(plainMasterPasswordBuffer);
 
@@ -124,7 +135,7 @@ public class StoreManagerTests {
     [Fact]
     public void EnsureAuthenticatedThrowsIfNotAuthenticated() {
         var randomByteGenerator = new RandomByteGenerator();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider());
 
         Assert.False(subject.IsAuthenticated);
         Assert.Throws<NotAuthenticatedException>(() => subject.EnsureAuthenticated());
@@ -133,7 +144,7 @@ public class StoreManagerTests {
     [Fact]
     public async Task SaveStorageSitesThrowsIfNotAuthenticated() {
         var randomByteGenerator = new RandomByteGenerator();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider());
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.SaveStorageSites());
     }
@@ -141,7 +152,7 @@ public class StoreManagerTests {
     [Fact]
     public async Task LoadStorageSitesThrowsIfNotAuthenticated() {
         var randomByteGenerator = new RandomByteGenerator();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider());
         using var encryptedBuffer = new SecureBuffer([]);
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.LoadStorageSites(encryptedBuffer));
@@ -150,7 +161,7 @@ public class StoreManagerTests {
     [Fact]
     public async Task SaveDataStoreThrowsIfNotAuthenticated() {
         var randomByteGenerator = new RandomByteGenerator();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider());
         using var dataStore = new DataStore();
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.SaveDataStore(dataStore));
@@ -159,7 +170,7 @@ public class StoreManagerTests {
     [Fact]
     public async Task LoadDataStoreThrowsIfNotAuthenticated() {
         var randomByteGenerator = new RandomByteGenerator();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider());
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.LoadDataStore());
     }
@@ -167,7 +178,7 @@ public class StoreManagerTests {
     [Fact]
     public async Task GetPlainStoreKeyBufferThrowsIfNotAuthenticated() {
         var randomByteGenerator = new RandomByteGenerator();
-        using var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider());
+        using var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider());
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.GetPlainStoreKeyBuffer());
     }
@@ -179,7 +190,7 @@ public class StoreManagerTests {
         DataCollection<StorageSiteBase> storageSites;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
             await subject.Authenticate(plainMasterPasswordBuffer);
@@ -199,9 +210,9 @@ public class StoreManagerTests {
         StoreManager disposedSubject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.True(disposedSubject.IsDisposed);
     }
@@ -211,7 +222,7 @@ public class StoreManagerTests {
         StoreManager disposedSubject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             disposedSubject = subject;
         }
 
@@ -219,15 +230,27 @@ public class StoreManagerTests {
     }
 
     [Fact]
-    public void StorageSitesThrowsIfDisposed() {
+    public void GetStorageSitesThrowsIfDisposed() {
         StoreManager disposedSubject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             disposedSubject = subject;
         }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.StorageSites);
+    }
+
+    [Fact]
+    public void SetStorageSitesThrowsIfDisposed() {
+        StoreManager disposedSubject;
+
+        var randomByteGenerator = new RandomByteGenerator();
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.StorageSites = []);
     }
 
     [Fact]
@@ -236,7 +259,7 @@ public class StoreManagerTests {
         var plainMasterPasswordBuffer = new SecureBuffer(0);
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             disposedSubject = subject;
         }
 
@@ -249,7 +272,7 @@ public class StoreManagerTests {
         var encryptedStorageSettingsBuffer = new SecureBuffer(0);
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             disposedSubject = subject;
         }
 
@@ -261,7 +284,7 @@ public class StoreManagerTests {
         StoreManager disposedSubject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             disposedSubject = subject;
         }
 
@@ -273,7 +296,7 @@ public class StoreManagerTests {
         StoreManager disposedSubject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             disposedSubject = subject;
         }
 
@@ -286,7 +309,7 @@ public class StoreManagerTests {
         using var dataStore = new DataStore();
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             disposedSubject = subject;
         }
 
@@ -298,7 +321,7 @@ public class StoreManagerTests {
         StoreManager disposedSubject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             disposedSubject = subject;
         }
 
@@ -310,7 +333,7 @@ public class StoreManagerTests {
         StoreManager disposedSubject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), new StorageSiteFactory(), randomByteGenerator, new HashProvider())) {
+        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             disposedSubject = subject;
         }
 

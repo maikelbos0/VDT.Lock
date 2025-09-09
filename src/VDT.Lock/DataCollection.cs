@@ -5,7 +5,18 @@ using System.Linq;
 
 namespace VDT.Lock;
 
-public sealed class DataCollection<T> : IData, ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData, IDisposable {
+public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData<T>, IDisposable {
+    public static DataCollection<T> DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+        var position = 0;
+        var collection = new DataCollection<T>();
+
+        while (position < plainSpan.Length) {
+            collection.Add(T.DeserializeFrom(plainSpan.ReadSpan(ref position)));
+        }
+
+        return collection;
+    }
+
     private readonly List<T> items = [];
 
     public bool IsDisposed { get; private set; }
@@ -26,11 +37,11 @@ public sealed class DataCollection<T> : IData, ICollection<T>, IEnumerable<T>, I
         }
     }
 
-    public int Length {
+    public IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return items.Sum(static item => item.Length + 4);
+            return items.Select(static item => item.GetLength());
         }
     }
 
@@ -76,10 +87,14 @@ public sealed class DataCollection<T> : IData, ICollection<T>, IEnumerable<T>, I
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public void SerializeTo(SecureByteList plainBytes) {
+    public void SerializeTo(SecureByteList plainBytes) => SerializeTo(plainBytes, true);
+
+    public void SerializeTo(SecureByteList plainBytes, bool includeLength) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(Length);
+        if (includeLength) {
+            plainBytes.WriteInt(this.GetLength());
+        }
 
         foreach (var item in items) {
             item.SerializeTo(plainBytes);

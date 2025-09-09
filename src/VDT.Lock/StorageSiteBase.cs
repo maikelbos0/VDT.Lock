@@ -1,21 +1,33 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using VDT.Lock.StorageSites;
 
 namespace VDT.Lock;
 
-public abstract class StorageSiteBase : IData, IDisposable {
+public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
+    public static StorageSiteBase DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+        var position = 0;
+        var typeName = plainSpan.ReadString(ref position);
+        var storageSettings = StorageSettings.DeserializeFrom(plainSpan.ReadSpan(ref position));
+
+        return typeName switch {
+            nameof(FileSystemStorageSite) => new FileSystemStorageSite(storageSettings),
+            nameof(ChromeStorageSite) => new ChromeStorageSite(storageSettings),
+            _ => throw new NotImplementedException($"No implementation found for '{typeName}'.")
+        };
+    }
+
     protected readonly StorageSettings storageSettings;
 
     public bool IsDisposed { get; private set; }
 
-    public int Length {
+    public IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return Encoding.UTF8.GetByteCount(GetType().Name)
-                + storageSettings.Length
-                + 8;
+            return [Encoding.UTF8.GetByteCount(GetType().Name), storageSettings.GetLength()];
         }
     }
 
@@ -42,8 +54,8 @@ public abstract class StorageSiteBase : IData, IDisposable {
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(Length);
-        plainBytes.WriteSpan(Encoding.UTF8.GetBytes(GetType().Name));
+        plainBytes.WriteInt(this.GetLength());
+        plainBytes.WriteString(GetType().Name);
         storageSettings.SerializeTo(plainBytes);
     }
 

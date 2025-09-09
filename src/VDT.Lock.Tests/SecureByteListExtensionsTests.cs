@@ -31,4 +31,13 @@ public class SecureByteListExtensionsTests {
 
         Assert.Equal(new byte[] { 3, 0, 0, 0, 97, 98, 99 }, subject.GetValue());
     }
+
+    [Fact]
+    public void WriteStringBuffer() {
+        using var subject = new SecureByteList();
+
+        subject.WriteString("Foo");
+
+        Assert.Equal(new byte[] { 3, 0, 0, 0, 70, 111, 111 }, subject.GetValue());
+    }
 }

@@ -9,7 +9,6 @@ public sealed class StoreManager : IDisposable {
     public static byte[] MasterPasswordSalt => [66, 6, 86, 3, 238, 211, 38, 177, 32, 98, 112, 223, 115, 234, 230, 103];
 
     private readonly IEncryptor encryptor;
-    private readonly IStorageSiteFactory storageSiteFactory;
     private readonly IRandomByteGenerator randomByteGenerator;
     private readonly IHashProvider hashProvider;
 
@@ -17,7 +16,7 @@ public sealed class StoreManager : IDisposable {
     private SecureBuffer? encryptedStoreKeyBuffer;
 
     // TODO should these be encrypted in any way? We have the technology.
-    private readonly DataCollection<StorageSiteBase> storageSites = [];
+    private DataCollection<StorageSiteBase> storageSites = [];
 
     public bool IsDisposed { get; private set; }
 
@@ -36,11 +35,16 @@ public sealed class StoreManager : IDisposable {
 
             return storageSites;
         }
+        set {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            storageSites.Dispose();
+            storageSites = value;
+        }
     }
 
-    public StoreManager(IEncryptor encryptor, IStorageSiteFactory storageSiteFactory, IRandomByteGenerator randomByteGenerator, IHashProvider hashProvider) {
+    public StoreManager(IEncryptor encryptor, IRandomByteGenerator randomByteGenerator, IHashProvider hashProvider) {
         this.encryptor = encryptor;
-        this.storageSiteFactory = storageSiteFactory;
         this.randomByteGenerator = randomByteGenerator;
         this.hashProvider = hashProvider;
     }
@@ -66,16 +70,8 @@ public sealed class StoreManager : IDisposable {
         try {
             using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
             using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
-            var position = 0;
-            var length = plainBuffer.ReadInt(ref position);
 
-            if (plainBuffer.Value.Length != length + 4) {
-                throw new InvalidAuthenticationException("Invalid buffer length.");
-            }
-
-            while (position < plainBuffer.Value.Length) {
-                StorageSites.Add(storageSiteFactory.DeserializeFrom(plainBuffer.ReadSpan(ref position)));
-            }
+            StorageSites = DataCollection<StorageSiteBase>.DeserializeFrom(plainBuffer);
         }
         catch (Exception ex) {
             throw new InvalidAuthenticationException("Deserializing buffer failed.", ex);
@@ -89,7 +85,7 @@ public sealed class StoreManager : IDisposable {
 
         using var plainStorageSettingsBytes = new SecureByteList();
 
-        storageSites.SerializeTo(plainStorageSettingsBytes);
+        storageSites.SerializeTo(plainStorageSettingsBytes, false);
 
         using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
         using var plainStorageSettingsBuffer = plainStorageSettingsBytes.ToBuffer();
@@ -110,9 +106,8 @@ public sealed class StoreManager : IDisposable {
                 using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
                 using var encryptedBuffer = await storageSites.Single().Load();
                 using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
-                var position = 0;
 
-                return DataStore.DeserializeFrom(plainBuffer.ReadSpan(ref position));
+                return DataStore.DeserializeFrom(plainBuffer);
             }
             catch (Exception ex) {
                 throw new InvalidAuthenticationException("Deserializing buffer failed.", ex);

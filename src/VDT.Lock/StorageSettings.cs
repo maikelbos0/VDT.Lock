@@ -5,13 +5,13 @@ using System.Text;
 
 namespace VDT.Lock;
 
-public sealed class StorageSettings : IData, IDisposable {
+public sealed class StorageSettings : IData<StorageSettings>, IDisposable {
     public static StorageSettings DeserializeFrom(ReadOnlySpan<byte> plainSettingsSpan) {
         var storageSettings = new StorageSettings();
         var position = 0;
 
         while (position < plainSettingsSpan.Length) {
-            storageSettings.plainSettingsBuffers[Encoding.UTF8.GetString(plainSettingsSpan.ReadSpan(ref position))] = new SecureBuffer(plainSettingsSpan.ReadSpan(ref position).ToArray());
+            storageSettings.plainSettingsBuffers[plainSettingsSpan.ReadString(ref position)] = new SecureBuffer(plainSettingsSpan.ReadSpan(ref position).ToArray());
         }
 
         return storageSettings;
@@ -21,11 +21,14 @@ public sealed class StorageSettings : IData, IDisposable {
 
     public bool IsDisposed { get; private set; }
 
-    public int Length {
+    public IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return plainSettingsBuffers.Sum(pair => Encoding.UTF8.GetByteCount(pair.Key) + pair.Value.Value.Length + 8);
+            foreach (var plainSettingsBuffer in plainSettingsBuffers) {
+                yield return Encoding.UTF8.GetByteCount(plainSettingsBuffer.Key);
+                yield return plainSettingsBuffer.Value.Value.Length;
+            }
         }
     }
 
@@ -50,10 +53,10 @@ public sealed class StorageSettings : IData, IDisposable {
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(Length);
+        plainBytes.WriteInt(this.GetLength());
 
         foreach (var pair in plainSettingsBuffers.OrderBy(pair => pair.Key)) {
-            plainBytes.WriteSpan(Encoding.UTF8.GetBytes(pair.Key));
+            plainBytes.WriteString(pair.Key);
             plainBytes.WriteSecureBuffer(pair.Value);
         }
     }

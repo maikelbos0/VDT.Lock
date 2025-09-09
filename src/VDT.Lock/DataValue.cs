@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataValue : IData, IDisposable {
+public sealed class DataValue : IData<DataValue>, IDisposable {
     public static DataValue DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
@@ -27,15 +28,15 @@ public sealed class DataValue : IData, IDisposable {
         }
     }
 
-    public int Length {
+    public IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return plainValueBuffer.Value.Length + 4;
+            return [plainValueBuffer.Value.Length];
         }
     }
 
-    public DataValue() : this(ReadOnlySpan<byte>.Empty) { }
+    public DataValue() : this([]) { }
 
     public DataValue(ReadOnlySpan<byte> plainValueSpan) {
         plainValueBuffer = new(plainValueSpan.ToArray());
@@ -44,7 +45,7 @@ public sealed class DataValue : IData, IDisposable {
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(Length);
+        plainBytes.WriteInt(this.GetLength());
         plainBytes.WriteSecureBuffer(plainValueBuffer);
     }
 

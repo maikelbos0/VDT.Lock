@@ -1,56 +1,52 @@
 ﻿using System;
+using System.Linq;
 using Xunit;
 
 namespace VDT.Lock.Tests;
 
 public class DataCollectionTests {
-    public class TestDataItem : IData, IDisposable {
-        public bool IsDisposed { get; private set; }
+    [Fact]
+    public void DeserializeFrom() {
+        var plainSpan = new ReadOnlySpan<byte>([7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5]);
 
-        public int Length => 4;
+        using var subject = DataCollection<DataValue>.DeserializeFrom(plainSpan);
 
-        public void Dispose() {
-            IsDisposed = true;
-            GC.SuppressFinalize(this);
-        }
-
-        public void SerializeTo(SecureByteList plainBytes) {
-            plainBytes.WriteSpan([15, 0, 0, 0]);
-        }
+        Assert.Equal(2, subject.Count);
+        Assert.Contains(subject, dataValue => dataValue.Value.SequenceEqual(new byte[] { 102, 111, 111 }));
+        Assert.Contains(subject, dataValue => dataValue.Value.SequenceEqual(new byte[] { 1, 2, 3, 4, 5 }));
     }
 
     [Fact]
     public void Count() {
-        using var subject = new DataCollection<TestDataItem> {
+        using var subject = new DataCollection<DataValue> {
+            new(),
             new()
         };
 
-#pragma warning disable xUnit2013 // Do not use equality check to check for collection size.
-        Assert.Equal(1, subject.Count);
-#pragma warning restore xUnit2013 // Do not use equality check to check for collection size.
+        Assert.Equal(2, subject.Count);
     }
 
     [Fact]
     public void IsReadOnly() {
-        using var subject = new DataCollection<TestDataItem>();
+        using var subject = new DataCollection<DataValue>();
 
         Assert.False(subject.IsReadOnly);
     }
 
     [Fact]
-    public void Length() {
-        using var subject = new DataCollection<TestDataItem>() {
-            new(),
-            new()
+    public void FieldLengths() {
+        using var subject = new DataCollection<DataValue>() {
+            new([102, 111, 111]),
+            new([1, 2, 3, 4, 5])
         };
 
-        Assert.Equal(16, subject.Length);
+        Assert.Equal([7, 9], subject.FieldLengths);
     }
 
     [Fact]
     public void Add() {
-        using var subject = new DataCollection<TestDataItem>();
-        var item = new TestDataItem();
+        using var subject = new DataCollection<DataValue>();
+        var item = new DataValue();
 
         subject.Add(item);
 
@@ -59,8 +55,8 @@ public class DataCollectionTests {
 
     [Fact]
     public void ContainsIsTrueWhenPresent() {
-        using var subject = new DataCollection<TestDataItem>();
-        var item = new TestDataItem();
+        using var subject = new DataCollection<DataValue>();
+        var item = new DataValue();
 
         subject.Add(item);
 
@@ -71,8 +67,8 @@ public class DataCollectionTests {
 
     [Fact]
     public void ContainsIsFalseWhenNotPresent() {
-        using var subject = new DataCollection<TestDataItem>();
-        using var item = new TestDataItem();
+        using var subject = new DataCollection<DataValue>();
+        using var item = new DataValue();
 
 #pragma warning disable xUnit2017 // Do not use Contains() to check if a value exists in a collection
         Assert.False(subject.Contains(item));
@@ -81,8 +77,8 @@ public class DataCollectionTests {
 
     [Fact]
     public void RemoveRemovesWhenPresent() {
-        using var subject = new DataCollection<TestDataItem>();
-        var item = new TestDataItem();
+        using var subject = new DataCollection<DataValue>();
+        var item = new DataValue();
 
         subject.Add(item);
 
@@ -93,8 +89,8 @@ public class DataCollectionTests {
 
     [Fact]
     public void RemoveDoesNotRemoveWhenNotPresent() {
-        using var subject = new DataCollection<TestDataItem>();
-        using var item = new TestDataItem();
+        using var subject = new DataCollection<DataValue>();
+        using var item = new DataValue();
 
         Assert.False(subject.Remove(item));
         Assert.False(item.IsDisposed);
@@ -102,8 +98,8 @@ public class DataCollectionTests {
 
     [Fact]
     public void Clear() {
-        using var subject = new DataCollection<TestDataItem>();
-        var item = new TestDataItem();
+        using var subject = new DataCollection<DataValue>();
+        var item = new DataValue();
         subject.Add(item);
 
         subject.Clear();
@@ -112,53 +108,55 @@ public class DataCollectionTests {
         Assert.True(item.IsDisposed);
     }
 
-    [Fact]
-    public void SerializeTo() {
-        using var subject = new DataCollection<TestDataItem>() {
-            new(),
-            new()
+    [Theory]
+    [InlineData(true, new byte[] { 24, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5 })]
+    [InlineData(false, new byte[] { 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5 })]
+    public void SerializeTo(bool includeLength, byte[] expectedResult) {
+        using var subject = new DataCollection<DataValue>() {
+            new([102, 111, 111]),
+            new([1, 2, 3, 4, 5])
         };
 
         using var result = new SecureByteList();
-        subject.SerializeTo(result);
+        subject.SerializeTo(result, includeLength);
 
-        Assert.Equal(new ReadOnlySpan<byte>([16, 0, 0, 0, 4, 0, 0, 0, 15, 0, 0, 0, 4, 0, 0, 0, 15, 0, 0, 0]), result.GetValue());
+        Assert.Equal(expectedResult, result.GetValue());
     }
 
     [Fact]
     public void CopyToThrows() {
-        using var subject = new DataCollection<TestDataItem>();
+        using var subject = new DataCollection<DataValue>();
 
         Assert.Throws<NotSupportedException>(() => subject.CopyTo([], 0));
     }
 
     [Fact]
     public void Dispose() {
-        var item = new TestDataItem();
+        var item = new DataValue();
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             subject.Add(item);
-        };
+        }
 
         Assert.True(item.IsDisposed);
     }
 
     [Fact]
     public void IsDisposed() {
-        DataCollection<TestDataItem> disposedSubject;
+        DataCollection<DataValue> disposedSubject;
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.True(disposedSubject.IsDisposed);
     }
 
     [Fact]
     public void CountThrowsIfDisposed() {
-        DataCollection<TestDataItem> disposedSubject;
+        DataCollection<DataValue> disposedSubject;
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             disposedSubject = subject;
         }
 
@@ -167,9 +165,9 @@ public class DataCollectionTests {
 
     [Fact]
     public void IsReadOnlyThrowsIfDisposed() {
-        DataCollection<TestDataItem> disposedSubject;
+        DataCollection<DataValue> disposedSubject;
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             disposedSubject = subject;
         }
 
@@ -177,22 +175,22 @@ public class DataCollectionTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
-        DataCollection<TestDataItem> disposedSubject;
+    public void FieldLengthsThrowsIfDisposed() {
+        DataCollection<DataValue> disposedSubject;
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             disposedSubject = subject;
         }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
 
     [Fact]
     public void AddThrowsIfDisposed() {
-        DataCollection<TestDataItem> disposedSubject;
-        using var item = new TestDataItem();
+        DataCollection<DataValue> disposedSubject;
+        using var item = new DataValue();
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             disposedSubject = subject;
         }
 
@@ -201,31 +199,31 @@ public class DataCollectionTests {
 
     [Fact]
     public void ContainsThrowsIfDisposed() {
-        DataCollection<TestDataItem> disposedSubject;
+        DataCollection<DataValue> disposedSubject;
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             disposedSubject = subject;
         }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Contains(new TestDataItem()));
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Contains(new DataValue()));
     }
 
     [Fact]
     public void RemoveThrowsIfDisposed() {
-        DataCollection<TestDataItem> disposedSubject;
+        DataCollection<DataValue> disposedSubject;
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             disposedSubject = subject;
         }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Remove(new TestDataItem()));
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Remove(new DataValue()));
     }
 
     [Fact]
     public void ClearThrowsIfDisposed() {
-        DataCollection<TestDataItem> disposedSubject;
+        DataCollection<DataValue> disposedSubject;
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             disposedSubject = subject;
         }
 
@@ -234,9 +232,9 @@ public class DataCollectionTests {
 
     [Fact]
     public void GetEnumeratorThrowsIfDisposed() {
-        DataCollection<TestDataItem> disposedSubject;
+        DataCollection<DataValue> disposedSubject;
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             disposedSubject = subject;
         }
 
@@ -245,10 +243,10 @@ public class DataCollectionTests {
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        DataCollection<TestDataItem> disposedSubject;
+        DataCollection<DataValue> disposedSubject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new DataCollection<TestDataItem>()) {
+        using (var subject = new DataCollection<DataValue>()) {
             disposedSubject = subject;
         }
 

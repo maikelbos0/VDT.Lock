@@ -1,5 +1,4 @@
-﻿#if !BROWSER
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace VDT.Lock.StorageSites;
@@ -24,4 +23,3 @@ public class FileSystemStorageSite : StorageSiteBase {
         throw new NotImplementedException();
     }
 }
-#endif

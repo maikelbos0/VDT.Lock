@@ -20,5 +20,5 @@
 		<RemoveDir Directories="$(ProjectDir)publish" />
 		<Copy SourceFiles="@(WasmFiles)" DestinationFolder="$(ProjectDir)publish" />
 	</Target>
-	
+
 </Project>

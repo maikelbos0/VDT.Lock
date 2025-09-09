@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataField : IData, IDisposable {
+public sealed class DataField : IData<DataField>, IDisposable {
     public static DataField DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
@@ -13,6 +14,8 @@ public sealed class DataField : IData, IDisposable {
     private SecureBuffer plainValueBuffer;
 
     public bool IsDisposed { get; private set; }
+    
+    // TODO this should have a selector also
 
     public ReadOnlySpan<byte> Name {
         get {
@@ -42,15 +45,15 @@ public sealed class DataField : IData, IDisposable {
         }
     }
 
-    public int Length {
+    public IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return plainNameBuffer.Value.Length + plainValueBuffer.Value.Length + 8;
+            return [Name.Length, Value.Length];
         }
     }
 
-    public DataField() : this(ReadOnlySpan<byte>.Empty, ReadOnlySpan<byte>.Empty) { }
+    public DataField() : this([], []) { }
 
     public DataField(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> plainDataSpan) {
         plainNameBuffer = new(plainNameSpan.ToArray());
@@ -60,7 +63,7 @@ public sealed class DataField : IData, IDisposable {
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(Length);
+        plainBytes.WriteInt(this.GetLength());
         plainBytes.WriteSecureBuffer(plainNameBuffer);
         plainBytes.WriteSecureBuffer(plainValueBuffer);
     }

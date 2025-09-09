@@ -44,12 +44,25 @@ public class DataStoreTests {
     }
 
     [Fact]
-    public void Length() {
+    public void SetItems() {
+        using var subject = new DataStore();
+
+        var previousItems = subject.Items;
+        var newItems = new DataCollection<DataItem>();
+
+        subject.Items = newItems;
+
+        Assert.Same(newItems, subject.Items);
+        Assert.True(previousItems.IsDisposed);
+    }
+
+    [Fact]
+    public void FieldLengths() {
         using var subject = new DataStore([98, 97, 114]);
         subject.Items.Add(new DataItem([102, 111, 111]));
         subject.Items.Add(new DataItem([5, 6, 7, 8, 9]));
 
-        Assert.Equal(59, subject.Length);
+        Assert.Equal([3, 48], subject.FieldLengths);
     }
 
     [Fact]
@@ -61,7 +74,7 @@ public class DataStoreTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([59, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 48, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 48, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), result.GetValue());
     }
 
     [Fact]
@@ -84,7 +97,7 @@ public class DataStoreTests {
 
         using (var subject = new DataStore()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
     }
@@ -95,13 +108,13 @@ public class DataStoreTests {
 
         using (var subject = new DataStore()) {
             disposedSubject = subject;
-        };
+        }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
     }
 
     [Fact]
-    public void ItemsThrowsIfDisposed() {
+    public void GetItemsThrowsIfDisposed() {
         DataStore disposedSubject;
 
         using (var subject = new DataStore()) {
@@ -112,14 +125,25 @@ public class DataStoreTests {
     }
 
     [Fact]
-    public void LengthThrowsIfDisposed() {
+    public void SetItemsThrowsIfDisposed() {
         DataStore disposedSubject;
 
         using (var subject = new DataStore()) {
             disposedSubject = subject;
-        };
+        }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Length);
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Items = []);
+    }
+
+    [Fact]
+    public void FieldLengthsThrowsIfDisposed() {
+        DataStore disposedSubject;
+
+        using (var subject = new DataStore()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
 
     [Fact]

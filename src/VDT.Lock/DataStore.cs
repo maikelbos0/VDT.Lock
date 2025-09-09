@@ -1,23 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataStore : IData, IDisposable {
+public sealed class DataStore : IData<DataStore>, IDisposable {
     public static DataStore DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
-        var dataStore = new DataStore(plainSpan.ReadSpan(ref position));
-        var plainItemsSpan = plainSpan.ReadSpan(ref position);
-
-        position = 0;
-        while (position < plainItemsSpan.Length) {
-            dataStore.Items.Add(DataItem.DeserializeFrom(plainItemsSpan.ReadSpan(ref position)));
-        }
-
-        return dataStore;
+        
+        return new DataStore(plainSpan.ReadSpan(ref position)) {
+            Items = DataCollection<DataItem>.DeserializeFrom(plainSpan.ReadSpan(ref position))
+        };
     }
 
     private SecureBuffer plainNameBuffer;
-    private readonly DataCollection<DataItem> items = [];
+    private DataCollection<DataItem> items = [];
 
     public bool IsDisposed { get; private set; }
 
@@ -41,19 +37,23 @@ public sealed class DataStore : IData, IDisposable {
 
             return items;
         }
-    }
-
-    public int Length {
-        get {
+        set {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return plainNameBuffer.Value.Length
-                + items.Length
-                + 8;
+            items.Dispose();
+            items = value;
         }
     }
 
-    public DataStore() : this(ReadOnlySpan<byte>.Empty) { }
+    public IEnumerable<int> FieldLengths {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return [plainNameBuffer.Value.Length, items.GetLength()];
+        }
+    }
+
+    public DataStore() : this([]) { }
 
     public DataStore(ReadOnlySpan<byte> plainValueSpan) {
         plainNameBuffer = new(plainValueSpan.ToArray());
@@ -62,7 +62,7 @@ public sealed class DataStore : IData, IDisposable {
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(Length);
+        // We don't include the length since we're always going to deserialize the entire buffer
         plainBytes.WriteSecureBuffer(plainNameBuffer);
         items.SerializeTo(plainBytes);
     }
