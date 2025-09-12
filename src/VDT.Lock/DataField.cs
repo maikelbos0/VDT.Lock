@@ -7,7 +7,9 @@ public sealed class DataField : IData<DataField>, IDisposable {
     public static DataField DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
-        return new(plainSpan.ReadSpan(ref position), plainSpan.ReadSpan(ref position));
+        return new(plainSpan.ReadSpan(ref position), plainSpan.ReadSpan(ref position)) {
+            Selectors = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position))
+        };
     }
 
     private SecureBuffer plainNameBuffer;
@@ -62,7 +64,7 @@ public sealed class DataField : IData<DataField>, IDisposable {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [plainNameBuffer.Value.Length, plainValueBuffer.Value.Length];
+            return [plainNameBuffer.Value.Length, plainValueBuffer.Value.Length, selectors.GetLength()];
         }
     }
 
@@ -79,6 +81,7 @@ public sealed class DataField : IData<DataField>, IDisposable {
         plainBytes.WriteInt(this.GetLength());
         plainBytes.WriteSecureBuffer(plainNameBuffer);
         plainBytes.WriteSecureBuffer(plainValueBuffer);
+        selectors.SerializeTo(plainBytes);
     }
 
     public void Dispose() {
