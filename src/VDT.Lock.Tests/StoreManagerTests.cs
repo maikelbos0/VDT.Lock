@@ -9,7 +9,7 @@ public class StoreManagerTests {
     public class TestStorageSite : StorageSiteBase {
         private byte[] encryptedData = [];
 
-        public TestStorageSite(StorageSettings storageSettings) : base(storageSettings) { }
+        public TestStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
 
         protected override Task<SecureBuffer> ExecuteLoad() {
             return Task.FromResult(new SecureBuffer(encryptedData));
@@ -62,8 +62,8 @@ public class StoreManagerTests {
         var hashProvider = new HashProvider();
 
         using var saveSubject = new StoreManager(encryptor, randomByteGenerator, hashProvider);
-        saveSubject.StorageSites.Add(new FileSystemStorageSite("abc"u8));
-        saveSubject.StorageSites.Add(new FileSystemStorageSite("def"u8));
+        saveSubject.StorageSites.Add(new FileSystemStorageSite("foo"u8, "abc"u8));
+        saveSubject.StorageSites.Add(new FileSystemStorageSite("bar"u8, "def"u8));
         await saveSubject.Authenticate(plainMasterPasswordBuffer);
         using var encryptedBuffer = await saveSubject.SaveStorageSites();
 
@@ -72,8 +72,8 @@ public class StoreManagerTests {
         await loadSubject.LoadStorageSites(encryptedBuffer);
 
         Assert.Equal(2, loadSubject.StorageSites.Count);
-        Assert.Contains(loadSubject.StorageSites, storageSite => storageSite is FileSystemStorageSite fileSystemStorageSite && fileSystemStorageSite.Location.SequenceEqual("abc"u8));
-        Assert.Contains(loadSubject.StorageSites, storageSite => storageSite is FileSystemStorageSite fileSystemStorageSite && fileSystemStorageSite.Location.SequenceEqual("def"u8));
+        Assert.Contains(loadSubject.StorageSites, storageSite => storageSite is FileSystemStorageSite fileSystemStorageSite && fileSystemStorageSite.Name.SequenceEqual("foo"u8) && fileSystemStorageSite.Location.SequenceEqual("abc"u8));
+        Assert.Contains(loadSubject.StorageSites, storageSite => storageSite is FileSystemStorageSite fileSystemStorageSite && fileSystemStorageSite.Name.SequenceEqual("bar"u8) && fileSystemStorageSite.Location.SequenceEqual("def"u8));
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public class StoreManagerTests {
 
         using var subject = new StoreManager(encryptor, randomByteGenerator, hashProvider) {
             StorageSites = {
-                new TestStorageSite(new StorageSettings())
+                new TestStorageSite("foo"u8, new StorageSettings())
             }
         };
 
