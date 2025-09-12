@@ -49,7 +49,7 @@ public sealed class DataField : IData<DataField>, IDisposable {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [Name.Length, Value.Length];
+            return [plainNameBuffer.Value.Length, plainValueBuffer.Value.Length];
         }
     }
 

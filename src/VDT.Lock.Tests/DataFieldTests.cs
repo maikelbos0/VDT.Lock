@@ -23,7 +23,6 @@ public class DataFieldTests {
 
         Assert.Equal(plainNameSpan, subject.Name);
         Assert.Equal(plainDataSpan, subject.Value);
-
     }
 
     [Fact]
