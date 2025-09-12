@@ -15,7 +15,7 @@ public class DataItemTests {
 
     [Fact]
     public void DeserializeFromDeserializesFields() {
-        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 40, 0, 0, 0, 16, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 1, 2, 3, 4, 5, 16, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0]);
+        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 48, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
         using var subject = DataItem.DeserializeFrom(plainSpan);
 
@@ -114,7 +114,7 @@ public class DataItemTests {
         subject.Locations.Add(new([102, 111, 111]));
         subject.Locations.Add(new([98, 97, 114]));
 
-        Assert.Equal([3, 40, 22, 22], subject.FieldLengths);
+        Assert.Equal([3, 48, 22, 22], subject.FieldLengths);
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class DataItemTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([103, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 40, 0, 0, 0, 16, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 1, 2, 3, 4, 5, 16, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 22, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 22, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([111, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 48, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 22, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 22, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
     }
 
     [Fact]

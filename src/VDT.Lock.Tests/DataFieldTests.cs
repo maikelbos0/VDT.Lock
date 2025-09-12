@@ -6,12 +6,13 @@ namespace VDT.Lock.Tests;
 public class DataFieldTests {
     [Fact]
     public void DeserializeFrom() {
-        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9]);
+        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 13, 0, 0, 0, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5]);
 
         using var subject = DataField.DeserializeFrom(plainSpan);
 
         Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
         Assert.Equal(new ReadOnlySpan<byte>([5, 6, 7, 8, 9]), subject.Value);
+        Assert.Equal(new ReadOnlySpan<byte>([1, 2, 3, 4, 5]), Assert.Single(subject.Selectors).Value);
     }
 
     [Fact]
@@ -23,7 +24,6 @@ public class DataFieldTests {
 
         Assert.Equal(plainNameSpan, subject.Name);
         Assert.Equal(plainDataSpan, subject.Value);
-
     }
 
     [Fact]
@@ -51,20 +51,35 @@ public class DataFieldTests {
     }
 
     [Fact]
+    public void SetSelectors() {
+        using var subject = new DataField();
+
+        var previousFields = subject.Selectors;
+        var newFields = new DataCollection<DataValue>();
+
+        subject.Selectors = newFields;
+
+        Assert.Same(newFields, subject.Selectors);
+        Assert.True(previousFields.IsDisposed);
+    }
+
+    [Fact]
     public void FieldLengths() {
         using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
+        subject.Selectors.Add(new DataValue([1, 2, 3, 4, 5]));
 
-        Assert.Equal([3, 5], subject.FieldLengths);
+        Assert.Equal([3, 5, 13], subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeTo() {
         using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
+        subject.Selectors.Add(new DataValue([1, 2, 3, 4, 5]));
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([16, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([33, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 13, 0, 0, 0, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5]), result.GetValue());
     }
 
     [Fact]
@@ -134,6 +149,28 @@ public class DataFieldTests {
         }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([15, 15, 15]));
+    }
+
+    [Fact]
+    public void GetSelectorsThrowsIfDisposed() {
+        DataField disposedSubject;
+
+        using (var subject = new DataField()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Selectors);
+    }
+
+    [Fact]
+    public void SetSelectorsThrowsIfDisposed() {
+        DataField disposedSubject;
+
+        using (var subject = new DataField()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Selectors = []);
     }
 
     [Fact]

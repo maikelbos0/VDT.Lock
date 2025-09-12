@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 namespace VDT.Lock.StorageSites;
 
 public class FileSystemStorageSite : StorageSiteBase {
-    public FileSystemStorageSite(StorageSettings storageSettings) : base(storageSettings) { }
+    public FileSystemStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
 
-    public FileSystemStorageSite(ReadOnlySpan<byte> location) : base(new StorageSettings()) {
+    public FileSystemStorageSite(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> location) : base(plainNameSpan, new StorageSettings()) {
         Location = location;
     }
 

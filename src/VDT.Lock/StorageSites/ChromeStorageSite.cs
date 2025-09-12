@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace VDT.Lock.StorageSites;
 
 public class ChromeStorageSite : StorageSiteBase {
-    public ChromeStorageSite(StorageSettings storageSettings) : base(storageSettings) { }
+    public ChromeStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
 
     protected override Task<SecureBuffer> ExecuteLoad() {
         throw new NotImplementedException();
