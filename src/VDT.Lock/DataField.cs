@@ -12,10 +12,9 @@ public sealed class DataField : IData<DataField>, IDisposable {
 
     private SecureBuffer plainNameBuffer;
     private SecureBuffer plainValueBuffer;
+    private DataCollection<DataValue> selectors = [];
 
     public bool IsDisposed { get; private set; }
-    
-    // TODO this should have a selector also
 
     public ReadOnlySpan<byte> Name {
         get {
@@ -42,6 +41,20 @@ public sealed class DataField : IData<DataField>, IDisposable {
 
             plainValueBuffer.Dispose();
             plainValueBuffer = new(value.ToArray());
+        }
+    }
+
+    public DataCollection<DataValue> Selectors {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return selectors;
+        }
+        set {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            selectors.Dispose();
+            selectors = value;
         }
     }
 

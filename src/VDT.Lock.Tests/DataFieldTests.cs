@@ -50,6 +50,19 @@ public class DataFieldTests {
     }
 
     [Fact]
+    public void SetSelectors() {
+        using var subject = new DataField();
+
+        var previousFields = subject.Selectors;
+        var newFields = new DataCollection<DataValue>();
+
+        subject.Selectors = newFields;
+
+        Assert.Same(newFields, subject.Selectors);
+        Assert.True(previousFields.IsDisposed);
+    }
+
+    [Fact]
     public void FieldLengths() {
         using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
 
@@ -133,6 +146,28 @@ public class DataFieldTests {
         }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([15, 15, 15]));
+    }
+
+    [Fact]
+    public void GetSelectorsThrowsIfDisposed() {
+        DataField disposedSubject;
+
+        using (var subject = new DataField()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Selectors);
+    }
+
+    [Fact]
+    public void SetSelectorsThrowsIfDisposed() {
+        DataField disposedSubject;
+
+        using (var subject = new DataField()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Selectors = []);
     }
 
     [Fact]
