@@ -12,6 +12,7 @@ public class DataFieldTests {
 
         Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
         Assert.Equal(new ReadOnlySpan<byte>([5, 6, 7, 8, 9]), subject.Value);
+        Assert.Equal(new ReadOnlySpan<byte>([1, 2, 3, 4, 5]), Assert.Single(subject.Selectors).Value);
     }
 
     [Fact]

@@ -48,7 +48,7 @@ public class StorageSiteBaseTests {
 
     [Fact]
     public void SetName() {
-        using var subject = new TestStorageSite("foo"u8, new StorageSettings());
+        using var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings());
 
         var plainPreviousValueBuffer = subject.GetBuffer<StorageSiteBase>("plainNameBuffer");
 
@@ -63,28 +63,28 @@ public class StorageSiteBaseTests {
         var storageSettings = new StorageSettings();
         storageSettings.Set("foo", new ReadOnlySpan<byte>([5, 6, 7, 8, 9]));
 
-        using var subject = new TestStorageSite("foo"u8, storageSettings);
+        using var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), storageSettings);
 
         Assert.Equal([15, 3, 16], subject.FieldLengths);
     }
 
     [Fact]
     public async Task Load() {
-        using var subject = new TestStorageSite("foo"u8, new StorageSettings());
+        using var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings());
 
         await Assert.ThrowsAsync<NotImplementedException>(() => subject.Load());
     }
 
     [Fact]
     public async Task Save() {
-        using var subject = new TestStorageSite("foo"u8, new StorageSettings());
+        using var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings());
 
         await Assert.ThrowsAsync<NotImplementedException>(() => subject.Save(new ReadOnlySpan<byte>([])));
     }
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new TestStorageSite("foo"u8, new StorageSettings());
+        using var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings());
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
@@ -96,8 +96,7 @@ public class StorageSiteBaseTests {
     public void Dispose() {
         using var storageSettings = new StorageSettings();
 
-        using (var subject = new TestStorageSite("foo"u8, storageSettings)) { }
-        ;
+        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), storageSettings)) { }
 
         Assert.True(storageSettings.IsDisposed);
     }
@@ -106,10 +105,9 @@ public class StorageSiteBaseTests {
     public void IsDisposed() {
         TestStorageSite disposedSubject;
 
-        using (var subject = new TestStorageSite("foo"u8, new StorageSettings())) {
+        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings())) {
             disposedSubject = subject;
         }
-        ;
 
         Assert.True(disposedSubject.IsDisposed);
     }
@@ -118,7 +116,7 @@ public class StorageSiteBaseTests {
     public void GetNameThrowsIfDisposed() {
         TestStorageSite disposedSubject;
 
-        using (var subject = new TestStorageSite("foo"u8, new StorageSettings())) {
+        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings())) {
             disposedSubject = subject;
         }
 
@@ -129,7 +127,7 @@ public class StorageSiteBaseTests {
     public void SetNameThrowsIfDisposed() {
         TestStorageSite disposedSubject;
 
-        using (var subject = new TestStorageSite("foo"u8, new StorageSettings())) {
+        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings())) {
             disposedSubject = subject;
         }
 
@@ -140,10 +138,9 @@ public class StorageSiteBaseTests {
     public void FieldLengthsThrowsIfDisposed() {
         TestStorageSite disposedSubject;
 
-        using (var subject = new TestStorageSite("foo"u8, new StorageSettings())) {
+        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings())) {
             disposedSubject = subject;
         }
-        ;
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
     }
@@ -152,10 +149,9 @@ public class StorageSiteBaseTests {
     public async Task LoadThrowsIfDisposed() {
         TestStorageSite disposedSubject;
 
-        using (var subject = new TestStorageSite("foo"u8, new StorageSettings())) {
+        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings())) {
             disposedSubject = subject;
         }
-        ;
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => disposedSubject.Load());
     }
@@ -164,10 +160,9 @@ public class StorageSiteBaseTests {
     public async Task SaveThrowsIfDisposed() {
         TestStorageSite disposedSubject;
 
-        using (var subject = new TestStorageSite("foo"u8, new StorageSettings())) {
+        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings())) {
             disposedSubject = subject;
         }
-        ;
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => disposedSubject.Save(new ReadOnlySpan<byte>([])));
     }
@@ -177,10 +172,9 @@ public class StorageSiteBaseTests {
         TestStorageSite disposedSubject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new TestStorageSite("foo"u8, new StorageSettings())) {
+        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings())) {
             disposedSubject = subject;
         }
-        ;
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
     }
