@@ -11,14 +11,14 @@ public class StoreManagerTests {
 
         public TestStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
 
-        protected override Task<SecureBuffer> ExecuteLoad() {
-            return Task.FromResult(new SecureBuffer(encryptedData));
+        protected override Task<SecureBuffer?> ExecuteLoad() {
+            return Task.FromResult<SecureBuffer?>(new SecureBuffer(encryptedData));
         }
 
-        protected override Task ExecuteSave(ReadOnlySpan<byte> encryptedData) {
+        protected override Task<bool> ExecuteSave(ReadOnlySpan<byte> encryptedData) {
             this.encryptedData = encryptedData.ToArray();
 
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 
