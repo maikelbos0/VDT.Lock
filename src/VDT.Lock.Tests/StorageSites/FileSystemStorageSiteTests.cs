@@ -20,10 +20,11 @@ public class FileSystemStorageSiteTests {
         const string fileName = "FileSystemStorage_ExecuteLoad.data";
         var expectedResult = ContentProvider.GetFileContents(fileName);
 
-        using var subject = new FileSystemStorageSite(Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
+        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
 
         var result = await subject.Load();
 
+        Assert.NotNull(result);
         Assert.Equal(expectedResult, result.Value);
     }
 
@@ -33,9 +34,9 @@ public class FileSystemStorageSiteTests {
         const string fileContents = "This is not actually encrypted data, but normally it would be.";
         var expectedResult = Encoding.UTF8.GetBytes(fileContents);
 
-        using var subject = new FileSystemStorageSite(Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
+        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
 
-        await subject.Save(expectedResult.AsSpan());
+        Assert.True(await subject.Save(expectedResult.AsSpan()));
         var result = ContentProvider.GetFileContents(fileName);
 
         Assert.Equal(expectedResult, result);
