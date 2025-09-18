@@ -7,8 +7,8 @@ namespace VDT.Lock;
 
 public static partial class TestClass {
     [JSExport]
-    public static async Task<string> StorageTest() {
-        using var plainBuffer = new SecureBuffer("password"u8.ToArray());
+    public static async Task<string> TestEncryption(string password) {
+        using var plainBuffer = new SecureBuffer(Encoding.UTF8.GetBytes(password));
         var randomByteGenerator = new RandomByteGenerator();
         var encryptor = new Encryptor(randomByteGenerator);
         using var key = new SecureBuffer(randomByteGenerator.Generate(Encryptor.KeySizeInBytes));

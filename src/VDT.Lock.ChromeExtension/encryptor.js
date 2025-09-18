@@ -5,7 +5,7 @@ export async function Encrypt(plainBytes, key, iv) {
         key.buffer,
         "AES-CBC",
         false,
-        ["encrypt"] //, "decrypt"
+        ["encrypt"]
     );
 
     return new Uint8Array(await window.crypto.subtle.encrypt(
