@@ -3,7 +3,7 @@ using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 
-namespace VDT.Lock;
+namespace VDT.Lock.JavascriptInterop;
 
 public static partial class JSEncryptor {
     public static Task ImportModule() => JSHost.ImportAsync("Encryptor", "../encryptor.js");
@@ -16,11 +16,7 @@ public static partial class JSEncryptor {
 
     [JSImport("Encrypt", "Encryptor")]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>()]
-    private static partial Task<object?> EncryptInternal(
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] plainBytes,
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] key,
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] iv
-    );
+    private static partial Task<object?> EncryptInternal(byte[] plainBytes, byte[] key, byte[] iv);
 
     public static async Task<byte[]> Decrypt(byte[] encryptedBytes, byte[] key, byte[] iv) {
         await ImportModule();
@@ -30,10 +26,6 @@ public static partial class JSEncryptor {
 
     [JSImport("Decrypt", "Encryptor")]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>()]
-    private static partial Task<object?> DecryptInternal(
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] encryptedBytes,
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] key,
-        [JSMarshalAs<JSType.Array<JSType.Number>>] byte[] iv
-    );
+    private static partial Task<object?> DecryptInternal(byte[] encryptedBytes, byte[] key, byte[] iv);
 }
 #endif

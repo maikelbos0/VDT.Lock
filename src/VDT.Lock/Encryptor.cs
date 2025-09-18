@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-#if !BROWSER
+#if BROWSER
+using VDT.Lock.JavascriptInterop;
+#else
 using System.IO;
 using System.Security.Cryptography;
 #endif
