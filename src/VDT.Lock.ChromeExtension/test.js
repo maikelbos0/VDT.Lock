@@ -13,10 +13,7 @@ document.getElementById('encryptionTest').addEventListener('click', async functi
 
 document.getElementById('storageTest').addEventListener('click', async function () {
     const input = document.getElementById('storageInput').value;
-
-    await chrome.storage.local.set({ value: input });
-
-    var storedValue = await chrome.storage.local.get('value');
+    const result = await exports.VDT.Lock.TestClass.TestChromeStorage(input);
     
-    document.getElementById('storageResult').innerText = storedValue.value;
+    document.getElementById('storageResult').innerText = result;
 });
