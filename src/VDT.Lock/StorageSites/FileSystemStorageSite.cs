@@ -20,26 +20,28 @@ public class FileSystemStorageSite : StorageSiteBase {
         set => storageSettings.Set(nameof(Location), value);
     }
 
-    protected override Task<SecureBuffer?> ExecuteLoad() {
 #if BROWSER
-        return Task.FromResult<SecureBuffer?>(null);
+    protected override Task<SecureBuffer?> ExecuteLoad()
+        => Task.FromResult<SecureBuffer?>(null);
 #else
+    protected override Task<SecureBuffer?> ExecuteLoad() {
         using var fileStream = File.OpenRead(Encoding.UTF8.GetString(Location));
         using var encryptedBytes = new SecureByteList(fileStream);
 
         return Task.FromResult<SecureBuffer?>(encryptedBytes.ToBuffer());
-#endif
     }
+#endif
 
-    protected override Task<bool> ExecuteSave(ReadOnlySpan<byte> encryptedSpan) {
 #if BROWSER
-        return Task.FromResult(false);
+    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer)
+        => Task.FromResult(false);
 #else
+    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer) {
         using var fileStream = File.Create(Encoding.UTF8.GetString(Location));
 
-        fileStream.Write(encryptedSpan);
+        fileStream.Write(encryptedBuffer.Value);
 
         return Task.FromResult(true);
-#endif
     }
+#endif
 }

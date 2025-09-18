@@ -12,6 +12,7 @@ public partial class ChromeStorageSite : StorageSiteBase {
 
 #if BROWSER
     protected override async Task<SecureBuffer?> ExecuteLoad() {
+        // TODO null check
         return new SecureBuffer(await JSChromeDataStore.Load());
     }
 #else
@@ -22,21 +23,14 @@ public partial class ChromeStorageSite : StorageSiteBase {
 
 
 #if BROWSER
-    // TODO refactor ExecuteSave to accept SecureBuffer
-    protected override Task<bool> ExecuteSave(ReadOnlySpan<byte> encryptedSpan) {
-        // We're not disposing because we need it async; this is temporary
-        var encryptedBuffer = new SecureBuffer(encryptedSpan.ToArray());
-
-        return ExecuteSaveTemp(encryptedBuffer);
-    }
-    
-    private async Task<bool> ExecuteSaveTemp(SecureBuffer encryptedBuffer) {
-        
+    protected async override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer) {
+        // TODO return actual result
         await JSChromeDataStore.Save(encryptedBuffer.Value);
+
         return true;
     }
 #else
-    protected override Task<bool> ExecuteSave(ReadOnlySpan<byte> encryptedSpan) {
+    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer) {
         return Task.FromResult(false);
     }
 #endif

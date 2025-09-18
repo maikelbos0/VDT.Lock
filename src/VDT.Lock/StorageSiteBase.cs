@@ -60,13 +60,13 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
 
     protected abstract Task<SecureBuffer?> ExecuteLoad();
 
-    public Task<bool> Save(ReadOnlySpan<byte> encryptedSpan) {
+    public Task<bool> Save(SecureBuffer encryptedBuffer) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        return ExecuteSave(encryptedSpan);
+        return ExecuteSave(encryptedBuffer);
     }
 
-    protected abstract Task<bool> ExecuteSave(ReadOnlySpan<byte> encryptedSpan);
+    protected abstract Task<bool> ExecuteSave(SecureBuffer encryptedSpan);
 
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);

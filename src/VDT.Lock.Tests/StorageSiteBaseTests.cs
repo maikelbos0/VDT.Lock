@@ -12,7 +12,7 @@ public class StorageSiteBaseTests {
         protected override Task<SecureBuffer?> ExecuteLoad()
             => Task.FromResult<SecureBuffer?>(new SecureBuffer([]));
 
-        protected override Task<bool> ExecuteSave(ReadOnlySpan<byte> encryptedData)
+        protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer)
             => Task.FromResult(true);
     }
 
@@ -80,7 +80,7 @@ public class StorageSiteBaseTests {
     public async Task Save() {
         using var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings());
 
-        var result = await subject.Save(new ReadOnlySpan<byte>([]));
+        var result = await subject.Save(new SecureBuffer([]));
 
         Assert.True(result);
     }
@@ -167,7 +167,7 @@ public class StorageSiteBaseTests {
             disposedSubject = subject;
         }
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => disposedSubject.Save(new ReadOnlySpan<byte>([])));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => disposedSubject.Save(new SecureBuffer([])));
     }
 
     [Fact]

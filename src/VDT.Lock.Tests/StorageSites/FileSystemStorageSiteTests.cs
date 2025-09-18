@@ -11,7 +11,7 @@ public class FileSystemStorageSiteTests {
     public void Constructor() {
         using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new ReadOnlySpan<byte>([97, 98, 99]));
 
-        Assert.Equal(new byte[] { 102, 111, 111  }, subject.Name);
+        Assert.Equal(new byte[] { 102, 111, 111 }, subject.Name);
         Assert.Equal(new byte[] { 97, 98, 99 }, subject.Location);
     }
 
@@ -36,7 +36,7 @@ public class FileSystemStorageSiteTests {
 
         using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
 
-        Assert.True(await subject.Save(expectedResult.AsSpan()));
+        Assert.True(await subject.Save(new SecureBuffer(expectedResult)));
         var result = ContentProvider.GetFileContents(fileName);
 
         Assert.Equal(expectedResult, result);

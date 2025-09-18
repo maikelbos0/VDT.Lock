@@ -147,7 +147,7 @@ public sealed class StoreManager : IDisposable {
         var result = false;
 
         foreach (var storageSite in storageSites) {
-            result |= await storageSite.Save(encryptedBuffer.Value);
+            result |= await storageSite.Save(encryptedBuffer);
         }
 
         return result;

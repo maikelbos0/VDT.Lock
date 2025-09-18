@@ -7,16 +7,16 @@ namespace VDT.Lock.Tests;
 
 public class StoreManagerTests {
     public class TestStorageSite : StorageSiteBase {
-        private byte[] encryptedData = [];
+        private byte[] encryptedBytes = [];
 
         public TestStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
 
         protected override Task<SecureBuffer?> ExecuteLoad() {
-            return Task.FromResult<SecureBuffer?>(new SecureBuffer(encryptedData));
+            return Task.FromResult<SecureBuffer?>(new SecureBuffer(encryptedBytes));
         }
 
-        protected override Task<bool> ExecuteSave(ReadOnlySpan<byte> encryptedData) {
-            this.encryptedData = encryptedData.ToArray();
+        protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer) {
+            encryptedBytes = [.. encryptedBuffer.Value];
 
             return Task.FromResult(true);
         }
