@@ -5,6 +5,10 @@
 		<OutputType>Library</OutputType>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\VDT.Lock\VDT.Lock.csproj" />
+	</ItemGroup>
+
 	<PropertyGroup>
 		<DefaultItemExcludes>$(DefaultItemExcludes);publish\**\*.*</DefaultItemExcludes>
 	</PropertyGroup>
