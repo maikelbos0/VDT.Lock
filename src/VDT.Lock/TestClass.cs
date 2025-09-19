@@ -26,7 +26,7 @@ public static partial class TestClass {
         await chromeStorageSite.Save(plainBuffer);
         var storedValue = await chromeStorageSite.Load();
 
-        return Encoding.UTF8.GetString(storedValue);
+        return Encoding.UTF8.GetString(storedValue?.Value ?? []);
     }
 }
 #endif
