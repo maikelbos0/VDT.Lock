@@ -28,8 +28,8 @@ public class SecureBufferSplitterTests {
         using var buffer = new SecureBuffer([83, 112, 108, 105, 116, 32, 109, 101, 32, 105, 110, 116, 111, 32, 115, 101, 99, 116, 105, 111, 110, 115, 32, 112, 108, 101, 97, 115, 101]);
         var subject = new SecureBufferSplitter(buffer, 8);
 
-        var result = subject.GetSection(sectionIndex);
+        using var result = subject.GetSectionBuffer(sectionIndex);
 
-        Assert.Equal(expectedResult, result);
+        Assert.Equal(expectedResult, result.Value);
     }
 }

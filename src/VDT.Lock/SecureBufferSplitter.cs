@@ -20,6 +20,12 @@ public class SecureBufferSplitter {
         }
     }
 
-    public ReadOnlySpan<byte> GetSection(int sectionIndex)
-        => new(buffer.Value, sectionIndex * sectionSize, Math.Min(sectionSize, buffer.Value.Length - sectionIndex * sectionSize));
+    public SecureBuffer GetSectionBuffer(int sectionIndex) {
+        var currentSectionSize = Math.Min(sectionSize, buffer.Value.Length - sectionIndex * sectionSize);
+        var currentSectionBuffer = new SecureBuffer(currentSectionSize);
+
+        Buffer.BlockCopy(buffer.Value, sectionIndex * sectionSize, currentSectionBuffer.Value, 0, currentSectionSize);
+
+        return currentSectionBuffer;
+    }
 }
