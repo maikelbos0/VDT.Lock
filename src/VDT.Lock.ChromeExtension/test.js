@@ -15,5 +15,5 @@ document.getElementById('storageTest').addEventListener('click', async function 
     const input = document.getElementById('storageInput').value;
     const result = await exports.VDT.Lock.TestClass.TestChromeStorage(input);
     
-    document.getElementById('storageResult').innerText = result;
+    document.getElementById('storageResult').innerText = result.substring(0, 25) + "...";
 });

@@ -16,14 +16,27 @@ public partial class ChromeStorageSite : StorageSiteBase {
 
 #if BROWSER
     protected override async Task<SecureBuffer?> ExecuteLoad() {
-        byte[]? result = null; //await JSChromeDataStore.Load();
+        var header = await JSChromeDataStore.Load(headerKey);
 
-        if (result != null) {
-            return new SecureBuffer(result);
-        }
-        else {
+        if (header == null || header.Length != 4) {
             return null;
         }
+
+        var sectionCount = header[0] | (header[1] << 8) | (header[2] << 16) | (header[3] << 24);
+        using var encryptedBytes = new SecureByteList(sectionCount * sectionSize);
+
+        for (var sectionIndex = 0; sectionIndex < sectionCount; sectionIndex++) {
+            var sectionBytes = await JSChromeDataStore.Load($"{sectionKey}{sectionIndex}");
+
+            if (sectionBytes == null) {
+                return null;
+            }
+
+            using var sectionBuffer = new SecureBuffer(sectionBytes);
+            encryptedBytes.Add(sectionBuffer.Value);
+        }
+
+        return encryptedBytes.ToBuffer();
     }
 #else
     protected override Task<SecureBuffer?> ExecuteLoad()
