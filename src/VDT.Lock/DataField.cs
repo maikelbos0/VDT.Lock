@@ -87,6 +87,7 @@ public sealed class DataField : IData<DataField>, IDisposable {
     public void Dispose() {
         plainNameBuffer.Dispose();
         plainValueBuffer.Dispose();
+        selectors.Dispose();
         IsDisposed = true;
         GC.SuppressFinalize(this);
     }

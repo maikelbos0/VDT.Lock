@@ -86,14 +86,17 @@ public class DataFieldTests {
     public void Dispose() {
         SecureBuffer plainNameBuffer;
         SecureBuffer plainDataBuffer;
+        DataCollection<DataValue> selectors;
 
         using (var subject = new DataField()) {
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             plainDataBuffer = subject.GetBuffer("plainValueBuffer");
+            selectors = subject.Selectors;
         }
 
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(plainDataBuffer.IsDisposed);
+        Assert.True(selectors.IsDisposed);
     }
 
     [Fact]
