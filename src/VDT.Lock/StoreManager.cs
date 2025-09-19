@@ -130,8 +130,7 @@ public sealed class StoreManager : IDisposable {
         }
     }
 
-    // TODO add information about which stores succeeded
-    public async Task<bool> SaveDataStore(DataStore dataStore) {
+    public async Task<SaveDataStoreResult> SaveDataStore(DataStore dataStore) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         EnsureAuthenticated();
@@ -144,11 +143,21 @@ public sealed class StoreManager : IDisposable {
         using var plainBuffer = plainBytes.ToBuffer();
         using var encryptedBuffer = await encryptor.Encrypt(plainBuffer, plainStoreKeyBuffer);
 
-        var result = false;
+        var result = new SaveDataStoreResult();
+        var resultLock = new object();
 
-        foreach (var storageSite in storageSites) {
-            result |= await storageSite.Save(encryptedBuffer);
+        await Parallel.ForEachAsync(storageSites, async (storageSite, _) => {
+            if (await storageSite.Save(encryptedBuffer)) {
+                lock (resultLock) {
+                    result.SucceededStorageSites.Add(new DataValue(storageSite.Name));
+                }
+            }
+            else {
+                lock (resultLock) {
+                    result.FailedStorageSites.Add(new DataValue(storageSite.Name));
+                }
         }
+        });
 
         return result;
     }

@@ -100,7 +100,7 @@ public class StoreManagerTests {
 
         using var subject = new StoreManager(encryptor, randomByteGenerator, hashProvider) {
             StorageSites = {
-                new TestStorageSite("foo"u8, new StorageSettings())
+                new TestStorageSite([98, 97, 114], new StorageSettings())
             }
         };
 
@@ -111,12 +111,16 @@ public class StoreManagerTests {
         };
 
         await subject.Authenticate(plainMasterPasswordBuffer);
-        await subject.SaveDataStore(dataStore);
+        var saveResult = await subject.SaveDataStore(dataStore);
 
-        var result = await subject.LoadDataStore();
+        var succeededStorageSite = Assert.Single(saveResult.SucceededStorageSites);
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), succeededStorageSite.Value);
+        Assert.Empty(saveResult.FailedStorageSites);
 
-        Assert.Equal(new ReadOnlySpan<byte>([102, 111, 111]), result.Name);
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), Assert.Single(result.Items).Name);
+        var loadResult = await subject.LoadDataStore();
+
+        Assert.Equal(new ReadOnlySpan<byte>([102, 111, 111]), loadResult.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), Assert.Single(loadResult.Items).Name);
     }
 
     [Fact]
