@@ -9,13 +9,11 @@ public class StorageSiteBaseTests {
     public class TestStorageSite : StorageSiteBase {
         public TestStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
 
-        protected override Task<SecureBuffer> ExecuteLoad() {
-            throw new NotImplementedException();
-        }
+        protected override Task<SecureBuffer?> ExecuteLoad()
+            => Task.FromResult<SecureBuffer?>(new SecureBuffer([]));
 
-        protected override Task ExecuteSave(ReadOnlySpan<byte> encryptedData) {
-            throw new NotImplementedException();
-        }
+        protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer)
+            => Task.FromResult(true);
     }
 
     [Fact]
@@ -72,14 +70,19 @@ public class StorageSiteBaseTests {
     public async Task Load() {
         using var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings());
 
-        await Assert.ThrowsAsync<NotImplementedException>(() => subject.Load());
+        var result = await subject.Load();
+
+        Assert.NotNull(result);
+        Assert.Equal([], result.Value);
     }
 
     [Fact]
     public async Task Save() {
         using var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings());
 
-        await Assert.ThrowsAsync<NotImplementedException>(() => subject.Save(new ReadOnlySpan<byte>([])));
+        var result = await subject.Save(new SecureBuffer([]));
+
+        Assert.True(result);
     }
 
     [Fact]
@@ -94,10 +97,14 @@ public class StorageSiteBaseTests {
 
     [Fact]
     public void Dispose() {
+        SecureBuffer plainNameBuffer;
         using var storageSettings = new StorageSettings();
 
-        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), storageSettings)) { }
+        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), storageSettings)) {
+            plainNameBuffer = subject.GetBuffer<StorageSiteBase>("plainNameBuffer");
+        }
 
+        Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(storageSettings.IsDisposed);
     }
 
@@ -164,7 +171,7 @@ public class StorageSiteBaseTests {
             disposedSubject = subject;
         }
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => disposedSubject.Save(new ReadOnlySpan<byte>([])));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => disposedSubject.Save(new SecureBuffer([])));
     }
 
     [Fact]

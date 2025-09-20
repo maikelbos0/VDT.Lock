@@ -52,21 +52,21 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
         this.storageSettings = storageSettings;
     }
 
-    public Task<SecureBuffer> Load() {
+    public Task<SecureBuffer?> Load() {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         return ExecuteLoad();
     }
 
-    protected abstract Task<SecureBuffer> ExecuteLoad();
+    protected abstract Task<SecureBuffer?> ExecuteLoad();
 
-    public Task Save(ReadOnlySpan<byte> encryptedData) {
+    public Task<bool> Save(SecureBuffer encryptedBuffer) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        return ExecuteSave(encryptedData);
+        return ExecuteSave(encryptedBuffer);
     }
 
-    protected abstract Task ExecuteSave(ReadOnlySpan<byte> encryptedData);
+    protected abstract Task<bool> ExecuteSave(SecureBuffer encryptedSpan);
 
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);

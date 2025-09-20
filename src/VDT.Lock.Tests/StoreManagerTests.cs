@@ -7,18 +7,18 @@ namespace VDT.Lock.Tests;
 
 public class StoreManagerTests {
     public class TestStorageSite : StorageSiteBase {
-        private byte[] encryptedData = [];
+        private byte[] encryptedBytes = [];
 
         public TestStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
 
-        protected override Task<SecureBuffer> ExecuteLoad() {
-            return Task.FromResult(new SecureBuffer(encryptedData));
+        protected override Task<SecureBuffer?> ExecuteLoad() {
+            return Task.FromResult<SecureBuffer?>(new SecureBuffer(encryptedBytes));
         }
 
-        protected override Task ExecuteSave(ReadOnlySpan<byte> encryptedData) {
-            this.encryptedData = encryptedData.ToArray();
+        protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer) {
+            encryptedBytes = [.. encryptedBuffer.Value];
 
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 
@@ -100,7 +100,7 @@ public class StoreManagerTests {
 
         using var subject = new StoreManager(encryptor, randomByteGenerator, hashProvider) {
             StorageSites = {
-                new TestStorageSite("foo"u8, new StorageSettings())
+                new TestStorageSite([98, 97, 114], new StorageSettings())
             }
         };
 
@@ -111,12 +111,16 @@ public class StoreManagerTests {
         };
 
         await subject.Authenticate(plainMasterPasswordBuffer);
-        await subject.SaveDataStore(dataStore);
+        var saveResult = await subject.SaveDataStore(dataStore);
 
-        var result = await subject.LoadDataStore();
+        var succeededStorageSite = Assert.Single(saveResult.SucceededStorageSites);
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), succeededStorageSite.Value);
+        Assert.Empty(saveResult.FailedStorageSites);
 
-        Assert.Equal(new ReadOnlySpan<byte>([102, 111, 111]), result.Name);
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), Assert.Single(result.Items).Name);
+        var loadResult = await subject.LoadDataStore();
+
+        Assert.Equal(new ReadOnlySpan<byte>([102, 111, 111]), loadResult.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), Assert.Single(loadResult.Items).Name);
     }
 
     [Fact]

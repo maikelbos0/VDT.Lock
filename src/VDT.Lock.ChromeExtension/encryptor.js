@@ -1,11 +1,11 @@
 
-export async function Encrypt(plainBytes, key, iv) {
+export async function encrypt(plainBytes, key, iv) {
     var key = await crypto.subtle.importKey(
         "raw",
         key.buffer,
         "AES-CBC",
         false,
-        ["encrypt"] //, "decrypt"
+        ["encrypt"]
     );
 
     return new Uint8Array(await window.crypto.subtle.encrypt(
@@ -18,7 +18,7 @@ export async function Encrypt(plainBytes, key, iv) {
     ));
 }
 
-export async function Decrypt(encryptedBytes, key, iv) {
+export async function decrypt(encryptedBytes, key, iv) {
     var key = await crypto.subtle.importKey(
         "raw",
         key.buffer,

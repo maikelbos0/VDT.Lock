@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-#if !BROWSER
+#if BROWSER
+using VDT.Lock.JavascriptInterop;
+#else
 using System.IO;
 using System.Security.Cryptography;
 #endif
@@ -23,7 +25,7 @@ public sealed class Encryptor : IEncryptor {
         await JSEncryptor.ImportModule();
 
         using var ivBuffer = new SecureBuffer(randomByteGenerator.Generate(BlockSizeInBytes));
-        using var encryptedBuffer = new SecureBuffer(await JSEncryptor.Encrypt(plainBuffer.Value, keyBuffer.Value, ivBuffer.Value) as byte[] ?? throw new InvalidOperationException());
+        using var encryptedBuffer = new SecureBuffer(await JSEncryptor.Encrypt(plainBuffer.Value, keyBuffer.Value, ivBuffer.Value));
 
         var payloadBuffer = new SecureBuffer(ivBuffer.Value.Length + encryptedBuffer.Value.Length);
         Buffer.BlockCopy(ivBuffer.Value, 0, payloadBuffer.Value, 0, ivBuffer.Value.Length);
@@ -66,7 +68,7 @@ public sealed class Encryptor : IEncryptor {
         using var payloadBuffer = new SecureBuffer(encryptedBuffer.Value.Length - BlockSizeInBytes);
         Buffer.BlockCopy(encryptedBuffer.Value, BlockSizeInBytes, payloadBuffer.Value, 0, encryptedBuffer.Value.Length - BlockSizeInBytes);
 
-        return new SecureBuffer(await JSEncryptor.Decrypt(payloadBuffer.Value, keyBuffer.Value, ivBuffer.Value) as byte[] ?? throw new InvalidOperationException());
+        return new SecureBuffer(await JSEncryptor.Decrypt(payloadBuffer.Value, keyBuffer.Value, ivBuffer.Value));
     }
 #else
     public Task<SecureBuffer> Decrypt(SecureBuffer encryptedBuffer, SecureBuffer keyBuffer) {

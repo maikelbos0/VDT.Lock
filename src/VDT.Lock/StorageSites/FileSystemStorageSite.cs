@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+#if !BROWSER
+using System.IO;
+using System.Text;
+#endif
+
 namespace VDT.Lock.StorageSites;
 
 public class FileSystemStorageSite : StorageSiteBase {
@@ -15,11 +20,28 @@ public class FileSystemStorageSite : StorageSiteBase {
         set => storageSettings.Set(nameof(Location), value);
     }
 
-    protected override Task<SecureBuffer> ExecuteLoad() {
-        throw new NotImplementedException();
-    }
+#if BROWSER
+    protected override Task<SecureBuffer?> ExecuteLoad()
+        => Task.FromResult<SecureBuffer?>(null);
+#else
+    protected override Task<SecureBuffer?> ExecuteLoad() {
+        using var fileStream = File.OpenRead(Encoding.UTF8.GetString(Location));
+        using var encryptedBytes = new SecureByteList(fileStream);
 
-    protected override Task ExecuteSave(ReadOnlySpan<byte> encryptedData) {
-        throw new NotImplementedException();
+        return Task.FromResult<SecureBuffer?>(encryptedBytes.ToBuffer());
     }
+#endif
+
+#if BROWSER
+    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer)
+        => Task.FromResult(false);
+#else
+    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer) {
+        using var fileStream = File.Create(Encoding.UTF8.GetString(Location));
+
+        fileStream.Write(encryptedBuffer.Value);
+
+        return Task.FromResult(true);
+    }
+#endif
 }

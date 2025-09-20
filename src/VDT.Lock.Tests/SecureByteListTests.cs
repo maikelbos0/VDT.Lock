@@ -23,6 +23,13 @@ public sealed class SecureByteListTests {
     }
 
     [Fact]
+    public void CapacityConstructor() {
+        using var subject = new SecureByteList(20);
+
+        Assert.Equal(GetExpectedBufferValue(20), subject.GetBuffer().Value);
+    }
+
+    [Fact]
     public void StreamConstructor() {
         using var stream = new MemoryStream();
         stream.Write("abc"u8.ToArray(), 0, 3);

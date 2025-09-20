@@ -23,10 +23,10 @@ public sealed class SecureByteList : IDisposable {
 
     public bool IsDisposed { get; private set; }
 
-    // TODO add indexer?
+    public SecureByteList() : this(DefaultCapacity) { }
 
-    public SecureByteList() {
-        buffer = new(DefaultCapacity);
+    public SecureByteList(int capacity) {
+        buffer = new(capacity);
     }
 
     public SecureByteList(Stream stream) {

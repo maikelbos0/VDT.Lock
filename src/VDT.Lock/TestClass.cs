@@ -2,13 +2,14 @@
 using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Threading.Tasks;
+using VDT.Lock.StorageSites;
 
 namespace VDT.Lock;
 
 public static partial class TestClass {
     [JSExport]
-    public static async Task<string> Test() {
-        using var plainBuffer = new SecureBuffer("password"u8.ToArray());
+    public static async Task<string> TestEncryption(string value) {
+        using var plainBuffer = new SecureBuffer(Encoding.UTF8.GetBytes(value));
         var randomByteGenerator = new RandomByteGenerator();
         var encryptor = new Encryptor(randomByteGenerator);
         using var key = new SecureBuffer(randomByteGenerator.Generate(Encryptor.KeySizeInBytes));
@@ -16,6 +17,20 @@ public static partial class TestClass {
         using var resultBuffer = await encryptor.Decrypt(encryptedBytes, key);
 
         return Encoding.UTF8.GetString(resultBuffer.Value);
+    }
+
+    [JSExport]
+    public static async Task<string> TestChromeStorage(string value) {
+        for (int i = 0; i < 10; i++) {
+            value += " " + value;
+        }
+
+        using var plainBuffer = new SecureBuffer(Encoding.UTF8.GetBytes(value));
+        var chromeStorageSite = new ChromeStorageSite([], new());
+        await chromeStorageSite.Save(plainBuffer);
+        var storedValue = await chromeStorageSite.Load();
+
+        return Encoding.UTF8.GetString(storedValue?.Value ?? []);
     }
 }
 #endif
