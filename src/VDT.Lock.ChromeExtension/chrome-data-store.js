@@ -1,6 +1,6 @@
 
-export async function Load(key) {
-    if (!chrome || !chrome.storage || !chrome.storage.sync) {
+export async function load(key) {
+    if (!chrome || !chrome.storage?.sync) {
         return null;
     }
 
@@ -13,8 +13,8 @@ export async function Load(key) {
     }
 }
 
-export async function Clear() {
-    if (!chrome || !chrome.storage || !chrome.storage.sync) {
+export async function clear() {
+    if (!chrome || !chrome.storage?.sync) {
         return false;
     }
 
@@ -27,8 +27,8 @@ export async function Clear() {
     }
 }
 
-export async function Save(key, encryptedBytes) {
-    if (!chrome || !chrome.storage || !chrome.storage.sync) {
+export async function save(key, encryptedBytes) {
+    if (!chrome || !chrome.storage?.sync) {
         return false;
     }
 

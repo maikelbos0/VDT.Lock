@@ -14,7 +14,7 @@ public static partial class JSEncryptor {
         return await EncryptInternal(plainBytes, key, iv) as byte[] ?? throw new InvalidOperationException();
     }
 
-    [JSImport("Encrypt", "Encryptor")]
+    [JSImport("encrypt", "Encryptor")]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>()]
     private static partial Task<object?> EncryptInternal(byte[] plainBytes, byte[] key, byte[] iv);
 
@@ -24,7 +24,7 @@ public static partial class JSEncryptor {
         return await DecryptInternal(encryptedBytes, key, iv) as byte[] ?? throw new InvalidOperationException();
     }
 
-    [JSImport("Decrypt", "Encryptor")]
+    [JSImport("decrypt", "Encryptor")]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>()]
     private static partial Task<object?> DecryptInternal(byte[] encryptedBytes, byte[] key, byte[] iv);
 }

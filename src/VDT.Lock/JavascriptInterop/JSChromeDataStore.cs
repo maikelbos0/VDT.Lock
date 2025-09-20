@@ -13,7 +13,7 @@ public static partial class JSChromeDataStore {
         return await LoadInternal(name) as byte[];
     }
 
-    [JSImport("Load", "ChromeDataStore")]
+    [JSImport("load", "ChromeDataStore")]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>()]
     public static partial Task<object?> LoadInternal(string name);
 
@@ -23,7 +23,7 @@ public static partial class JSChromeDataStore {
         return await ClearInternal();
     }
 
-    [JSImport("Clear", "ChromeDataStore")]
+    [JSImport("clear", "ChromeDataStore")]
     [return: JSMarshalAs<JSType.Promise<JSType.Boolean>>()]
     private static partial Task<bool> ClearInternal();
 
@@ -33,7 +33,7 @@ public static partial class JSChromeDataStore {
         return await SaveInternal(name, bytes);
     }
 
-    [JSImport("Save", "ChromeDataStore")]
+    [JSImport("save", "ChromeDataStore")]
     [return: JSMarshalAs<JSType.Promise<JSType.Boolean>>()]
     private static partial Task<bool> SaveInternal(string name, byte[] bytes);
 }
