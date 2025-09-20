@@ -101,9 +101,9 @@ public sealed class StoreManager : IDisposable {
         EnsureAuthenticated();
 
         var dataStores = new List<DataStore>();
+        var resultLock = new object();
 
-        foreach (var storageSite in storageSites) {
-
+        await Parallel.ForEachAsync(storageSites, async (storageSite, _) => {
             try {
                 using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
                 using var encryptedBuffer = await storageSites.Single().Load();
@@ -111,13 +111,15 @@ public sealed class StoreManager : IDisposable {
                 if (encryptedBuffer != null) {
                     using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
 
-                    dataStores.Add(DataStore.DeserializeFrom(plainBuffer));
+                    lock (resultLock) {
+                        dataStores.Add(DataStore.DeserializeFrom(plainBuffer));
+                    }
                 }
             }
             catch (Exception ex) {
                 throw new InvalidAuthenticationException("Deserializing buffer failed.", ex);
             }
-        }
+        });
 
         if (dataStores.Count == 0) {
             return new DataStore();
@@ -156,7 +158,7 @@ public sealed class StoreManager : IDisposable {
                 lock (resultLock) {
                     result.FailedStorageSites.Add(new DataValue(storageSite.Name));
                 }
-        }
+            }
         });
 
         return result;
