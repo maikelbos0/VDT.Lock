@@ -21,6 +21,10 @@ public static partial class TestClass {
 
     [JSExport]
     public static async Task<string> TestChromeStorage(string value) {
+        for (int i = 0; i < 10; i++) {
+            value += " " + value;
+        }
+
         using var plainBuffer = new SecureBuffer(Encoding.UTF8.GetBytes(value));
         var chromeStorageSite = new ChromeStorageSite([], new());
         await chromeStorageSite.Save(plainBuffer);
