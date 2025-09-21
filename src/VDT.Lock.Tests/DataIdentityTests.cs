@@ -5,6 +5,67 @@ namespace VDT.Lock.Tests;
 
 public class DataIdentityTests {
     [Fact]
+    public void EqualityOperatorIsTrueForNulls() {
+        DataIdentity? a = null;
+        DataIdentity? b = null;
+
+        Assert.True(a == b);
+    }
+
+    [Fact]
+    public void EqualityOperatorIsFalseWhenAIsNull() {
+        DataIdentity? a = null;
+        var b = new DataIdentity();
+
+        Assert.False(a == b);
+    }
+
+    [Fact]
+    public void EqualityOperatorIsFalseWhenBIsNull() {
+        var a = new DataIdentity();
+        DataIdentity? b = null;
+
+        Assert.False(a == b);
+    }
+
+    [Theory]
+    [InlineData(
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 },
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 225, 188, 188, 99, 0, 0, 0, 0 },
+        true
+    )]
+    [InlineData(
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 },
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 3, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 },
+        false
+    )]
+    public void EqualityOperatorUsesOnlyKey(byte[] plainSpanA, byte[] plainSpanB, bool expectedResult) {
+        using var a = DataIdentity.DeserializeFrom(plainSpanA);
+        using var b = DataIdentity.DeserializeFrom(plainSpanB);
+
+        Assert.Equal(expectedResult, a == b);
+    }
+
+
+    [Theory]
+    [InlineData(
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 },
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 225, 188, 188, 99, 0, 0, 0, 0 },
+        false
+    )]
+    [InlineData(
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 },
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 3, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 },
+        true
+    )]
+    public void InequalityOperator(byte[] plainSpanA, byte[] plainSpanB, bool expectedResult) {
+        using var a = DataIdentity.DeserializeFrom(plainSpanA);
+        using var b = DataIdentity.DeserializeFrom(plainSpanB);
+
+        Assert.Equal(expectedResult, a != b);
+    }
+
+    [Fact]
     public void DeserializeFrom() {
         var plainSpan = new ReadOnlySpan<byte>([16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0]);
 
@@ -77,7 +138,7 @@ public class DataIdentityTests {
     )]
     public void EqualsUsesOnlyKey(byte[] plainSpan, byte[] otherPlainSpan, bool expectedResult) {
         using var subject = DataIdentity.DeserializeFrom(plainSpan);
-        using var other = DataIdentity.DeserializeFrom(otherPlainSpan);
+        using IDisposable other = DataIdentity.DeserializeFrom(otherPlainSpan);
 
         Assert.Equal(expectedResult, subject.Equals(other));
     }

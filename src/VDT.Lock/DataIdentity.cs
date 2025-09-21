@@ -1,9 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VDT.Lock;
 
-public sealed class DataIdentity : IData<DataIdentity>, IDisposable {
+public sealed class DataIdentity : IData<DataIdentity>, IEquatable<DataIdentity>, IDisposable {
+    public static bool operator ==(DataIdentity? a, DataIdentity? b) {
+        if (a is null) {
+            return b is null;
+        }
+    
+        return a.Equals(b);
+    }
+
+    public static bool operator !=(DataIdentity? a, DataIdentity? b) => !(a == b);
+
     public static DataIdentity DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
         
