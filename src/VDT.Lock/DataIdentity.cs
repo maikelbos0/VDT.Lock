@@ -62,6 +62,18 @@ public sealed class DataIdentity : IData<DataIdentity>, IDisposable {
         plainBytes.WriteSecureBuffer(plainVersionBuffer);
     }
 
+    public override int GetHashCode() {
+        unchecked {
+            var result = 0;
+
+            foreach (byte b in plainKeyBuffer.Value) {
+                result = (result * 31) ^ b;
+            }
+
+            return result;
+        }
+    }
+
     public void Dispose() {
         plainKeyBuffer.Dispose();
         plainVersionBuffer.Dispose();
