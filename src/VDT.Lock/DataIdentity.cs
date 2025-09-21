@@ -49,6 +49,11 @@ public sealed class DataIdentity : IData<DataIdentity>, IDisposable {
         plainVersionBuffer = new(plainVersionSpan.ToArray());
     }
 
+    public void Update() {
+        plainVersionBuffer.Dispose();
+        plainVersionBuffer = new(DateTimeOffset.UtcNow.ToVersion());
+    }
+
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 

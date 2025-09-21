@@ -30,6 +30,20 @@ public class DataIdentityTests {
     }
 
     [Fact]
+    public void Update() {
+        var plainSpan = new ReadOnlySpan<byte>([16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0]);
+
+        using var subject = DataIdentity.DeserializeFrom(plainSpan);
+        var previousVersion = subject.Version[0] | (subject.Version[1] << 8) | (subject.Version[2] << 16) | (subject.Version[3] << 24) | (subject.Version[4] << 32) | (subject.Version[5] << 40) | (subject.Version[6] << 48) | (subject.Version[7] << 56);
+
+        subject.Update();
+
+        var version = subject.Version[0] | (subject.Version[1] << 8) | (subject.Version[2] << 16) | (subject.Version[3] << 24) | (subject.Version[4] << 32) | (subject.Version[5] << 40) | (subject.Version[6] << 48) | (subject.Version[7] << 56);
+
+        Assert.True(previousVersion <= version);
+    }
+
+    [Fact]
     public void SerializeTo() {
         using var subject = new DataIdentity();
 
@@ -37,7 +51,6 @@ public class DataIdentityTests {
         subject.SerializeTo(result);
 
         Assert.Equal(new ReadOnlySpan<byte>([32, 0, 0, 0, 16, 0, 0, 0, .. subject.Key, 8, 0, 0, 0, .. subject.Version]), result.GetValue());
-
     }
 
     [Fact]
