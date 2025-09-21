@@ -62,6 +62,20 @@ public sealed class DataIdentity : IData<DataIdentity>, IDisposable {
         plainBytes.WriteSecureBuffer(plainVersionBuffer);
     }
 
+    public override bool Equals(object? obj) => Equals(obj as DataIdentity);
+
+    public bool Equals(DataIdentity? other) { 
+        if (other is null) {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other)) {
+            return true;
+        }
+
+        return plainKeyBuffer.Value.SequenceEqual(other.plainKeyBuffer.Value);
+    }
+
     public override int GetHashCode() {
         unchecked {
             var result = 0;

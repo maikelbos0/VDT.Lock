@@ -53,6 +53,42 @@ public class DataIdentityTests {
         Assert.Equal(new ReadOnlySpan<byte>([32, 0, 0, 0, 16, 0, 0, 0, .. subject.Key, 8, 0, 0, 0, .. subject.Version]), result.GetValue());
     }
 
+    [Theory]
+    [InlineData(new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 }, -764201580)]
+    [InlineData(new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 225, 188, 188, 99, 0, 0, 0, 0 }, -764201580)]
+    public void GetHashCodeUsesOnlyKey(byte[] plainSpan, int expectedResult) {
+        using var subject = DataIdentity.DeserializeFrom(plainSpan);
+
+        var result = subject.GetHashCode();
+
+        Assert.Equal(expectedResult, result);
+    }
+
+    [Theory]
+    [InlineData(
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 },
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 225, 188, 188, 99, 0, 0, 0, 0 },
+        true
+    )]
+    [InlineData(
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 },
+        new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 3, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 },
+        false
+    )]
+    public void EqualsUsesOnlyKey(byte[] plainSpan, byte[] otherPlainSpan, bool expectedResult) {
+        using var subject = DataIdentity.DeserializeFrom(plainSpan);
+        using var other = DataIdentity.DeserializeFrom(otherPlainSpan);
+
+        Assert.Equal(expectedResult, subject.Equals(other));
+    }
+
+    [Fact]
+    public void EqualsIsFalseForNull() {
+        using var subject = new DataIdentity();
+
+        Assert.False(subject.Equals(null));
+    }
+
     [Fact]
     public void Dispose() {
         SecureBuffer plainKeyBuffer;
