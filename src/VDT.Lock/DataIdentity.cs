@@ -9,18 +9,41 @@ public sealed class DataIdentity : IData<DataIdentity>, IEquatable<DataIdentity>
         if (a is null) {
             return b is null;
         }
-    
+
         return a.Equals(b);
     }
 
     public static bool operator !=(DataIdentity? a, DataIdentity? b) => !(a == b);
 
+    public static T SelectNewest<T>(IEnumerable<T> candidates) where T : IIdentifiableData {
+        T result = default!;
+        var newestVersion = long.MinValue;
+
+        foreach (var candidate in candidates) {
+            var version = candidate.Identity.Version[0]
+                | ((long)candidate.Identity.Version[1] << 8)
+                | ((long)candidate.Identity.Version[2] << 16)
+                | ((long)candidate.Identity.Version[3] << 24)
+                | ((long)candidate.Identity.Version[4] << 32)
+                | ((long)candidate.Identity.Version[5] << 40)
+                | ((long)candidate.Identity.Version[6] << 48)
+                | ((long)candidate.Identity.Version[7] << 56);
+
+            if (version > newestVersion) {
+                result = candidate;
+                newestVersion = version;
+            }
+        }
+
+        return result;
+    }
+
     public static DataIdentity DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
-        
+
         return new(plainSpan.ReadSpan(ref position), plainSpan.ReadSpan(ref position));
     }
-    
+
     private SecureBuffer plainKeyBuffer;
     private SecureBuffer plainVersionBuffer;
 
@@ -75,7 +98,7 @@ public sealed class DataIdentity : IData<DataIdentity>, IEquatable<DataIdentity>
 
     public override bool Equals(object? obj) => Equals(obj as DataIdentity);
 
-    public bool Equals(DataIdentity? other) { 
+    public bool Equals(DataIdentity? other) {
         if (other is null) {
             return false;
         }

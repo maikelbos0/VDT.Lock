@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NSubstitute;
+using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace VDT.Lock.Tests;
@@ -66,6 +68,31 @@ public class DataIdentityTests {
     }
 
     [Fact]
+    public void SelectNewest() {
+        var key = Guid.NewGuid().ToByteArray();
+
+        using var identity1 = DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 226, 189, 209, 101, 0, 0, 0, 0]);
+        var candidate1 = Substitute.For<IIdentifiableData>();
+        candidate1.Identity.Returns(identity1);
+
+        using var identity2 = DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 226, 189, 189, 201, 0, 0, 0, 0]);
+        var candidate2 = Substitute.For<IIdentifiableData>();
+        candidate2.Identity.Returns(identity2);
+
+        using var identity3 = DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 226, 209, 189, 101, 0, 0, 0, 0]);
+        var candidate3 = Substitute.For<IIdentifiableData>();
+        candidate3.Identity.Returns(identity3);
+
+        using var identity4 = DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 246, 189, 209, 101, 0, 0, 0, 0]);
+        var candidate4 = Substitute.For<IIdentifiableData>();
+        candidate4.Identity.Returns(identity4);
+
+        var result = DataIdentity.SelectNewest([candidate1, candidate2, candidate3, candidate4]);
+
+        Assert.Same(candidate2, result);
+    }
+
+    [Fact]
     public void DeserializeFrom() {
         var plainSpan = new ReadOnlySpan<byte>([16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0]);
 
@@ -95,11 +122,25 @@ public class DataIdentityTests {
         var plainSpan = new ReadOnlySpan<byte>([16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0]);
 
         using var subject = DataIdentity.DeserializeFrom(plainSpan);
-        var previousVersion = subject.Version[0] | (subject.Version[1] << 8) | (subject.Version[2] << 16) | (subject.Version[3] << 24) | (subject.Version[4] << 32) | (subject.Version[5] << 40) | (subject.Version[6] << 48) | (subject.Version[7] << 56);
+        var previousVersion = subject.Version[0] 
+            | ((long)subject.Version[1] << 8) 
+            | ((long)subject.Version[2] << 16) 
+            | ((long)subject.Version[3] << 24) 
+            | ((long)subject.Version[4] << 32) 
+            | ((long)subject.Version[5] << 40) 
+            | ((long)subject.Version[6] << 48) 
+            | ((long)subject.Version[7] << 56);
 
         subject.Update();
 
-        var version = subject.Version[0] | (subject.Version[1] << 8) | (subject.Version[2] << 16) | (subject.Version[3] << 24) | (subject.Version[4] << 32) | (subject.Version[5] << 40) | (subject.Version[6] << 48) | (subject.Version[7] << 56);
+        var version = subject.Version[0]
+            | ((long)subject.Version[1] << 8)
+            | ((long)subject.Version[2] << 16)
+            | ((long)subject.Version[3] << 24)
+            | ((long)subject.Version[4] << 32)
+            | ((long)subject.Version[5] << 40)
+            | ((long)subject.Version[6] << 48)
+            | ((long)subject.Version[7] << 56);
 
         Assert.True(previousVersion <= version);
     }
