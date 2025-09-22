@@ -7,7 +7,7 @@ namespace VDT.Lock.Tests;
 public class DataCollectionTests {
     [Fact]
     public void DeserializeFrom() {
-        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedValue(0, 122, 101, 114, 111), .. DataProvider.CreateSerializedValue(1, 111, 110, 101)]);
+        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedValue(0, [122, 101, 114, 111]), .. DataProvider.CreateSerializedValue(1, [111, 110, 101])]);
 
         using var subject = DataCollection<DataValue>.DeserializeFrom(plainSpan);
 
@@ -111,27 +111,27 @@ public class DataCollectionTests {
     [Fact]
     public void SerializeToIncludingLength() {
         using var subject = new DataCollection<DataValue>() {
-            DataProvider.CreateValue(0, 122, 101, 114, 111),
-            DataProvider.CreateValue(1, 111, 110, 101)
+            DataProvider.CreateValue(0, [122, 101, 114, 111]),
+            DataProvider.CreateValue(1, [111, 110, 101])
         };
 
         using var result = new SecureByteList();
         subject.SerializeTo(result, true);
 
-        Assert.Equal(new ReadOnlySpan<byte>([95, 0, 0, 0, ..DataProvider.CreateSerializedValue(0, 122, 101, 114, 111), ..DataProvider.CreateSerializedValue(1, 111, 110, 101)]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([95, 0, 0, 0, ..DataProvider.CreateSerializedValue(0, [122, 101, 114, 111]), ..DataProvider.CreateSerializedValue(1, [111, 110, 101])]), result.GetValue());
     }
 
     [Fact]
     public void SerializeToExcludingLength() {
         using var subject = new DataCollection<DataValue>() {
-            DataProvider.CreateValue(0, 122, 101, 114, 111),
-            DataProvider.CreateValue(1, 111, 110, 101)
+            DataProvider.CreateValue(0, [122, 101, 114, 111]),
+            DataProvider.CreateValue(1, [111, 110, 101])
         };
 
         using var result = new SecureByteList();
         subject.SerializeTo(result, false);
 
-        Assert.Equal(new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedValue(0, 122, 101, 114, 111), .. DataProvider.CreateSerializedValue(1, 111, 110, 101)]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedValue(0, [122, 101, 114, 111]), .. DataProvider.CreateSerializedValue(1, [111, 110, 101])]), result.GetValue());
     }
 
     [Fact]
