@@ -6,11 +6,11 @@ namespace VDT.Lock.Tests;
 public class DataValueTests {
     [Fact]
     public void DeserializeFrom() {
-        var plainSpan = new ReadOnlySpan<byte>([32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 5, 0, 0, 0, 5, 6, 7, 8, 9]);
+        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 5, 0, 0, 0, 5, 6, 7, 8, 9]);
 
         using var subject = DataValue.DeserializeFrom(plainSpan);
 
-        Assert.Equal(DataProvider.DataIdentity, subject.Identity);
+        Assert.Equal(DataProvider.CreateIdentity(0), subject.Identity);
         Assert.Equal(new ReadOnlySpan<byte>([5, 6, 7, 8, 9]), subject.Value);
     }
 
@@ -44,12 +44,12 @@ public class DataValueTests {
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new DataValue(DataProvider.DataIdentity, [98, 97, 114]);
+        using var subject = new DataValue(DataProvider.CreateIdentity(0), [98, 97, 114]);
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([43, 0, 0, 0, 32, 0, 0, 0, ..DataProvider.SerializedDataIdentity, 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([43, 0, 0, 0, ..DataProvider.CreateSerializedIdentity(0), 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
     }
 
     [Fact]

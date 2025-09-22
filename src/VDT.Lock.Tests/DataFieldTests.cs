@@ -6,7 +6,7 @@ namespace VDT.Lock.Tests;
 public class DataFieldTests {
     [Fact]
     public void DeserializeFrom() {
-        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 49, 0, 0, 0, 45, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 5, 0, 0, 0, 1, 2, 3, 4, 5]);
+        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 49, 0, 0, 0, 45, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 5, 0, 0, 0, 1, 2, 3, 4, 5]);
 
         using var subject = DataField.DeserializeFrom(plainSpan);
 
@@ -74,12 +74,12 @@ public class DataFieldTests {
     [Fact]
     public void SerializeTo() {
         using var subject = new DataField([98, 97, 114], [5, 6, 7, 8, 9]);
-        subject.Selectors.Add(new DataValue(DataProvider.DataIdentity, [1, 2, 3, 4, 5]));
+        subject.Selectors.Add(new DataValue(DataProvider.CreateIdentity(0), [1, 2, 3, 4, 5]));
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([69, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 49, 0, 0, 0, 45, 0, 0, 0, 32, 0, 0, 0, ..DataProvider.SerializedDataIdentity, 5, 0, 0, 0, 1, 2, 3, 4, 5]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([69, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 49, 0, 0, 0, 45, 0, 0, 0, ..DataProvider.CreateSerializedIdentity(0), 5, 0, 0, 0, 1, 2, 3, 4, 5]), result.GetValue());
     }
 
     [Fact]

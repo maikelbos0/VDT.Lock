@@ -7,7 +7,7 @@ namespace VDT.Lock.Tests;
 public class DataCollectionTests {
     [Fact]
     public void DeserializeFrom() {
-        var plainSpan = new ReadOnlySpan<byte>([43, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 3, 0, 0, 0, 102, 111, 111, 45, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 5, 0, 0, 0, 1, 2, 3, 4, 5]);
+        var plainSpan = new ReadOnlySpan<byte>([43, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 3, 0, 0, 0, 102, 111, 111, 45, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(1), 5, 0, 0, 0, 1, 2, 3, 4, 5]);
 
         using var subject = DataCollection<DataValue>.DeserializeFrom(plainSpan);
 
@@ -111,27 +111,27 @@ public class DataCollectionTests {
     [Fact]
     public void SerializeToIncludingLength() {
         using var subject = new DataCollection<DataValue>() {
-            new(DataProvider.DataIdentity, [102, 111, 111]),
-            new(DataProvider.DataIdentity, [1, 2, 3, 4, 5])
+            new(DataProvider.CreateIdentity(0), [102, 111, 111]),
+            new(DataProvider.CreateIdentity(1), [1, 2, 3, 4, 5])
         };
 
         using var result = new SecureByteList();
         subject.SerializeTo(result, true);
 
-        Assert.Equal(new ReadOnlySpan<byte>([96, 0, 0, 0, 43, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 3, 0, 0, 0, 102, 111, 111, 45, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 5, 0, 0, 0, 1, 2, 3, 4, 5]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([96, 0, 0, 0, 43, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 3, 0, 0, 0, 102, 111, 111, 45, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(1), 5, 0, 0, 0, 1, 2, 3, 4, 5]), result.GetValue());
     }
 
     [Fact]
     public void SerializeToExcludingLength() {
         using var subject = new DataCollection<DataValue>() {
-            new(DataProvider.DataIdentity, [102, 111, 111]),
-            new(DataProvider.DataIdentity, [1, 2, 3, 4, 5])
+            new(DataProvider.CreateIdentity(0), [102, 111, 111]),
+            new(DataProvider.CreateIdentity(1), [1, 2, 3, 4, 5])
         };
 
         using var result = new SecureByteList();
         subject.SerializeTo(result, false);
 
-        Assert.Equal(new ReadOnlySpan<byte>([43, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 3, 0, 0, 0, 102, 111, 111, 45, 0, 0, 0, 32, 0, 0, 0, ..DataProvider.SerializedDataIdentity, 5, 0, 0, 0, 1, 2, 3, 4, 5]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([43, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 3, 0, 0, 0, 102, 111, 111, 45, 0, 0, 0, ..DataProvider.CreateSerializedIdentity(1), 5, 0, 0, 0, 1, 2, 3, 4, 5]), result.GetValue());
     }
 
     [Fact]

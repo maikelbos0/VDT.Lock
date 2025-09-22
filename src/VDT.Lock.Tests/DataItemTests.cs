@@ -26,7 +26,7 @@ public class DataItemTests {
 
     [Fact]
     public void DeserializeFromDeserializesLabels() {
-        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 96, 0, 0, 0, 43, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 3, 0, 0, 0, 98, 97, 114, 45, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0]);
+        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 96, 0, 0, 0, 43, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 3, 0, 0, 0, 98, 97, 114, 45, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0]);
 
         using var subject = DataItem.DeserializeFrom(plainSpan);
 
@@ -37,7 +37,7 @@ public class DataItemTests {
 
     [Fact]
     public void DeserializeFromDeserializesLocations() {
-        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 96, 0, 0, 0, 43, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 3, 0, 0, 0, 98, 97, 114, 45, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 5, 0, 0, 0, 1, 2, 3, 4, 5]);
+        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 96, 0, 0, 0, 43, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 3, 0, 0, 0, 98, 97, 114, 45, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 5, 0, 0, 0, 1, 2, 3, 4, 5]);
 
         using var subject = DataItem.DeserializeFrom(plainSpan);
 
@@ -122,15 +122,15 @@ public class DataItemTests {
         using var subject = new DataItem([98, 97, 114]);
         subject.Fields.Add(new([102, 111, 111], [1, 2, 3, 4, 5]));
         subject.Fields.Add(new([98, 97, 114], [5, 6, 7, 8, 9]));
-        subject.Labels.Add(new(DataProvider.DataIdentity, [102, 111, 111]));
-        subject.Labels.Add(new(DataProvider.DataIdentity, [98, 97, 114]));
-        subject.Locations.Add(new(DataProvider.DataIdentity, [102, 111, 111]));
-        subject.Locations.Add(new(DataProvider.DataIdentity, [98, 97, 114]));
+        subject.Labels.Add(new(DataProvider.CreateIdentity(0), [102, 111, 111]));
+        subject.Labels.Add(new(DataProvider.CreateIdentity(1), [98, 97, 114]));
+        subject.Locations.Add(new(DataProvider.CreateIdentity(2), [102, 111, 111]));
+        subject.Locations.Add(new(DataProvider.CreateIdentity(3), [98, 97, 114]));
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([255, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 48, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 94, 0, 0, 0, 43, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 3, 0, 0, 0, 102, 111, 111, 43, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 3, 0, 0, 0, 98, 97, 114, 94, 0, 0, 0, 43, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 3, 0, 0, 0, 102, 111, 111, 43, 0, 0, 0, 32, 0, 0, 0, .. DataProvider.SerializedDataIdentity, 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([255, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 48, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 94, 0, 0, 0, 43, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 3, 0, 0, 0, 102, 111, 111, 43, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(1), 3, 0, 0, 0, 98, 97, 114, 94, 0, 0, 0, 43, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(2), 3, 0, 0, 0, 102, 111, 111, 43, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(3), 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
     }
 
     [Fact]
