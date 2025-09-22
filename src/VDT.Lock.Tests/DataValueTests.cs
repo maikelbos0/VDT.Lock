@@ -54,12 +54,15 @@ public class DataValueTests {
 
     [Fact]
     public void Dispose() {
+        DataIdentity identity;
         SecureBuffer plainValueBuffer;
 
         using (var subject = new DataValue()) {
+            identity = subject.Identity;
             plainValueBuffer = subject.GetBuffer("plainValueBuffer");
         }
 
+        Assert.True(identity.IsDisposed);
         Assert.True(plainValueBuffer.IsDisposed);
     }
 
@@ -72,6 +75,17 @@ public class DataValueTests {
         }
 
         Assert.True(disposedSubject.IsDisposed);
+    }
+
+    [Fact]
+    public void IdentityThrowsIfDisposed() {
+        DataValue disposedSubject;
+
+        using (var subject = new DataValue()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Identity; });
     }
 
     [Fact]

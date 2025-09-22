@@ -10,11 +10,18 @@ public sealed class DataValue : IData<DataValue>, IIdentifiableData, IDisposable
         return new(DataIdentity.DeserializeFrom(plainSpan.ReadSpan(ref position)), plainSpan.ReadSpan(ref position));
     }
 
+    private readonly DataIdentity identity;
     private SecureBuffer plainValueBuffer;
 
     public bool IsDisposed { get; private set; }
 
-    public DataIdentity Identity { get; }
+    public DataIdentity Identity {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return identity;
+        }
+    }
 
     public ReadOnlySpan<byte> Value {
         get {
@@ -43,7 +50,7 @@ public sealed class DataValue : IData<DataValue>, IIdentifiableData, IDisposable
     public DataValue(ReadOnlySpan<byte> plainValueSpan) : this(new(), plainValueSpan) { }
 
     public DataValue(DataIdentity identity, ReadOnlySpan<byte> plainValueSpan) {
-        Identity = identity;
+        this.identity = identity;
         plainValueBuffer = new(plainValueSpan.ToArray());
     }
 
@@ -56,6 +63,7 @@ public sealed class DataValue : IData<DataValue>, IIdentifiableData, IDisposable
     }
 
     public void Dispose() {
+        identity.Dispose();
         plainValueBuffer.Dispose();
         IsDisposed = true;
         GC.SuppressFinalize(this);
