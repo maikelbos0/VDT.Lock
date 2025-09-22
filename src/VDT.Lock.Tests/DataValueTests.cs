@@ -6,17 +6,17 @@ namespace VDT.Lock.Tests;
 public class DataValueTests {
     [Fact]
     public void DeserializeFrom() {
-        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 5, 0, 0, 0, 5, 6, 7, 8, 9]);
+        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 5, 0, 0, 0, 118, 97, 108, 117, 101]);
 
         using var subject = DataValue.DeserializeFrom(plainSpan);
 
         Assert.Equal(DataProvider.CreateIdentity(0), subject.Identity);
-        Assert.Equal(new ReadOnlySpan<byte>([5, 6, 7, 8, 9]), subject.Value);
+        Assert.Equal(new ReadOnlySpan<byte>([118, 97, 108, 117, 101]), subject.Value);
     }
 
     [Fact]
     public void Constructor() {
-        var plainValueSpan = new ReadOnlySpan<byte>([98, 97, 114]);
+        var plainValueSpan = new ReadOnlySpan<byte>([118, 97, 108, 117, 101]);
 
         using var subject = new DataValue(plainValueSpan);
 
@@ -29,27 +29,27 @@ public class DataValueTests {
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainValueBuffer");
 
-        subject.Value = new ReadOnlySpan<byte>([99, 99, 99]);
+        subject.Value = new ReadOnlySpan<byte>([118, 97, 108, 117, 101]);
 
-        Assert.Equal(new ReadOnlySpan<byte>([99, 99, 99]), subject.Value);
+        Assert.Equal(new ReadOnlySpan<byte>([118, 97, 108, 117, 101]), subject.Value);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
     }
 
     [Fact]
     public void FieldLengths() {
-        using var subject = new DataValue([98, 97, 114]);
+        using var subject = new DataValue([118, 97, 108, 117, 101]);
 
-        Assert.Equal([32, 3], subject.FieldLengths);
+        Assert.Equal([32, 5], subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new DataValue(DataProvider.CreateIdentity(0), [98, 97, 114]);
+        using var subject = new DataValue(DataProvider.CreateIdentity(0), [118, 97, 108, 117, 101]);
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([43, 0, 0, 0, ..DataProvider.CreateSerializedIdentity(0), 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([45, 0, 0, 0, ..DataProvider.CreateSerializedIdentity(0), 5, 0, 0, 0, 118, 97, 108, 117, 101]), result.GetValue());
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class DataValueTests {
             disposedSubject = subject;
         }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([15, 15, 15]));
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([118, 97, 108, 117, 101]));
     }
 
     [Fact]
