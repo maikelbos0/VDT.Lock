@@ -101,6 +101,7 @@ public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>
         }
     }
 
+    // TODO just... implement this?
     public void CopyTo(T[] array, int arrayIndex) {
         throw new NotSupportedException();
     }

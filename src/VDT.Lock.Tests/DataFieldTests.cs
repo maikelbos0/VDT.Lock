@@ -7,10 +7,11 @@ public class DataFieldTests {
     [Fact]
     public void DeserializeFrom() {
 
-        var plainSpan = new ReadOnlySpan<byte>([4, 0, 0, 0, 110, 97, 109, 101, 5, 0, 0, 0, 118, 97, 108, 117, 101, 48, 0, 0, 0, .. DataProvider.CreateSerializedValue(0, [105, 116, 101, 109])]);
+        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 5, 0, 0, 0, 118, 97, 108, 117, 101, 48, 0, 0, 0, .. DataProvider.CreateSerializedValue(0, [105, 116, 101, 109])]);
 
         using var subject = DataField.DeserializeFrom(plainSpan);
 
+        Assert.Equal(DataProvider.CreateIdentity(0), subject.Identity);
         Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
         Assert.Equal(new ReadOnlySpan<byte>([118, 97, 108, 117, 101]), subject.Value);
         Assert.Equal(new ReadOnlySpan<byte>([105, 116, 101, 109]), Assert.Single(subject.Selectors).Value);
@@ -72,12 +73,12 @@ public class DataFieldTests {
             }
         };
 
-        Assert.Equal([4, 5, 48], subject.FieldLengths);
+        Assert.Equal([32, 4, 5, 48], subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new DataField([110, 97, 109, 101], [118, 97, 108, 117, 101]) {
+        using var subject = new DataField(DataProvider.CreateIdentity(0), [110, 97, 109, 101], [118, 97, 108, 117, 101]) {
             Selectors = {
                 DataProvider.CreateValue(0, [105, 116, 101, 109])
             }
@@ -86,21 +87,24 @@ public class DataFieldTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([69, 0, 0, 0, 4, 0, 0, 0, 110, 97, 109, 101, 5, 0, 0, 0, 118, 97, 108, 117, 101, 48, 0, 0, 0, .. DataProvider.CreateSerializedValue(0, [105, 116, 101, 109])]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([105, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 5, 0, 0, 0, 118, 97, 108, 117, 101, 48, 0, 0, 0, .. DataProvider.CreateSerializedValue(0, [105, 116, 101, 109])]), result.GetValue());
     }
 
     [Fact]
     public void Dispose() {
+        DataIdentity identity;
         SecureBuffer plainNameBuffer;
         SecureBuffer plainDataBuffer;
         DataCollection<DataValue> selectors;
 
         using (var subject = new DataField()) {
+            identity = subject.Identity;
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             plainDataBuffer = subject.GetBuffer("plainValueBuffer");
             selectors = subject.Selectors;
         }
 
+        Assert.True(identity.IsDisposed);
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(plainDataBuffer.IsDisposed);
         Assert.True(selectors.IsDisposed);
@@ -115,6 +119,17 @@ public class DataFieldTests {
         }
 
         Assert.True(disposedSubject.IsDisposed);
+    }
+
+    [Fact]
+    public void IdentityThrowsIfDisposed() {
+        DataField disposedSubject;
+
+        using (var subject = new DataField()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Identity; });
     }
 
     [Fact]

@@ -3,20 +3,29 @@ using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataField : IData<DataField>, IDisposable {
+public sealed class DataField : IData<DataField>, IIdentifiableData, IDisposable {
     public static DataField DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
-        return new(plainSpan.ReadSpan(ref position), plainSpan.ReadSpan(ref position)) {
+        return new(DataIdentity.DeserializeFrom(plainSpan.ReadSpan(ref position)), plainSpan.ReadSpan(ref position), plainSpan.ReadSpan(ref position)) {
             Selectors = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position))
         };
     }
 
+    private readonly DataIdentity identity;
     private SecureBuffer plainNameBuffer;
     private SecureBuffer plainValueBuffer;
     private DataCollection<DataValue> selectors = [];
 
     public bool IsDisposed { get; private set; }
+
+    public DataIdentity Identity {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return identity;
+        }
+    }
 
     public ReadOnlySpan<byte> Name {
         get {
@@ -64,13 +73,16 @@ public sealed class DataField : IData<DataField>, IDisposable {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [plainNameBuffer.Value.Length, plainValueBuffer.Value.Length, selectors.GetLength()];
+            return [identity.GetLength(), plainNameBuffer.Value.Length, plainValueBuffer.Value.Length, selectors.GetLength()];
         }
     }
 
     public DataField() : this([], []) { }
 
-    public DataField(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> plainDataSpan) {
+    public DataField(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> plainDataSpan) : this(new(), plainNameSpan, plainDataSpan) { }
+
+    public DataField(DataIdentity identity, ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> plainDataSpan) {
+        this.identity = identity;
         plainNameBuffer = new(plainNameSpan.ToArray());
         plainValueBuffer = new(plainDataSpan.ToArray());
     }
@@ -79,12 +91,14 @@ public sealed class DataField : IData<DataField>, IDisposable {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(this.GetLength());
+        identity.SerializeTo(plainBytes);
         plainBytes.WriteSecureBuffer(plainNameBuffer);
         plainBytes.WriteSecureBuffer(plainValueBuffer);
         selectors.SerializeTo(plainBytes);
     }
 
     public void Dispose() {
+        identity.Dispose();
         plainNameBuffer.Dispose();
         plainValueBuffer.Dispose();
         selectors.Dispose();
