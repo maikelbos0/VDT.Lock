@@ -5,30 +5,20 @@ namespace VDT.Lock.Tests;
 
 public class DataStoreTests {
     [Fact]
-    public void DeserializeFromDeserializesName() {
-        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 0, 0, 0, 0]);
+    public void DeserializeFrom() {
+        var plainSpan = new ReadOnlySpan<byte>([4, 0, 0, 0, 110, 97, 109, 101, 24, 0, 0, 0, .. DataProvider.CreateSerializedItem(0, [105, 116, 101, 109])]);
 
         using var subject = DataStore.DeserializeFrom(plainSpan);
 
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
-    }
-
-    [Fact]
-    public void DeserializeFromDeserializesItems() {
-        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 46, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-
-        using var subject = DataStore.DeserializeFrom(plainSpan);
-
-        Assert.Equal(2, subject.Items.Count);
-        Assert.Contains(subject.Items, item => item.Name.SequenceEqual(new ReadOnlySpan<byte>([98, 97, 114])));
-        Assert.Contains(subject.Items, item => item.Name.SequenceEqual(new ReadOnlySpan<byte>([102, 111, 111])));
+        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([105, 116, 101, 109]), Assert.Single(subject.Items).Name);
     }
 
     [Fact]
     public void Constructor() {
-        using var subject = new DataStore([98, 97, 114]);
+        using var subject = new DataStore([110, 97, 109, 101]);
 
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
     }
 
     [Fact]
@@ -37,9 +27,9 @@ public class DataStoreTests {
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainNameBuffer");
 
-        subject.Name = new ReadOnlySpan<byte>([99, 99, 99]);
+        subject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]);
 
-        Assert.Equal(new ReadOnlySpan<byte>([99, 99, 99]), subject.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
     }
 
@@ -58,23 +48,21 @@ public class DataStoreTests {
 
     [Fact]
     public void FieldLengths() {
-        using var subject = new DataStore([98, 97, 114]);
-        subject.Items.Add(new DataItem([102, 111, 111]));
-        subject.Items.Add(new DataItem([5, 6, 7, 8, 9]));
+        using var subject = new DataStore([110, 97, 109, 101]);
+        subject.Items.Add(DataProvider.CreateItem(0, [105, 116, 101, 109]));
 
-        Assert.Equal([3, 48], subject.FieldLengths);
+        Assert.Equal([4, 24], subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new DataStore([98, 97, 114]);
-        subject.Items.Add(new DataItem([102, 111, 111]));
-        subject.Items.Add(new DataItem([5, 6, 7, 8, 9]));
+        using var subject = new DataStore([110, 97, 109, 101]);
+        subject.Items.Add(DataProvider.CreateItem(0, [105, 116, 101, 109]));
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 48, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([4, 0, 0, 0, 110, 97, 109, 101, 24, 0, 0, 0, .. DataProvider.CreateSerializedItem(0, [105, 116, 101, 109])]), result.GetValue());
     }
 
     [Fact]
@@ -110,7 +98,7 @@ public class DataStoreTests {
             disposedSubject = subject;
         }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]));
     }
 
     [Fact]

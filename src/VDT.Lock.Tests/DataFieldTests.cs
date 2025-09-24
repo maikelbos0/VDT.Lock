@@ -7,14 +7,14 @@ public class DataFieldTests {
     [Fact]
     public void DeserializeFrom() {
 
-        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 5, 0, 0, 0, 118, 97, 108, 117, 101, 48, 0, 0, 0, .. DataProvider.CreateSerializedValue(0, [105, 116, 101, 109])]);
+        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 5, 0, 0, 0, 118, 97, 108, 117, 101, 52, 0, 0, 0, .. DataProvider.CreateSerializedValue(0, [115, 101, 108, 101, 99, 116, 111, 114])]);
 
         using var subject = DataField.DeserializeFrom(plainSpan);
 
         Assert.Equal(DataProvider.CreateIdentity(0), subject.Identity);
         Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
         Assert.Equal(new ReadOnlySpan<byte>([118, 97, 108, 117, 101]), subject.Value);
-        Assert.Equal(new ReadOnlySpan<byte>([105, 116, 101, 109]), Assert.Single(subject.Selectors).Value);
+        Assert.Equal(new ReadOnlySpan<byte>([115, 101, 108, 101, 99, 116, 111, 114]), Assert.Single(subject.Selectors).Value);
     }
 
     [Fact]
