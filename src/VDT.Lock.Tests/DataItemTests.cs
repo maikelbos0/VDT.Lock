@@ -19,9 +19,12 @@ public class DataItemTests {
 
     [Fact]
     public void Constructor() {
-        using var subject = new DataItem([110, 97, 109, 101]);
+        var identity = new DataIdentity();
+        var plainNameSpan = new ReadOnlySpan<byte>([110, 97, 109, 101]); 
+        using var subject = new DataItem(identity, plainNameSpan);
 
-        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
+        Assert.Same(identity, subject.Identity);
+        Assert.Equal(plainNameSpan, subject.Name);
     }
 
     [Fact]

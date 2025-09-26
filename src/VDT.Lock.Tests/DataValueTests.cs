@@ -16,10 +16,12 @@ public class DataValueTests {
 
     [Fact]
     public void Constructor() {
+        var identity = new DataIdentity();
         var plainValueSpan = new ReadOnlySpan<byte>([118, 97, 108, 117, 101]);
 
-        using var subject = new DataValue(plainValueSpan);
+        using var subject = new DataValue(identity, plainValueSpan);
 
+        Assert.Same(identity, subject.Identity);
         Assert.Equal(plainValueSpan, subject.Value);
     }
 

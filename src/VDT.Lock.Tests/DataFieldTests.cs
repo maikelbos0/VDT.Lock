@@ -19,11 +19,13 @@ public class DataFieldTests {
 
     [Fact]
     public void Constructor() {
+        var identity = new DataIdentity();
         var plainNameSpan = new ReadOnlySpan<byte>([110, 97, 109, 101]);
         var plainDataSpan = new ReadOnlySpan<byte>([118, 97, 108, 117, 101]);
 
-        using var subject = new DataField(plainNameSpan, plainDataSpan);
+        using var subject = new DataField(identity, plainNameSpan, plainDataSpan);
 
+        Assert.Same(identity, subject.Identity);
         Assert.Equal(plainNameSpan, subject.Name);
         Assert.Equal(plainDataSpan, subject.Value);
     }
