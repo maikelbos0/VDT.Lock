@@ -96,9 +96,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData, IDisposable {
 
     public DataItem() : this([]) { }
 
-    public DataItem(ReadOnlySpan<byte> plainNameSpan) : this(new(), plainNameSpan) {
-        plainNameBuffer = new(plainNameSpan.ToArray());
-    }
+    public DataItem(ReadOnlySpan<byte> plainNameSpan) : this(new(), plainNameSpan) { }
 
     public DataItem(DataIdentity identity, ReadOnlySpan<byte> plainNameSpan) {
         this.identity = identity;
