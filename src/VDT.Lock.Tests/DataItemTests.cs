@@ -100,22 +100,36 @@ public class DataItemTests {
 
     [Fact]
     public void Dispose() {
+        DataIdentity identity;
         SecureBuffer plainNameBuffer;
         DataCollection<DataField> fields;
         DataCollection<DataValue> labels;
         DataCollection<DataValue> locations;
 
         using (var subject = new DataItem()) {
+            identity = subject.Identity;
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             fields = subject.Fields;
             labels = subject.Labels;
             locations = subject.Locations;
         }
 
+        Assert.True(identity.IsDisposed);
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(fields.IsDisposed);
         Assert.True(labels.IsDisposed);
         Assert.True(locations.IsDisposed);
+    }
+
+    [Fact]
+    public void IdentityThrowsIfDisposed() {
+        DataItem disposedSubject;
+
+        using (var subject = new DataItem()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Identity; });
     }
 
     [Fact]

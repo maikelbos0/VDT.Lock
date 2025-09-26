@@ -117,6 +117,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData, IDisposable {
     }
 
     public void Dispose() {
+        identity.Dispose();
         plainNameBuffer.Dispose();
         fields.Dispose();
         labels.Dispose();
