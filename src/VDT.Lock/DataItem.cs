@@ -3,23 +3,32 @@ using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataItem : IData<DataItem>, IDisposable {
+public sealed class DataItem : IData<DataItem>, IIdentifiableData, IDisposable {
     public static DataItem DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
-        
-        return new DataItem(plainSpan.ReadSpan(ref position)) {
+
+        return new DataItem(DataIdentity.DeserializeFrom(plainSpan.ReadSpan(ref position)), plainSpan.ReadSpan(ref position)) {
             Fields = DataCollection<DataField>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
             Labels = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
             Locations = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
         };
     }
 
+    private readonly DataIdentity identity;
     private SecureBuffer plainNameBuffer;
     private DataCollection<DataField> fields = [];
     private DataCollection<DataValue> labels = [];
     private DataCollection<DataValue> locations = [];
 
     public bool IsDisposed { get; private set; }
+
+    public DataIdentity Identity {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return identity;
+        }
+    }
 
     public ReadOnlySpan<byte> Name {
         get {
@@ -81,13 +90,18 @@ public sealed class DataItem : IData<DataItem>, IDisposable {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [plainNameBuffer.Value.Length, fields.GetLength(), labels.GetLength(), locations.GetLength()];
+            return [identity.GetLength(), plainNameBuffer.Value.Length, fields.GetLength(), labels.GetLength(), locations.GetLength()];
         }
     }
 
     public DataItem() : this([]) { }
 
-    public DataItem(ReadOnlySpan<byte> plainNameSpan) {
+    public DataItem(ReadOnlySpan<byte> plainNameSpan) : this(new(), plainNameSpan) {
+        plainNameBuffer = new(plainNameSpan.ToArray());
+    }
+
+    public DataItem(DataIdentity identity, ReadOnlySpan<byte> plainNameSpan) {
+        this.identity = identity;
         plainNameBuffer = new(plainNameSpan.ToArray());
     }
 
@@ -95,6 +109,7 @@ public sealed class DataItem : IData<DataItem>, IDisposable {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(this.GetLength());
+        identity.SerializeTo(plainBytes);
         plainBytes.WriteSecureBuffer(plainNameBuffer);
         fields.SerializeTo(plainBytes);
         labels.SerializeTo(plainBytes);

@@ -6,7 +6,7 @@ namespace VDT.Lock.Tests;
 public class DataStoreTests {
     [Fact]
     public void DeserializeFrom() {
-        var plainSpan = new ReadOnlySpan<byte>([4, 0, 0, 0, 110, 97, 109, 101, 24, 0, 0, 0, .. DataProvider.CreateSerializedItem(0, [105, 116, 101, 109])]);
+        var plainSpan = new ReadOnlySpan<byte>([4, 0, 0, 0, 110, 97, 109, 101, 60, 0, 0, 0, .. DataProvider.CreateSerializedItem(0, [105, 116, 101, 109])]);
 
         using var subject = DataStore.DeserializeFrom(plainSpan);
 
@@ -51,7 +51,7 @@ public class DataStoreTests {
         using var subject = new DataStore([110, 97, 109, 101]);
         subject.Items.Add(DataProvider.CreateItem(0, [105, 116, 101, 109]));
 
-        Assert.Equal([4, 24], subject.FieldLengths);
+        Assert.Equal([4, 60], subject.FieldLengths);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class DataStoreTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([4, 0, 0, 0, 110, 97, 109, 101, 24, 0, 0, 0, .. DataProvider.CreateSerializedItem(0, [105, 116, 101, 109])]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([4, 0, 0, 0, 110, 97, 109, 101, 60, 0, 0, 0, .. DataProvider.CreateSerializedItem(0, [105, 116, 101, 109])]), result.GetValue());
     }
 
     [Fact]

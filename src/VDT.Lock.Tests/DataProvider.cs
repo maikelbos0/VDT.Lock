@@ -16,14 +16,14 @@ public static class DataProvider {
         => new(CreateIdentity(key), value);
 
     public static IEnumerable<byte> CreateSerializedField(byte key, byte[] name, byte[] data)
-        => [(byte)(48 + name.Length + data.Length), 0, 0, 0, .. CreateSerializedIdentity(0), (byte)name.Length, 0, 0, 0, .. name, (byte)data.Length, 0, 0, 0, .. data, 0, 0, 0, 0];
+        => [(byte)(48 + name.Length + data.Length), 0, 0, 0, .. CreateSerializedIdentity(key), (byte)name.Length, 0, 0, 0, .. name, (byte)data.Length, 0, 0, 0, .. data, 0, 0, 0, 0];
 
     public static DataField CreateField(byte key, byte[] name, byte[] data)
         => new(CreateIdentity(key), name, data);
 
     public static IEnumerable<byte> CreateSerializedItem(byte key, byte[] name)
-        => [(byte)(16 + name.Length), 0, 0, 0, (byte)name.Length, 0, 0, 0, .. name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        => [(byte)(52 + name.Length), 0, 0, 0, .. CreateSerializedIdentity(key), (byte)name.Length, 0, 0, 0, .. name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     public static DataItem CreateItem(byte key, byte[] name)
-        => new(name);
+        => new(CreateIdentity(key), name);
 }
