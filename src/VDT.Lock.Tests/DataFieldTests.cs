@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace VDT.Lock.Tests;
@@ -15,6 +17,46 @@ public class DataFieldTests {
         Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
         Assert.Equal(new ReadOnlySpan<byte>([118, 97, 108, 117, 101]), subject.Value);
         Assert.Equal(new ReadOnlySpan<byte>([115, 101, 108, 101, 99, 116, 111, 114]), Assert.Single(subject.Selectors).Value);
+    }
+
+    [Fact]
+    public void Merge() {
+        var expectedSelector1 = new DataValue(DataProvider.CreateIdentity(1, 10), [115, 101, 108, 101, 99, 116, 111, 114]);
+        var expectedSelector2 = new DataValue(DataProvider.CreateIdentity(2, 10), [115, 101, 108, 101, 99, 116, 111, 114]);
+        var expectedSelector3 = new DataValue(DataProvider.CreateIdentity(3, 10), [115, 101, 108, 101, 99, 116, 111, 114]);
+
+        var expectedResult = new DataField(DataProvider.CreateIdentity(0, 5), [110, 97, 109, 101], [118, 97, 108, 117, 101]) {
+            Selectors = {
+                expectedSelector1,
+                new DataValue(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
+            }
+        };
+
+        var candidates = new List<DataField>() {
+            new(DataProvider.CreateIdentity(0, 3), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114]) {
+                Selectors = {
+                    expectedSelector2,
+                    new DataValue(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+                }
+            },
+            expectedResult,
+            new(DataProvider.CreateIdentity(0, 4), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114]) {
+                Selectors = {
+                    new DataValue(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114]),
+                    expectedSelector3
+                }
+            }
+        };
+
+
+        var result = DataField.Merge(candidates);
+
+        Assert.Same(expectedResult, result);
+        Assert.Equal([expectedSelector1, expectedSelector2, expectedSelector3], result.Selectors.OrderBy(selector => selector.Identity.Key[0]));
+
+        foreach (var candidate in candidates) {
+            Assert.Equal(candidate != expectedResult, candidate.IsDisposed);
+        }
     }
 
     [Fact]

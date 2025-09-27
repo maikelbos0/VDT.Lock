@@ -12,6 +12,34 @@ public sealed class DataField : IData<DataField>, IIdentifiableData, IDisposable
         };
     }
 
+    public static DataField Merge(IEnumerable<DataField> candidates) {
+        var result = DataIdentity.SelectNewest(candidates);
+        var selectors = new Dictionary<DataIdentity, List<DataValue>>();
+
+        foreach (var candidate in candidates) {
+            foreach (var selectorCandidate in candidate.Selectors.UnsafeClear()) {
+                if (selectors.TryGetValue(selectorCandidate.Identity, out var selectorCandidates)) {
+                    selectorCandidates.Add(selectorCandidate);
+                }
+                else {
+                    selectors.Add(selectorCandidate.Identity, [selectorCandidate]);
+                }
+            }
+        }
+
+        foreach (var selectorCandidates in selectors.Values) {
+            result.selectors.Add(DataValue.Merge(selectorCandidates));
+        }
+
+        foreach (var candidate in candidates) {
+            if (candidate != result) {
+                candidate.Dispose();
+            }
+        }
+
+        return result;
+    }
+
     private readonly DataIdentity identity;
     private SecureBuffer plainNameBuffer;
     private SecureBuffer plainValueBuffer;
