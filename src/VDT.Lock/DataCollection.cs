@@ -79,6 +79,16 @@ public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>
         items.Clear();
     }
 
+    public List<T> UnsafeClear() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        var clearedItems = new List<T>(items);
+
+        items.Clear();
+
+        return clearedItems;
+    }
+
     public IEnumerator<T> GetEnumerator() {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
@@ -101,9 +111,8 @@ public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>
         }
     }
 
-    // TODO just... implement this?
     public void CopyTo(T[] array, int arrayIndex) {
-        throw new NotSupportedException();
+        items.CopyTo(array, arrayIndex);
     }
 
     public void Dispose() {

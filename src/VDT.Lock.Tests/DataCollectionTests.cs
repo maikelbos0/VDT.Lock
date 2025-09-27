@@ -109,6 +109,19 @@ public class DataCollectionTests {
     }
 
     [Fact]
+    public void UnsafeClear() {
+        using var subject = new DataCollection<DataValue>();
+        var item = new DataValue();
+        subject.Add(item);
+
+        var result = subject.UnsafeClear();
+
+        Assert.Empty(subject);
+        Assert.Equal(item, Assert.Single(result));
+        Assert.False(item.IsDisposed);
+    }
+
+    [Fact]
     public void SerializeToIncludingLength() {
         using var subject = new DataCollection<DataValue>() {
             DataProvider.CreateValue(0, [122, 101, 114, 111]),
@@ -136,9 +149,16 @@ public class DataCollectionTests {
 
     [Fact]
     public void CopyToThrows() {
-        using var subject = new DataCollection<DataValue>();
+        using var subject = new DataCollection<DataValue>() {
+            DataProvider.CreateValue(0, [122, 101, 114, 111]),
+            DataProvider.CreateValue(1, [111, 110, 101])
+        };
+        var target = new DataValue[3];
 
-        Assert.Throws<NotSupportedException>(() => subject.CopyTo([], 0));
+        subject.CopyTo(target, 1);
+
+        Assert.Equal(subject.First(), target[1]);
+        Assert.Equal(subject.Last(), target[2]);
     }
 
     [Fact]
@@ -239,6 +259,17 @@ public class DataCollectionTests {
         }
 
         Assert.Throws<ObjectDisposedException>(() => disposedSubject.Clear());
+    }
+
+    [Fact]
+    public void UnsafeClearThrowsIfDisposed() {
+        DataCollection<DataValue> disposedSubject;
+
+        using (var subject = new DataCollection<DataValue>()) {
+            disposedSubject = subject;
+        }
+
+        Assert.Throws<ObjectDisposedException>(() => disposedSubject.UnsafeClear());
     }
 
     [Fact]
