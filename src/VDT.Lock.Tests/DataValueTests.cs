@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace VDT.Lock.Tests;
@@ -12,6 +14,25 @@ public class DataValueTests {
 
         Assert.Equal(DataProvider.CreateIdentity(0), subject.Identity);
         Assert.Equal(new ReadOnlySpan<byte>([118, 97, 108, 117, 101]), subject.Value);
+    }
+
+    [Fact]
+    public void SelectNewest() {
+        var expectedResult = new DataValue(DataProvider.CreateIdentity(0, 5), [118, 97, 108, 117, 101]);
+
+        var candidates = new List<DataValue>() {
+            new(DataProvider.CreateIdentity(0, 3), [111, 108, 100, 101, 114]),
+            expectedResult,
+            new(DataProvider.CreateIdentity(0, 4), [111, 108, 100, 101, 114])
+        };
+
+        var result = DataValue.Merge(candidates);
+
+        Assert.Same(expectedResult, result);
+
+        foreach (var candidate in candidates) {
+            Assert.Equal(candidate != expectedResult, candidate.IsDisposed);
+        }
     }
 
     [Fact]

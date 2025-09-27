@@ -10,6 +10,18 @@ public sealed class DataValue : IData<DataValue>, IIdentifiableData, IDisposable
         return new(DataIdentity.DeserializeFrom(plainSpan.ReadSpan(ref position)), plainSpan.ReadSpan(ref position));
     }
 
+    public static DataValue Merge(IEnumerable<DataValue> candidates) {
+        var result = DataIdentity.SelectNewest(candidates);
+
+        foreach (var candidate in candidates) {
+            if (candidate != result) {
+                candidate.Dispose();
+            }
+        }
+
+        return result;
+    }
+
     private readonly DataIdentity identity;
     private SecureBuffer plainValueBuffer;
 
