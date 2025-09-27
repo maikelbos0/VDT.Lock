@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace VDT.Lock;
 
-public sealed class DataValue : IData<DataValue>, IIdentifiableData, IDisposable {
+public sealed class DataValue : IData<DataValue>, IIdentifiableData<DataValue>, IDisposable {
     public static DataValue DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 

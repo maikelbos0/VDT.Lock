@@ -1,10 +1,41 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
 namespace VDT.Lock.Tests;
 
 public class DataCollectionTests {
+    [Fact]
+    public void Merge() {
+        var expectedValue1 = new DataValue(DataProvider.CreateIdentity(1, 10), [115, 101, 108, 101, 99, 116, 111, 114]);
+        var expectedValue2 = new DataValue(DataProvider.CreateIdentity(2, 10), [115, 101, 108, 101, 99, 116, 111, 114]);
+        var expectedValue3 = new DataValue(DataProvider.CreateIdentity(3, 10), [115, 101, 108, 101, 99, 116, 111, 114]);
+
+        var candidates = new List<DataCollection<DataValue>>() {
+            new() {
+                expectedValue2,
+                new DataValue(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+            },
+            new() {
+                expectedValue1,
+                new DataValue(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
+            },
+            new() {
+                new DataValue(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114]),
+                expectedValue3
+            }
+        };
+
+        var result = DataCollection.Merge(candidates);
+
+        Assert.Equal([expectedValue1, expectedValue2, expectedValue3], result.OrderBy(selector => selector.Identity.Key[0]));
+
+        foreach (var candidate in candidates) {
+            Assert.True(candidate.IsDisposed);
+        }
+    }
+
     [Fact]
     public void DeserializeFrom() {
         var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedValue(0, [122, 101, 114, 111]), .. DataProvider.CreateSerializedValue(1, [111, 110, 101])]);

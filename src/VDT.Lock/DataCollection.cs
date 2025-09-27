@@ -5,6 +5,32 @@ using System.Linq;
 
 namespace VDT.Lock;
 
+public static class DataCollection {
+    public static DataCollection<T> Merge<T>(IEnumerable<DataCollection<T>> candidates) where T : notnull, IData<T>, IIdentifiableData<T>, IDisposable {
+        var candidateItems = new Dictionary<DataIdentity, List<T>>();
+        var results = new DataCollection<T>();
+
+        foreach (var candidate in candidates) {
+            foreach (var selectorCandidate in candidate.UnsafeClear()) {
+                if (candidateItems.TryGetValue(selectorCandidate.Identity, out var selectorCandidates)) {
+                    selectorCandidates.Add(selectorCandidate);
+                }
+                else {
+                    candidateItems.Add(selectorCandidate.Identity, [selectorCandidate]);
+                }
+            }
+
+            candidate.Dispose();
+        }
+
+        foreach (var selectorCandidates in candidateItems.Values) {
+            results.Add(T.Merge(selectorCandidates));
+        }
+
+        return results;
+    }
+}
+
 public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData<T>, IDisposable {
     public static DataCollection<T> DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
