@@ -121,15 +121,7 @@ public sealed class StoreManager : IDisposable {
             }
         });
 
-        if (dataStores.Count == 0) {
-            return new DataStore();
-        }
-        else if (dataStores.Count == 1) {
-            return dataStores.Single();
-        }
-        else {
-            throw new InvalidOperationException("Retrieving data store from multiple sites is not yet supported.");
-        }
+        return DataStore.Merge(dataStores.DefaultIfEmpty(new()));
     }
 
     public async Task<SaveDataStoreResult> SaveDataStore(DataStore dataStore) {
