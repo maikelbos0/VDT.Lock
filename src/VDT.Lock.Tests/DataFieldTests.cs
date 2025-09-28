@@ -66,7 +66,8 @@ public class DataFieldTests {
 
     [Fact]
     public void SetName() {
-        using var subject = new DataField();
+        using var subject = new DataField(DataProvider.CreateIdentity(0, 0), [], []);
+        var previousVersion = subject.Identity.Version;
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainNameBuffer");
 
@@ -74,11 +75,13 @@ public class DataFieldTests {
 
         Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void SetValue() {
-        using var subject = new DataField();
+        using var subject = new DataField(DataProvider.CreateIdentity(0, 0), [], []);
+        var previousVersion = subject.Identity.Version;
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainValueBuffer");
 
@@ -86,11 +89,13 @@ public class DataFieldTests {
 
         Assert.Equal(new ReadOnlySpan<byte>([118, 97, 108, 117, 101]), subject.Value);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void SetSelectors() {
-        using var subject = new DataField();
+        using var subject = new DataField(DataProvider.CreateIdentity(0, 0), [], []);
+        var previousVersion = subject.Identity.Version;
 
         var previousFields = subject.Selectors;
         var newFields = new DataCollection<DataValue>();
@@ -99,6 +104,7 @@ public class DataFieldTests {
 
         Assert.Same(newFields, subject.Selectors);
         Assert.True(previousFields.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]

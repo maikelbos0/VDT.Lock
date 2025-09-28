@@ -86,7 +86,8 @@ public class DataItemTests {
 
     [Fact]
     public void SetName() {
-        using var subject = new DataItem();
+        using var subject = new DataItem(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainNameBuffer");
 
@@ -94,11 +95,13 @@ public class DataItemTests {
 
         Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void SetFields() {
-        using var subject = new DataItem();
+        using var subject = new DataItem(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var previousFields = subject.Fields;
         var newFields = new DataCollection<DataField>();
@@ -107,11 +110,13 @@ public class DataItemTests {
 
         Assert.Same(newFields, subject.Fields);
         Assert.True(previousFields.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void SetLabels() {
-        using var subject = new DataItem();
+        using var subject = new DataItem(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var previousLabels = subject.Labels;
         var newLabels = new DataCollection<DataValue>();
@@ -120,11 +125,13 @@ public class DataItemTests {
 
         Assert.Same(newLabels, subject.Labels);
         Assert.True(previousLabels.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void SetLocations() {
-        using var subject = new DataItem();
+        using var subject = new DataItem(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var previousLocations = subject.Locations;
         var newLocations = new DataCollection<DataValue>();
@@ -133,6 +140,7 @@ public class DataItemTests {
 
         Assert.Same(newLocations, subject.Locations);
         Assert.True(previousLocations.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]

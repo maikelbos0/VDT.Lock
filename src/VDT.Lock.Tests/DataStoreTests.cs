@@ -61,7 +61,8 @@ public class DataStoreTests {
 
     [Fact]
     public void SetName() {
-        using var subject = new DataStore();
+        using var subject = new DataStore(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainNameBuffer");
 
@@ -69,11 +70,13 @@ public class DataStoreTests {
 
         Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void SetItems() {
-        using var subject = new DataStore();
+        using var subject = new DataStore(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var previousItems = subject.Items;
         var newItems = new DataCollection<DataItem>();
@@ -82,6 +85,7 @@ public class DataStoreTests {
 
         Assert.Same(newItems, subject.Items);
         Assert.True(previousItems.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]

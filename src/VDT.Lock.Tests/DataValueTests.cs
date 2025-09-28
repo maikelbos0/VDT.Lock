@@ -47,14 +47,16 @@ public class DataValueTests {
 
     [Fact]
     public void SetValue() {
-        using var subject = new DataValue();
+        using var subject = new DataValue(DataProvider.CreateIdentity(0, 0), []);
 
+        var previousVersion = subject.Identity.Version;
         var plainPreviousValueBuffer = subject.GetBuffer("plainValueBuffer");
 
         subject.Value = new ReadOnlySpan<byte>([118, 97, 108, 117, 101]);
 
         Assert.Equal(new ReadOnlySpan<byte>([118, 97, 108, 117, 101]), subject.Value);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]

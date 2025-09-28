@@ -58,6 +58,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
 
             plainNameBuffer.Dispose();
             plainNameBuffer = new(value.ToArray());
+            identity.Update();
         }
     }
 
@@ -72,6 +73,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
 
             fields.Dispose();
             fields = value;
+            identity.Update();
         }
     }
 
@@ -86,6 +88,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
 
             labels.Dispose();
             labels = value;
+            identity.Update();
         }
     }
 
@@ -100,6 +103,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
 
             locations.Dispose();
             locations = value;
+            identity.Update();
         }
     }
 

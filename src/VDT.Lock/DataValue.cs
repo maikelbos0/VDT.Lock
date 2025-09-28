@@ -46,6 +46,7 @@ public sealed class DataValue : IData<DataValue>, IIdentifiableData<DataValue>, 
 
             plainValueBuffer.Dispose();
             plainValueBuffer = new(value.ToArray());
+            identity.Update();
         }
     }
 

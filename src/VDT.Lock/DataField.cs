@@ -53,6 +53,7 @@ public sealed class DataField : IData<DataField>, IIdentifiableData<DataField>, 
 
             plainNameBuffer.Dispose();
             plainNameBuffer = new(value.ToArray());
+            identity.Update();
         }
     }
 
@@ -67,6 +68,7 @@ public sealed class DataField : IData<DataField>, IIdentifiableData<DataField>, 
 
             plainValueBuffer.Dispose();
             plainValueBuffer = new(value.ToArray());
+            identity.Update();
         }
     }
 
@@ -81,6 +83,7 @@ public sealed class DataField : IData<DataField>, IIdentifiableData<DataField>, 
 
             selectors.Dispose();
             selectors = value;
+            identity.Update();
         }
     }
 

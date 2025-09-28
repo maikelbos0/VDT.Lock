@@ -52,6 +52,7 @@ public sealed class DataStore : IData<DataStore>, IIdentifiableData<DataStore>, 
 
             plainNameBuffer.Dispose();
             plainNameBuffer = new(value.ToArray());
+            identity.Update();
         }
     }
 
@@ -66,6 +67,7 @@ public sealed class DataStore : IData<DataStore>, IIdentifiableData<DataStore>, 
 
             items.Dispose();
             items = value;
+            identity.Update();
         }
     }
 
