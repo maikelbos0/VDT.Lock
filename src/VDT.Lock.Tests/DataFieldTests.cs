@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace VDT.Lock.Tests;
@@ -24,14 +23,14 @@ public class DataFieldTests {
         var expectedSelector = new DataValue(DataProvider.CreateIdentity(1, 10), [115, 101, 108, 101, 99, 116, 111, 114]);
         var expectedResult = new DataField(DataProvider.CreateIdentity(0, 5), [110, 97, 109, 101], [118, 97, 108, 117, 101]) {
             Selectors = {
-                new DataValue(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114]),
+                new(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114]),
             }
         };
 
         var candidates = new List<DataField>() {
             new(DataProvider.CreateIdentity(0, 3), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114]) {
                 Selectors = {
-                    new DataValue(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114])
+                    new(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114])
                 }
             },
             expectedResult,

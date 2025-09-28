@@ -26,26 +26,26 @@ public class DataItemTests {
 
         var expectedResult = new DataItem(DataProvider.CreateIdentity(0, 5), [110, 97, 109, 101]) {
             Fields = {
-                new DataField (DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114]),
+                new(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114]),
             },
             Labels = {
-                new DataValue(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
+                new(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
             },
             Locations = {
-                new DataValue(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+                new(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
             }
         };
 
         var candidates = new List<DataItem>() {
             new(DataProvider.CreateIdentity(0, 3), [111, 108, 100, 101, 114]) {
                 Fields = {
-                    new DataField(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114])
+                    new(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114])
                 },
                 Labels = {
-                    new DataValue(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
+                    new(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
                 },
                 Locations = {
-                    new DataValue(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+                    new(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
                 }
             },
             expectedResult,

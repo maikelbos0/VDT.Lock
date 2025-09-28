@@ -44,7 +44,7 @@ public sealed class DataIdentity : IData<DataIdentity>, IEquatable<DataIdentity>
         return new(plainSpan.ReadSpan(ref position), plainSpan.ReadSpan(ref position));
     }
 
-    private SecureBuffer plainKeyBuffer;
+    private readonly SecureBuffer plainKeyBuffer;
     private SecureBuffer plainVersionBuffer;
 
     public bool IsDisposed { get; private set; }
