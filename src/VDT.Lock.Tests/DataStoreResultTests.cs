@@ -3,13 +3,13 @@ using Xunit;
 
 namespace VDT.Lock.Tests;
 
-public class SaveDataStoreResultTests {
+public class DataStoreResultTests {
     [Fact]
     public void Dispose() {
         DataCollection<DataValue> succeededStorageSites;
         DataCollection<DataValue> failedStorageSites;
 
-        using (var subject = new SaveDataStoreResult()) {
+        using (var subject = new DataStoreResult()) {
             succeededStorageSites = subject.SucceededStorageSites;
             failedStorageSites = subject.FailedStorageSites;
         }
@@ -20,9 +20,9 @@ public class SaveDataStoreResultTests {
 
     [Fact]
     public void IsDisposed() {
-        SaveDataStoreResult disposedSubject;
+        DataStoreResult disposedSubject;
 
-        using (var subject = new SaveDataStoreResult()) {
+        using (var subject = new DataStoreResult()) {
             disposedSubject = subject;
         }
 
@@ -31,9 +31,9 @@ public class SaveDataStoreResultTests {
 
     [Fact]
     public void SucceededStorageSitesThrowsIfDisposed() {
-        SaveDataStoreResult disposedSubject;
+        DataStoreResult disposedSubject;
 
-        using (var subject = new SaveDataStoreResult()) {
+        using (var subject = new DataStoreResult()) {
             disposedSubject = subject;
         }
 
@@ -42,9 +42,9 @@ public class SaveDataStoreResultTests {
 
     [Fact]
     public void FailedStorageSitesThrowsIfDisposed() {
-        SaveDataStoreResult disposedSubject;
+        DataStoreResult disposedSubject;
 
-        using (var subject = new SaveDataStoreResult()) {
+        using (var subject = new DataStoreResult()) {
             disposedSubject = subject;
         }
 

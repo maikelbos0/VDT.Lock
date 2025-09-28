@@ -113,14 +113,15 @@ public class StoreManagerTests {
         await subject.Authenticate(plainMasterPasswordBuffer);
         var saveResult = await subject.SaveDataStore(dataStore);
 
-        var succeededStorageSite = Assert.Single(saveResult.SucceededStorageSites);
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), succeededStorageSite.Value);
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), Assert.Single(saveResult.SucceededStorageSites).Value);
         Assert.Empty(saveResult.FailedStorageSites);
 
-        var loadResult = await subject.LoadDataStore();
+        var (dataStoreResult, loadResult) = await subject.LoadDataStore();
 
-        Assert.Equal(new ReadOnlySpan<byte>([102, 111, 111]), loadResult.Name);
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), Assert.Single(loadResult.Items).Name);
+        Assert.Equal(new ReadOnlySpan<byte>([102, 111, 111]), dataStoreResult.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), Assert.Single(dataStoreResult.Items).Name);
+        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), Assert.Single(loadResult.SucceededStorageSites).Value);
+        Assert.Empty(loadResult.FailedStorageSites);
     }
 
     [Fact]

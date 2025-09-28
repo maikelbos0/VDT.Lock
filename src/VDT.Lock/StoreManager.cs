@@ -94,13 +94,13 @@ public sealed class StoreManager : IDisposable {
         return await encryptor.Encrypt(plainStorageSettingsBuffer, plainStoreKeyBuffer);
     }
 
-    // TODO add information about which stores succeeded
-    public async Task<DataStore> LoadDataStore() {
+    public async Task<(DataStore, DataStoreResult)> LoadDataStore() {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         EnsureAuthenticated();
 
         var dataStores = new List<DataStore>();
+        var result = new DataStoreResult();
         var resultLock = new object();
 
         await Parallel.ForEachAsync(storageSites, async (storageSite, _) => {
@@ -112,7 +112,13 @@ public sealed class StoreManager : IDisposable {
                     using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
 
                     lock (resultLock) {
+                        result.SucceededStorageSites.Add(new DataValue(storageSite.Name));
                         dataStores.Add(DataStore.DeserializeFrom(plainBuffer));
+                    }
+                }
+                else {
+                    lock (resultLock) {
+                        result.FailedStorageSites.Add(new DataValue(storageSite.Name));
                     }
                 }
             }
@@ -121,10 +127,10 @@ public sealed class StoreManager : IDisposable {
             }
         });
 
-        return DataStore.Merge(dataStores.DefaultIfEmpty(new()));
+        return (DataStore.Merge(dataStores.DefaultIfEmpty(new())), result);
     }
 
-    public async Task<SaveDataStoreResult> SaveDataStore(DataStore dataStore) {
+    public async Task<DataStoreResult> SaveDataStore(DataStore dataStore) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         EnsureAuthenticated();
@@ -137,7 +143,7 @@ public sealed class StoreManager : IDisposable {
         using var plainBuffer = plainBytes.ToBuffer();
         using var encryptedBuffer = await encryptor.Encrypt(plainBuffer, plainStoreKeyBuffer);
 
-        var result = new SaveDataStoreResult();
+        var result = new DataStoreResult();
         var resultLock = new object();
 
         await Parallel.ForEachAsync(storageSites, async (storageSite, _) => {
