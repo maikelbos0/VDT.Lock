@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VDT.Lock;
 
-public sealed class DataItem : IData<DataItem>, IIdentifiableData, IDisposable {
+public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDisposable {
     public static DataItem DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
@@ -12,6 +13,22 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData, IDisposable {
             Labels = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
             Locations = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
         };
+    }
+
+    public static DataItem Merge(IEnumerable<DataItem> candidates) {
+        var result = DataIdentity.SelectNewest(candidates);
+
+        result.Fields = DataCollection.Merge(candidates.Select(candidate => candidate.Fields));
+        result.Labels = DataCollection.Merge(candidates.Select(candidate => candidate.labels));
+        result.Locations = DataCollection.Merge(candidates.Select(candidate => candidate.locations));
+
+        foreach (var candidate in candidates) {
+            if (candidate != result) {
+                candidate.Dispose();
+            }
+        }
+
+        return result;
     }
 
     private readonly DataIdentity identity;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace VDT.Lock.Tests;
@@ -18,9 +19,65 @@ public class DataItemTests {
     }
 
     [Fact]
+    public void Merge() {
+        var expectedField = new DataField(DataProvider.CreateIdentity(1, 10), [118, 97, 108, 117, 101], [118, 97, 108, 117, 101]);
+        var expectedLabel = new DataValue(DataProvider.CreateIdentity(2, 10), [108, 97, 98, 101, 108]);
+        var expectedLocation = new DataValue(DataProvider.CreateIdentity(3, 10), [108, 111, 99, 97, 116, 105, 111, 110]);
+
+        var expectedResult = new DataItem(DataProvider.CreateIdentity(0, 5), [110, 97, 109, 101]) {
+            Fields = {
+                new DataField (DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114]),
+            },
+            Labels = {
+                new DataValue(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
+            },
+            Locations = {
+                new DataValue(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+            }
+        };
+
+        var candidates = new List<DataItem>() {
+            new(DataProvider.CreateIdentity(0, 3), [111, 108, 100, 101, 114]) {
+                Fields = {
+                    new DataField(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114])
+                },
+                Labels = {
+                    new DataValue(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
+                },
+                Locations = {
+                    new DataValue(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+                }
+            },
+            expectedResult,
+            new(DataProvider.CreateIdentity(0, 4), [111, 108, 100, 101, 114]) {
+                Fields = {
+                    expectedField
+                },
+                Labels = {
+                    expectedLabel
+                },
+                Locations = {
+                    expectedLocation
+                }
+            }
+        };
+
+        var result = DataItem.Merge(candidates);
+
+        Assert.Same(expectedResult, result);
+        Assert.Equal(expectedField, Assert.Single(result.Fields));
+        Assert.Equal(expectedLabel, Assert.Single(result.Labels));
+        Assert.Equal(expectedLocation, Assert.Single(result.Locations));
+
+        foreach (var candidate in candidates) {
+            Assert.Equal(candidate != expectedResult, candidate.IsDisposed);
+        }
+    }
+
+    [Fact]
     public void Constructor() {
         var identity = new DataIdentity();
-        var plainNameSpan = new ReadOnlySpan<byte>([110, 97, 109, 101]); 
+        var plainNameSpan = new ReadOnlySpan<byte>([110, 97, 109, 101]);
         using var subject = new DataItem(identity, plainNameSpan);
 
         Assert.Same(identity, subject.Identity);
