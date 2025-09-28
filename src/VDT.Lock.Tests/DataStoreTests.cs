@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace VDT.Lock.Tests;
@@ -13,6 +14,39 @@ public class DataStoreTests {
         Assert.Equal(DataProvider.CreateIdentity(0), subject.Identity);
         Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
         Assert.Equal(new ReadOnlySpan<byte>([105, 116, 101, 109]), Assert.Single(subject.Items).Name);
+    }
+
+    [Fact]
+    public void SelectNewest() {
+        var expectedItem = new DataItem(DataProvider.CreateIdentity(1, 10), [105, 116, 101, 109]);
+        var expectedResult = new DataStore(DataProvider.CreateIdentity(0, 5), [110, 97, 109, 101]) {
+            Items = {
+                new(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114]),
+            }
+        };
+
+        var candidates = new List<DataStore>() {
+            new(DataProvider.CreateIdentity(0, 3), [111, 108, 100, 101, 114]) {
+                Items = {
+                    new DataItem(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114])
+                }
+            },
+            expectedResult,
+            new(DataProvider.CreateIdentity(0, 4), [111, 108, 100, 101, 114]) {
+                Items = {
+                    expectedItem
+                }
+            }
+        };
+
+        var result = DataStore.Merge(candidates);
+
+        Assert.Same(expectedResult, result);
+        Assert.Equal(expectedItem, Assert.Single(result.Items));
+
+        foreach (var candidate in candidates) {
+            Assert.Equal(candidate != expectedResult, candidate.IsDisposed);
+        }
     }
 
     [Fact]

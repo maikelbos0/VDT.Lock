@@ -1,15 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VDT.Lock;
 
-public sealed class DataStore : IData<DataStore>, IIdentifiableData, IDisposable {
+public sealed class DataStore : IData<DataStore>, IIdentifiableData<DataStore>, IDisposable {
     public static DataStore DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
         return new DataStore(DataIdentity.DeserializeFrom(plainSpan.ReadSpan(ref position)), plainSpan.ReadSpan(ref position)) {
             Items = DataCollection<DataItem>.DeserializeFrom(plainSpan.ReadSpan(ref position))
         };
+    }
+
+    public static DataStore Merge(IEnumerable<DataStore> candidates) {
+        var result = DataIdentity.SelectNewest(candidates);
+
+        result.items = DataCollection.Merge(candidates.Select(candidate => candidate.items));
+
+        foreach (var candidate in candidates) {
+            if (candidate != result) {
+                candidate.Dispose();
+            }
+        }
+
+        return result;
     }
 
     private readonly DataIdentity identity;
