@@ -162,7 +162,7 @@ public class DataCollectionTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result, true);
 
-        Assert.Equal(new ReadOnlySpan<byte>([95, 0, 0, 0, ..DataProvider.CreateSerializedValue(0, [122, 101, 114, 111]), ..DataProvider.CreateSerializedValue(1, [111, 110, 101])]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([95, 0, 0, 0, .. DataProvider.CreateSerializedValue(0, [122, 101, 114, 111]), .. DataProvider.CreateSerializedValue(1, [111, 110, 101])]), result.GetValue());
     }
 
     [Fact]
@@ -179,7 +179,7 @@ public class DataCollectionTests {
     }
 
     [Fact]
-    public void CopyToThrows() {
+    public void CopyTo() {
         using var subject = new DataCollection<DataValue>() {
             DataProvider.CreateValue(0, [122, 101, 114, 111]),
             DataProvider.CreateValue(1, [111, 110, 101])
@@ -277,6 +277,15 @@ public class DataCollectionTests {
 
         Assert.Throws<ObjectDisposedException>(() => subject.UnsafeClear());
         }
+
+    [Fact]
+    public void CopyToThrowsIfDisposed() {
+        DataCollection<DataValue> subject;
+
+        using (subject = []) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.CopyTo([], 0));
+    }
 
     [Fact]
     public void GetEnumeratorThrowsIfDisposed() {

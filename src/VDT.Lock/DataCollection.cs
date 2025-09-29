@@ -138,6 +138,8 @@ public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>
     }
 
     public void CopyTo(T[] array, int arrayIndex) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         items.CopyTo(array, arrayIndex);
     }
 

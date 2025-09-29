@@ -22,23 +22,19 @@ public class DataStoreResultTests {
 
     [Fact]
     public void SucceededStorageSitesThrowsIfDisposed() {
-        DataStoreResult disposedSubject;
+        DataStoreResult subject;
 
-        using (var subject = new DataStoreResult()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.SucceededStorageSites; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.SucceededStorageSites; });
     }
 
     [Fact]
     public void FailedStorageSitesThrowsIfDisposed() {
-        DataStoreResult disposedSubject;
+        DataStoreResult subject;
 
-        using (var subject = new DataStoreResult()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.FailedStorageSites; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.FailedStorageSites; });
     }
 }
