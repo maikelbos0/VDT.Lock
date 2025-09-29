@@ -73,32 +73,23 @@ public class DataValueTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([45, 0, 0, 0, ..DataProvider.CreateSerializedIdentity(0), 5, 0, 0, 0, 118, 97, 108, 117, 101]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([45, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 5, 0, 0, 0, 118, 97, 108, 117, 101]), result.GetValue());
     }
 
     [Fact]
     public void Dispose() {
+        DataValue subject;
         DataIdentity identity;
         SecureBuffer plainValueBuffer;
 
-        using (var subject = new DataValue()) {
+        using (subject = new()) {
             identity = subject.Identity;
             plainValueBuffer = subject.GetBuffer("plainValueBuffer");
         }
 
+        Assert.True(subject.IsDisposed);
         Assert.True(identity.IsDisposed);
         Assert.True(plainValueBuffer.IsDisposed);
-    }
-
-    [Fact]
-    public void IsDisposed() {
-        DataValue disposedSubject;
-
-        using (var subject = new DataValue()) {
-            disposedSubject = subject;
-        }
-
-        Assert.True(disposedSubject.IsDisposed);
     }
 
     [Fact]

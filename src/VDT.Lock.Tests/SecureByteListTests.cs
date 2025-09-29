@@ -184,24 +184,15 @@ public sealed class SecureByteListTests {
 
     [Fact]
     public void Dispose() {
+        SecureByteList subject;
         SecureBuffer buffer;
 
-        using (var subject = new SecureByteList()) {
+        using (subject = new()) {
             buffer = subject.GetBuffer();
         }
 
+        Assert.True(subject.IsDisposed);
         Assert.True(buffer.IsDisposed);
-    }
-
-    [Fact]
-    public void IsDisposed() {
-        SecureByteList disposedSubject;
-
-        using (var subject = new SecureByteList()) {
-            disposedSubject = subject;
-        }
-
-        Assert.True(disposedSubject.IsDisposed);
     }
 
     [Fact]

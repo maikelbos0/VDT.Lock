@@ -168,6 +168,7 @@ public class DataItemTests {
 
     [Fact]
     public void Dispose() {
+        DataItem subject;
         DataIdentity identity;
         SecureBuffer plainNameBuffer;
         DataCollection<DataField> fields;
@@ -182,6 +183,7 @@ public class DataItemTests {
             locations = subject.Locations;
         }
 
+        Assert.True(subject.IsDisposed);
         Assert.True(identity.IsDisposed);
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(fields.IsDisposed);

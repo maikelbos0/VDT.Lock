@@ -109,16 +109,18 @@ public class DataStoreTests {
 
     [Fact]
     public void Dispose() {
+        DataStore subject;
         DataIdentity identity;
         SecureBuffer plainNameBuffer;
         DataCollection<DataItem> items;
 
-        using (var subject = new DataStore()) {
+        using (subject = new()) {
             identity = subject.Identity;
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             items = subject.Items;
         }
 
+        Assert.True(subject.IsDisposed);
         Assert.True(identity.IsDisposed);
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(items.IsDisposed);

@@ -47,7 +47,6 @@ public class DataIdentityTests {
         Assert.Equal(expectedResult, a == b);
     }
 
-
     [Theory]
     [InlineData(
         new byte[] { 16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0 },
@@ -192,27 +191,18 @@ public class DataIdentityTests {
 
     [Fact]
     public void Dispose() {
+        DataIdentity subject;
         SecureBuffer plainKeyBuffer;
         SecureBuffer plainVersionBuffer;
 
-        using (var subject = new DataIdentity()) {
+        using (subject = new()) {
             plainKeyBuffer = subject.GetBuffer("plainKeyBuffer");
             plainVersionBuffer = subject.GetBuffer("plainVersionBuffer");
         }
 
+        Assert.True(subject.IsDisposed);
         Assert.True(plainKeyBuffer.IsDisposed);
         Assert.True(plainVersionBuffer.IsDisposed);
-    }
-
-    [Fact]
-    public void IsDisposed() {
-        DataIdentity disposedSubject;
-
-        using (var subject = new DataIdentity()) {
-            disposedSubject = subject;
-        }
-
-        Assert.True(disposedSubject.IsDisposed);
     }
 
     [Fact]

@@ -134,33 +134,24 @@ public class DataFieldTests {
 
     [Fact]
     public void Dispose() {
+        DataField subject;
         DataIdentity identity;
         SecureBuffer plainNameBuffer;
         SecureBuffer plainDataBuffer;
         DataCollection<DataValue> selectors;
 
-        using (var subject = new DataField()) {
+        using (subject = new()) {
             identity = subject.Identity;
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             plainDataBuffer = subject.GetBuffer("plainValueBuffer");
             selectors = subject.Selectors;
         }
 
+        Assert.True(subject.IsDisposed);
         Assert.True(identity.IsDisposed);
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(plainDataBuffer.IsDisposed);
         Assert.True(selectors.IsDisposed);
-    }
-
-    [Fact]
-    public void IsDisposed() {
-        DataField disposedSubject;
-
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        }
-
-        Assert.True(disposedSubject.IsDisposed);
     }
 
     [Fact]

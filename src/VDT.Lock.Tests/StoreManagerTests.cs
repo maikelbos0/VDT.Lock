@@ -190,12 +190,13 @@ public class StoreManagerTests {
 
     [Fact]
     public async Task Dispose() {
+        StoreManager subject;
         SecureBuffer plainSessionKeyBuffer;
         SecureBuffer encryptedStoreKeyBuffer;
         DataCollection<StorageSiteBase> storageSites;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
             using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
             await subject.Authenticate(plainMasterPasswordBuffer);
@@ -205,21 +206,10 @@ public class StoreManagerTests {
             storageSites = subject.StorageSites;
         }
 
+        Assert.True(subject.IsDisposed);
         Assert.True(plainSessionKeyBuffer.IsDisposed);
         Assert.True(encryptedStoreKeyBuffer.IsDisposed);
         Assert.True(storageSites.IsDisposed);
-    }
-
-    [Fact]
-    public void IsDisposed() {
-        StoreManager disposedSubject;
-
-        var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
-
-        Assert.True(disposedSubject.IsDisposed);
     }
 
     [Fact]

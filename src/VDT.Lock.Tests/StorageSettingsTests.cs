@@ -65,31 +65,23 @@ public class StorageSettingsTests {
 
     [Fact]
     public void Dispose() {
+        StorageSettings subject;
         Dictionary<string, SecureBuffer> plainSettingsBuffer;
 
-        using (var subject = new StorageSettings()) {
+        using (subject = new()) {
             subject.Set("foo", new ReadOnlySpan<byte>([5, 6, 7, 8, 9]));
             subject.Set("bar", new ReadOnlySpan<byte>([1, 2, 3, 4]));
 
             plainSettingsBuffer = GetSettings(subject);
-        };
+        }
+
+        Assert.True(subject.IsDisposed);
 
         Assert.Equal(2, plainSettingsBuffer.Count);
 
         foreach (var buffer in plainSettingsBuffer.Values) {
             Assert.True(buffer.IsDisposed);
         }
-    }
-
-    [Fact]
-    public void IsDisposed() {
-        StorageSettings disposedSubject;
-
-        using (var subject = new StorageSettings()) {
-            disposedSubject = subject;
-        };
-
-        Assert.True(disposedSubject.IsDisposed);
     }
 
     [Fact]

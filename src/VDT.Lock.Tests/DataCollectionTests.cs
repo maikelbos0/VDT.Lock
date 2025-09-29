@@ -194,24 +194,15 @@ public class DataCollectionTests {
 
     [Fact]
     public void Dispose() {
+        DataCollection<DataValue> subject;
         var item = new DataValue();
 
-        using (var subject = new DataCollection<DataValue>()) {
+        using (subject = []) {
             subject.Add(item);
         }
 
+        Assert.True(subject.IsDisposed);
         Assert.True(item.IsDisposed);
-    }
-
-    [Fact]
-    public void IsDisposed() {
-        DataCollection<DataValue> disposedSubject;
-
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
-
-        Assert.True(disposedSubject.IsDisposed);
     }
 
     [Fact]

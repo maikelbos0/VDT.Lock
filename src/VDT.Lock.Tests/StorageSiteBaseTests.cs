@@ -97,26 +97,17 @@ public class StorageSiteBaseTests {
 
     [Fact]
     public void Dispose() {
+        TestStorageSite subject;
         SecureBuffer plainNameBuffer;
         using var storageSettings = new StorageSettings();
 
-        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), storageSettings)) {
+        using (subject = new TestStorageSite(new ReadOnlySpan<byte>([]), storageSettings)) {
             plainNameBuffer = subject.GetBuffer<StorageSiteBase>("plainNameBuffer");
         }
 
+        Assert.True(subject.IsDisposed);
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(storageSettings.IsDisposed);
-    }
-
-    [Fact]
-    public void IsDisposed() {
-        TestStorageSite disposedSubject;
-
-        using (var subject = new TestStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new StorageSettings())) {
-            disposedSubject = subject;
-        }
-
-        Assert.True(disposedSubject.IsDisposed);
     }
 
     [Fact]
