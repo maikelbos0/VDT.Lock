@@ -8,9 +8,9 @@ namespace VDT.Lock.Tests;
 public class DataCollectionTests {
     [Fact]
     public void Merge() {
-        var expectedValue1 = new DataValue(DataProvider.CreateIdentity(1, 10), [115, 101, 108, 101, 99, 116, 111, 114]);
-        var expectedValue2 = new DataValue(DataProvider.CreateIdentity(2, 10), [115, 101, 108, 101, 99, 116, 111, 114]);
-        var expectedValue3 = new DataValue(DataProvider.CreateIdentity(3, 10), [115, 101, 108, 101, 99, 116, 111, 114]);
+        var expectedValue1 = new DataValue(DataProvider.CreateIdentity(1, 10), [118, 97, 108, 117, 101]);
+        var expectedValue2 = new DataValue(DataProvider.CreateIdentity(2, 10), [118, 97, 108, 117, 101]);
+        var expectedValue3 = new DataValue(DataProvider.CreateIdentity(3, 10), [118, 97, 108, 117, 101]);
 
         var candidates = new List<DataCollection<DataValue>>() {
             new() {
@@ -276,7 +276,7 @@ public class DataCollectionTests {
         using (subject = []) { }
 
         Assert.Throws<ObjectDisposedException>(() => subject.UnsafeClear());
-        }
+    }
 
     [Fact]
     public void CopyToThrowsIfDisposed() {
