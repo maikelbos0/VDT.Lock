@@ -145,20 +145,34 @@ public class DataItemTests {
 
     [Fact]
     public void FieldLengths() {
-        using var subject = new DataItem([110, 97, 109, 101]);
-        subject.Fields.Add(DataProvider.CreateField(0, [110, 97, 109, 101], [118, 97, 108, 117, 101]));
-        subject.Labels.Add(DataProvider.CreateValue(1, [108, 97, 98, 101, 108]));
-        subject.Locations.Add(DataProvider.CreateValue(2, [108, 111, 99, 97, 116, 105, 111, 110]));
+        using var subject = new DataItem([110, 97, 109, 101]) {
+            Fields = {
+                DataProvider.CreateField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101])
+            },
+            Labels = {
+                DataProvider.CreateValue(2, [108, 97, 98, 101, 108])
+            },
+            Locations = {
+                DataProvider.CreateValue(3, [108, 111, 99, 97, 116, 105, 111, 110])
+            }
+        };
 
         Assert.Equal([32, 4, 61, 49, 52], subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new DataItem(DataProvider.CreateIdentity(0), [110, 97, 109, 101]);
-        subject.Fields.Add(DataProvider.CreateField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101]));
-        subject.Labels.Add(DataProvider.CreateValue(2, [108, 97, 98, 101, 108]));
-        subject.Locations.Add(DataProvider.CreateValue(3, [108, 111, 99, 97, 116, 105, 111, 110]));
+        using var subject = new DataItem(DataProvider.CreateIdentity(0), [110, 97, 109, 101]) {
+            Fields = {
+                DataProvider.CreateField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101])
+            },
+            Labels = {
+                DataProvider.CreateValue(2, [108, 97, 98, 101, 108])
+            },
+            Locations = {
+                DataProvider.CreateValue(3, [108, 111, 99, 97, 116, 105, 111, 110])
+            }
+        };
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);

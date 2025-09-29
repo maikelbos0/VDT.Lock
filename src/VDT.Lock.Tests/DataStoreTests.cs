@@ -90,16 +90,22 @@ public class DataStoreTests {
 
     [Fact]
     public void FieldLengths() {
-        using var subject = new DataStore([110, 97, 109, 101]);
-        subject.Items.Add(DataProvider.CreateItem(0, [105, 116, 101, 109]));
+        using var subject = new DataStore([110, 97, 109, 101]) {
+            Items = {
+                DataProvider.CreateItem(1, [105, 116, 101, 109])
+            }
+        };
 
         Assert.Equal([32, 4, 60], subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new DataStore(DataProvider.CreateIdentity(0), [110, 97, 109, 101]);
-        subject.Items.Add(DataProvider.CreateItem(1, [105, 116, 101, 109]));
+        using var subject = new DataStore(DataProvider.CreateIdentity(0), [110, 97, 109, 101]) {
+            Items = {
+                DataProvider.CreateItem(1, [105, 116, 101, 109])
+            }
+        };
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);

@@ -140,7 +140,7 @@ public class DataIdentityTests {
             | ((long)subject.Version[6] << 48)
             | ((long)subject.Version[7] << 56);
 
-        Assert.True(previousVersion <= version);
+        Assert.True(previousVersion < version);
     }
 
     [Fact]
