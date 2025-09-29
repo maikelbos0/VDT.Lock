@@ -214,124 +214,104 @@ public class StoreManagerTests {
 
     [Fact]
     public void IsAuthenticatedThrowsIfDisposed() {
-        StoreManager disposedSubject;
+        StoreManager subject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.IsAuthenticated);
+        Assert.Throws<ObjectDisposedException>(() => subject.IsAuthenticated);
     }
 
     [Fact]
     public void GetStorageSitesThrowsIfDisposed() {
-        StoreManager disposedSubject;
+        StoreManager subject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.StorageSites);
+        Assert.Throws<ObjectDisposedException>(() => subject.StorageSites);
     }
 
     [Fact]
     public void SetStorageSitesThrowsIfDisposed() {
-        StoreManager disposedSubject;
+        StoreManager subject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.StorageSites = []);
+        Assert.Throws<ObjectDisposedException>(() => subject.StorageSites = []);
     }
 
     [Fact]
     public async Task AuthenticateThrowsIfDisposed() {
-        StoreManager disposedSubject;
+        StoreManager subject;
         var plainMasterPasswordBuffer = new SecureBuffer(0);
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) { }
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await disposedSubject.Authenticate(plainMasterPasswordBuffer));
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.Authenticate(plainMasterPasswordBuffer));
     }
 
     [Fact]
     public async Task LoadStorageSitesThrowsIfDisposed() {
-        StoreManager disposedSubject;
+        StoreManager subject;
         var encryptedStorageSettingsBuffer = new SecureBuffer(0);
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) { }
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await disposedSubject.LoadStorageSites(encryptedStorageSettingsBuffer));
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.LoadStorageSites(encryptedStorageSettingsBuffer));
     }
 
     [Fact]
     public async Task SaveStorageSitesThrowsIfDisposed() {
-        StoreManager disposedSubject;
+        StoreManager subject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) { }
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await disposedSubject.SaveStorageSites());
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.SaveStorageSites());
     }
 
     [Fact]
     public async Task LoadDataStoreThrowsIfDisposed() {
-        StoreManager disposedSubject;
+        StoreManager subject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) { }
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await disposedSubject.LoadDataStore());
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.LoadDataStore());
     }
 
     [Fact]
     public async Task SaveDataStoreThrowsIfDisposed() {
-        StoreManager disposedSubject;
+        StoreManager subject;
         using var dataStore = new DataStore();
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) { }
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await disposedSubject.SaveDataStore(dataStore));
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.SaveDataStore(dataStore));
     }
 
     [Fact]
     public async Task GetPlainStoreKeyBufferThrowsIfDisposed() {
-        StoreManager disposedSubject;
+        StoreManager subject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) { }
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await disposedSubject.GetPlainStoreKeyBuffer());
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.GetPlainStoreKeyBuffer());
     }
 
     [Fact]
     public void EnsureAuthenticatedThrowsIfDisposed() {
-        StoreManager disposedSubject;
+        StoreManager subject;
 
         var randomByteGenerator = new RandomByteGenerator();
-        using (var subject = new StoreManager(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) {
-            disposedSubject = subject;
-        }
+        using (subject = new(new Encryptor(randomByteGenerator), randomByteGenerator, new HashProvider())) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.EnsureAuthenticated());
+        Assert.Throws<ObjectDisposedException>(() => subject.EnsureAuthenticated());
     }
 }

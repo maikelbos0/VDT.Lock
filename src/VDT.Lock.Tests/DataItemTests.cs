@@ -175,7 +175,7 @@ public class DataItemTests {
         DataCollection<DataValue> labels;
         DataCollection<DataValue> locations;
 
-        using (var subject = new DataItem()) {
+        using (subject = new()) {
             identity = subject.Identity;
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             fields = subject.Fields;
@@ -193,123 +193,101 @@ public class DataItemTests {
 
     [Fact]
     public void IdentityThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Identity; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Identity; });
     }
 
     [Fact]
     public void GetNameThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Name; });
     }
 
     [Fact]
     public void SetNameThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]));
+        Assert.Throws<ObjectDisposedException>(() => subject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]));
     }
 
     [Fact]
     public void GetFieldsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Fields);
+        Assert.Throws<ObjectDisposedException>(() => subject.Fields);
     }
 
     [Fact]
     public void SetFieldsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Fields = []);
+        Assert.Throws<ObjectDisposedException>(() => subject.Fields = []);
     }
 
     [Fact]
     public void GetLabelsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Labels);
+        Assert.Throws<ObjectDisposedException>(() => subject.Labels);
     }
 
     [Fact]
     public void SetLabelsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Labels = []);
+        Assert.Throws<ObjectDisposedException>(() => subject.Labels = []);
     }
 
     [Fact]
     public void GetLocationsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Locations);
+        Assert.Throws<ObjectDisposedException>(() => subject.Locations);
     }
 
     [Fact]
     public void SetLocationsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Locations = []);
+        Assert.Throws<ObjectDisposedException>(() => subject.Locations = []);
     }
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
 }

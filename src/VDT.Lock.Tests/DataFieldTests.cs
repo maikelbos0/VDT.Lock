@@ -125,7 +125,7 @@ public class DataFieldTests {
                 DataProvider.CreateValue(1, [105, 116, 101, 109])
             }
         };
-        
+
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
@@ -156,101 +156,83 @@ public class DataFieldTests {
 
     [Fact]
     public void IdentityThrowsIfDisposed() {
-        DataField disposedSubject;
+        DataField subject;
 
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Identity; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Identity; });
     }
 
     [Fact]
     public void GetNameThrowsIfDisposed() {
-        DataField disposedSubject;
+        DataField subject;
 
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Name; });
     }
 
     [Fact]
     public void SetNameThrowsIfDisposed() {
-        DataField disposedSubject;
+        DataField subject;
 
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]));
+        Assert.Throws<ObjectDisposedException>(() => subject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]));
     }
 
     [Fact]
     public void GetValueThrowsIfDisposed() {
-        DataField disposedSubject;
+        DataField subject;
 
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Value; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Value; });
     }
 
     [Fact]
     public void SetValueThrowsIfDisposed() {
-        DataField disposedSubject;
+        DataField subject;
 
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([118, 97, 108, 117, 101]));
+        Assert.Throws<ObjectDisposedException>(() => subject.Value = new ReadOnlySpan<byte>([118, 97, 108, 117, 101]));
     }
 
     [Fact]
     public void GetSelectorsThrowsIfDisposed() {
-        DataField disposedSubject;
+        DataField subject;
 
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Selectors);
+        Assert.Throws<ObjectDisposedException>(() => subject.Selectors);
     }
 
     [Fact]
     public void SetSelectorsThrowsIfDisposed() {
-        DataField disposedSubject;
+        DataField subject;
 
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Selectors = []);
+        Assert.Throws<ObjectDisposedException>(() => subject.Selectors = []);
     }
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
-        DataField disposedSubject;
+        DataField subject;
 
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        DataField disposedSubject;
+        DataField subject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new DataField()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
 }

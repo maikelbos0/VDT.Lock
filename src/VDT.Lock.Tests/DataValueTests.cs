@@ -94,57 +94,47 @@ public class DataValueTests {
 
     [Fact]
     public void IdentityThrowsIfDisposed() {
-        DataValue disposedSubject;
+        DataValue subject;
 
-        using (var subject = new DataValue()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Identity; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Identity; });
     }
 
     [Fact]
     public void GetValueThrowsIfDisposed() {
-        DataValue disposedSubject;
+        DataValue subject;
 
-        using (var subject = new DataValue()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Value; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Value; });
     }
 
     [Fact]
     public void SetValueThrowsIfDisposed() {
-        DataValue disposedSubject;
+        DataValue subject;
 
-        using (var subject = new DataValue()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Value = new ReadOnlySpan<byte>([118, 97, 108, 117, 101]));
+        Assert.Throws<ObjectDisposedException>(() => subject.Value = new ReadOnlySpan<byte>([118, 97, 108, 117, 101]));
     }
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
-        DataValue disposedSubject;
+        DataValue subject;
 
-        using (var subject = new DataValue()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        DataValue disposedSubject;
+        DataValue subject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new DataValue()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
 }

@@ -197,90 +197,74 @@ public sealed class SecureByteListTests {
 
     [Fact]
     public void AddCharThrowsIfDisposed() {
-        SecureByteList disposedSubject;
+        SecureByteList subject;
 
-        using (var subject = new SecureByteList()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add('a'));
+        Assert.Throws<ObjectDisposedException>(() => subject.Add('a'));
     }
 
     [Fact]
     public void AddByteThrowsIfDisposed() {
-        SecureByteList disposedSubject;
+        SecureByteList subject;
 
-        using (var subject = new SecureByteList()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add(15));
+        Assert.Throws<ObjectDisposedException>(() => subject.Add(15));
     }
 
     [Fact]
     public void AddReadOnlySpanThrowsIfDisposed() {
-        SecureByteList disposedSubject;
+        SecureByteList subject;
 
-        using (var subject = new SecureByteList()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add(new ReadOnlySpan<byte>([15, 15, 15])));
+        Assert.Throws<ObjectDisposedException>(() => subject.Add(new ReadOnlySpan<byte>([15, 15, 15])));
     }
 
     [Fact]
     public void EnsureCapacityThrowsIfDisposed() {
-        SecureByteList disposedSubject;
+        SecureByteList subject;
 
-        using (var subject = new SecureByteList()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.EnsureCapacity(0));
+        Assert.Throws<ObjectDisposedException>(() => subject.EnsureCapacity(0));
     }
 
     [Fact]
     public void RemoveLastThrowsIfDisposed() {
-        SecureByteList disposedSubject;
+        SecureByteList subject;
 
-        using (var subject = new SecureByteList()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.RemoveLast());
+        Assert.Throws<ObjectDisposedException>(() => subject.RemoveLast());
     }
 
     [Fact]
     public void ClearThrowsIfDisposed() {
-        SecureByteList disposedSubject;
+        SecureByteList subject;
 
-        using (var subject = new SecureByteList()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Clear());
+        Assert.Throws<ObjectDisposedException>(() => subject.Clear());
     }
 
     [Fact]
     public void GetValueThrowsIfDisposed() {
-        SecureByteList disposedSubject;
+        SecureByteList subject;
 
-        using (var subject = new SecureByteList()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.GetValue());
+        Assert.Throws<ObjectDisposedException>(() => subject.GetValue());
     }
 
     [Fact]
     public void ToBufferThrowsIfDisposed() {
-        SecureByteList disposedSubject;
+        SecureByteList subject;
 
-        using (var subject = new SecureByteList()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.ToBuffer());
+        Assert.Throws<ObjectDisposedException>(() => subject.ToBuffer());
     }
 
     private static byte[] GetExpectedBufferValue(int length, params byte[] bytes) {

@@ -120,13 +120,13 @@ public class DataIdentityTests {
         var plainSpan = new ReadOnlySpan<byte>([16, 0, 0, 0, 56, 240, 157, 219, 241, 61, 91, 71, 186, 251, 45, 225, 99, 172, 214, 4, 8, 0, 0, 0, 226, 189, 189, 101, 0, 0, 0, 0]);
 
         using var subject = DataIdentity.DeserializeFrom(plainSpan);
-        var previousVersion = subject.Version[0] 
-            | ((long)subject.Version[1] << 8) 
-            | ((long)subject.Version[2] << 16) 
-            | ((long)subject.Version[3] << 24) 
-            | ((long)subject.Version[4] << 32) 
-            | ((long)subject.Version[5] << 40) 
-            | ((long)subject.Version[6] << 48) 
+        var previousVersion = subject.Version[0]
+            | ((long)subject.Version[1] << 8)
+            | ((long)subject.Version[2] << 16)
+            | ((long)subject.Version[3] << 24)
+            | ((long)subject.Version[4] << 32)
+            | ((long)subject.Version[5] << 40)
+            | ((long)subject.Version[6] << 48)
             | ((long)subject.Version[7] << 56);
 
         subject.Update();
@@ -207,46 +207,38 @@ public class DataIdentityTests {
 
     [Fact]
     public void KeyThrowsIfDisposed() {
-        DataIdentity disposedSubject;
+        DataIdentity subject;
 
-        using (var subject = new DataIdentity()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Key; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Key; });
     }
 
     [Fact]
     public void VersionThrowsIfDisposed() {
-        DataIdentity disposedSubject;
+        DataIdentity subject;
 
-        using (var subject = new DataIdentity()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Version; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Version; });
     }
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
-        DataIdentity disposedSubject;
+        DataIdentity subject;
 
-        using (var subject = new DataIdentity()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        DataIdentity disposedSubject;
+        DataIdentity subject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new DataIdentity()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
 }

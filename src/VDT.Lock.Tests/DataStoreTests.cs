@@ -128,79 +128,65 @@ public class DataStoreTests {
 
     [Fact]
     public void IdentityThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Identity; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Identity; });
     }
 
     [Fact]
     public void GetNameThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Name; });
     }
 
     [Fact]
     public void SetNameThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]));
+        Assert.Throws<ObjectDisposedException>(() => subject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]));
     }
 
     [Fact]
     public void GetItemsThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Items);
+        Assert.Throws<ObjectDisposedException>(() => subject.Items);
     }
 
     [Fact]
     public void SetItemsThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Items = []);
+        Assert.Throws<ObjectDisposedException>(() => subject.Items = []);
     }
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
 }

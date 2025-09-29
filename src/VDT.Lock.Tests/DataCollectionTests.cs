@@ -207,113 +207,93 @@ public class DataCollectionTests {
 
     [Fact]
     public void CountThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Count);
+        Assert.Throws<ObjectDisposedException>(() => subject.Count);
     }
 
     [Fact]
     public void IsReadOnlyThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.IsReadOnly);
+        Assert.Throws<ObjectDisposedException>(() => subject.IsReadOnly);
     }
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
 
     [Fact]
     public void AddThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
         using var item = new DataValue();
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add(item));
+        Assert.Throws<ObjectDisposedException>(() => subject.Add(item));
     }
 
     [Fact]
     public void ContainsThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Contains(new DataValue()));
+        Assert.Throws<ObjectDisposedException>(() => subject.Contains(new DataValue()));
     }
 
     [Fact]
     public void RemoveThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Remove(new DataValue()));
+        Assert.Throws<ObjectDisposedException>(() => subject.Remove(new DataValue()));
     }
 
     [Fact]
     public void ClearThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Clear());
+        Assert.Throws<ObjectDisposedException>(() => subject.Clear());
     }
 
     [Fact]
     public void UnsafeClearThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
+        using (subject = []) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.UnsafeClear());
         }
-
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.UnsafeClear());
-    }
 
     [Fact]
     public void GetEnumeratorThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.GetEnumerator());
+        Assert.Throws<ObjectDisposedException>(() => subject.GetEnumerator());
     }
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
 }

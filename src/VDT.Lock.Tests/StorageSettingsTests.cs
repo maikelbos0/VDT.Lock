@@ -86,48 +86,40 @@ public class StorageSettingsTests {
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
-        StorageSettings disposedSubject;
+        StorageSettings subject;
 
-        using (var subject = new StorageSettings()) {
-            disposedSubject = subject;
-        };
+        using (subject = new()) { }
 
         // The enumerable is lazily evaluated here so we need to materialize it
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths.ToList());
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths.ToList());
     }
 
     [Fact]
     public void GetThrowsIfDisposed() {
-        StorageSettings disposedSubject;
+        StorageSettings subject;
 
-        using (var subject = new StorageSettings()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Get("foo"));
+        Assert.Throws<ObjectDisposedException>(() => subject.Get("foo"));
     }
 
     [Fact]
     public void SetThrowsIfDisposed() {
-        StorageSettings disposedSubject;
+        StorageSettings subject;
 
-        using (var subject = new StorageSettings()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Set("foo", new ReadOnlySpan<byte>([])));
+        Assert.Throws<ObjectDisposedException>(() => subject.Set("foo", new ReadOnlySpan<byte>([])));
     }
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        StorageSettings disposedSubject;
+        StorageSettings subject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new StorageSettings()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
 
     private static Dictionary<string, SecureBuffer> GetSettings(StorageSettings storageSettings) {
