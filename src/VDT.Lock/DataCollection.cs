@@ -7,24 +7,24 @@ namespace VDT.Lock;
 
 public static class DataCollection {
     public static DataCollection<T> Merge<T>(IEnumerable<DataCollection<T>> candidates) where T : notnull, IData<T>, IIdentifiableData<T>, IDisposable {
-        var candidateItems = new Dictionary<DataIdentity, List<T>>();
+        var candidateItemGroups = new Dictionary<DataIdentity, List<T>>();
         var results = new DataCollection<T>();
 
         foreach (var candidate in candidates) {
-            foreach (var selectorCandidate in candidate.UnsafeClear()) {
-                if (candidateItems.TryGetValue(selectorCandidate.Identity, out var selectorCandidates)) {
-                    selectorCandidates.Add(selectorCandidate);
+            foreach (var candidateItem in candidate.UnsafeClear()) {
+                if (candidateItemGroups.TryGetValue(candidateItem.Identity, out var selectorCandidates)) {
+                    selectorCandidates.Add(candidateItem);
                 }
                 else {
-                    candidateItems.Add(selectorCandidate.Identity, [selectorCandidate]);
+                    candidateItemGroups.Add(candidateItem.Identity, [candidateItem]);
                 }
             }
 
             candidate.Dispose();
         }
 
-        foreach (var selectorCandidates in candidateItems.Values) {
-            results.Add(T.Merge(selectorCandidates));
+        foreach (var candidateItems in candidateItemGroups.Values) {
+            results.Add(T.Merge(candidateItems));
         }
 
         return results;
