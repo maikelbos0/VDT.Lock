@@ -84,6 +84,8 @@ public sealed class DataIdentity : IData<DataIdentity>, IEquatable<DataIdentity>
     }
 
     public void Update() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
         plainVersionBuffer.Dispose();
         plainVersionBuffer = new(DateTimeOffset.UtcNow.ToVersion());
     }
@@ -94,6 +96,18 @@ public sealed class DataIdentity : IData<DataIdentity>, IEquatable<DataIdentity>
         plainBytes.WriteInt(this.GetLength());
         plainBytes.WriteSecureBuffer(plainKeyBuffer);
         plainBytes.WriteSecureBuffer(plainVersionBuffer);
+    }
+
+    public override int GetHashCode() {
+        unchecked {
+            var result = 0;
+
+            foreach (byte b in plainKeyBuffer.Value) {
+                result = (result * 31) ^ b;
+            }
+
+            return result;
+        }
     }
 
     public override bool Equals(object? obj) => Equals(obj as DataIdentity);
@@ -108,18 +122,6 @@ public sealed class DataIdentity : IData<DataIdentity>, IEquatable<DataIdentity>
         }
 
         return plainKeyBuffer.Value.SequenceEqual(other.plainKeyBuffer.Value);
-    }
-
-    public override int GetHashCode() {
-        unchecked {
-            var result = 0;
-
-            foreach (byte b in plainKeyBuffer.Value) {
-                result = (result * 31) ^ b;
-            }
-
-            return result;
-        }
     }
 
     public void Dispose() {

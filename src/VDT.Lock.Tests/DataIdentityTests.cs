@@ -233,6 +233,16 @@ public class DataIdentityTests {
     }
 
     [Fact]
+    public void UpdateThrowsIfDisposed() {
+        DataIdentity subject;
+        using var plainBytes = new SecureByteList();
+
+        using (subject = new()) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.Update());
+    }
+
+    [Fact]
     public void SerializeToThrowsIfDisposed() {
         DataIdentity subject;
         using var plainBytes = new SecureByteList();
