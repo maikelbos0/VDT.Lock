@@ -5,6 +5,32 @@ using System.Linq;
 
 namespace VDT.Lock;
 
+public static class DataCollection {
+    public static DataCollection<T> Merge<T>(IEnumerable<DataCollection<T>> candidates) where T : notnull, IData<T>, IIdentifiableData<T>, IDisposable {
+        var candidateItemGroups = new Dictionary<DataIdentity, List<T>>();
+        var results = new DataCollection<T>();
+
+        foreach (var candidate in candidates) {
+            foreach (var candidateItem in candidate.UnsafeClear()) {
+                if (candidateItemGroups.TryGetValue(candidateItem.Identity, out var selectorCandidates)) {
+                    selectorCandidates.Add(candidateItem);
+                }
+                else {
+                    candidateItemGroups.Add(candidateItem.Identity, [candidateItem]);
+                }
+            }
+
+            candidate.Dispose();
+        }
+
+        foreach (var candidateItems in candidateItemGroups.Values) {
+            results.Add(T.Merge(candidateItems));
+        }
+
+        return results;
+    }
+}
+
 public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>, IEnumerable<T>, IDisposable where T : notnull, IData<T>, IDisposable {
     public static DataCollection<T> DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
@@ -79,6 +105,16 @@ public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>
         items.Clear();
     }
 
+    public List<T> UnsafeClear() {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        var clearedItems = new List<T>(items);
+
+        items.Clear();
+
+        return clearedItems;
+    }
+
     public IEnumerator<T> GetEnumerator() {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
@@ -102,7 +138,9 @@ public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>
     }
 
     public void CopyTo(T[] array, int arrayIndex) {
-        throw new NotSupportedException();
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        items.CopyTo(array, arrayIndex);
     }
 
     public void Dispose() {

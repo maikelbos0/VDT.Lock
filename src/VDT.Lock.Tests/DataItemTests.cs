@@ -1,73 +1,107 @@
 ﻿using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace VDT.Lock.Tests;
 
 public class DataItemTests {
     [Fact]
-    public void DeserializeFromDeserializesName() {
-        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    public void DeserializeFrom() {
+        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 61, 0, 0, 0, .. DataProvider.CreateSerializedField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101]), 49, 0, 0, 0, .. DataProvider.CreateSerializedValue(2, [108, 97, 98, 101, 108]), 52, 0, 0, 0, .. DataProvider.CreateSerializedValue(3, [108, 111, 99, 97, 116, 105, 111, 110])]);
 
         using var subject = DataItem.DeserializeFrom(plainSpan);
 
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
+        Assert.Equal(DataProvider.CreateIdentity(0), subject.Identity);
+        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([118, 97, 108, 117, 101]), Assert.Single(subject.Fields).Value);
+        Assert.Equal(new ReadOnlySpan<byte>([108, 97, 98, 101, 108]), Assert.Single(subject.Labels).Value);
+        Assert.Equal(new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]), Assert.Single(subject.Locations).Value);
     }
 
     [Fact]
-    public void DeserializeFromDeserializesFields() {
-        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 48, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    public void Merge() {
+        var expectedField = new DataField(DataProvider.CreateIdentity(1, 10), [118, 97, 108, 117, 101], [118, 97, 108, 117, 101]);
+        var expectedLabel = new DataValue(DataProvider.CreateIdentity(2, 10), [108, 97, 98, 101, 108]);
+        var expectedLocation = new DataValue(DataProvider.CreateIdentity(3, 10), [108, 111, 99, 97, 116, 105, 111, 110]);
 
-        using var subject = DataItem.DeserializeFrom(plainSpan);
+        var expectedResult = new DataItem(DataProvider.CreateIdentity(0, 5), [110, 97, 109, 101]) {
+            Fields = {
+                new(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114]),
+            },
+            Labels = {
+                new(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
+            },
+            Locations = {
+                new(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+            }
+        };
 
-        Assert.Equal(2, subject.Fields.Count);
-        Assert.Contains(subject.Fields, field => field.Name.SequenceEqual(new ReadOnlySpan<byte>([98, 97, 114])) && field.Value.SequenceEqual(new ReadOnlySpan<byte>([1, 2, 3, 4, 5])));
-        Assert.Contains(subject.Fields, field => field.Name.SequenceEqual(new ReadOnlySpan<byte>([102, 111, 111])) && field.Value.SequenceEqual(new ReadOnlySpan<byte>([5, 6, 7, 8, 9])));
-    }
+        var candidates = new List<DataItem>() {
+            new(DataProvider.CreateIdentity(0, 3), [111, 108, 100, 101, 114]) {
+                Fields = {
+                    new(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114])
+                },
+                Labels = {
+                    new(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
+                },
+                Locations = {
+                    new(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+                }
+            },
+            expectedResult,
+            new(DataProvider.CreateIdentity(0, 4), [111, 108, 100, 101, 114]) {
+                Fields = {
+                    expectedField
+                },
+                Labels = {
+                    expectedLabel
+                },
+                Locations = {
+                    expectedLocation
+                }
+            }
+        };
 
-    [Fact]
-    public void DeserializeFromDeserializesLabels() {
-        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0]);
+        var result = DataItem.Merge(candidates);
 
-        using var subject = DataItem.DeserializeFrom(plainSpan);
+        Assert.Same(expectedResult, result);
+        Assert.Equal(expectedField, Assert.Single(result.Fields));
+        Assert.Equal(expectedLabel, Assert.Single(result.Labels));
+        Assert.Equal(expectedLocation, Assert.Single(result.Locations));
 
-        Assert.Equal(2, subject.Labels.Count);
-        Assert.Contains(subject.Labels, label => label.Value.SequenceEqual(new ReadOnlySpan<byte>([98, 97, 114])));
-        Assert.Contains(subject.Labels, label => label.Value.SequenceEqual(new ReadOnlySpan<byte>([1, 2, 3, 4, 5])));
-    }
-
-    [Fact]
-    public void DeserializeFromDeserializesLocations() {
-        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5]);
-
-        using var subject = DataItem.DeserializeFrom(plainSpan);
-
-        Assert.Equal(2, subject.Locations.Count);
-        Assert.Contains(subject.Locations, location => location.Value.SequenceEqual(new ReadOnlySpan<byte>([98, 97, 114])));
-        Assert.Contains(subject.Locations, location => location.Value.SequenceEqual(new ReadOnlySpan<byte>([1, 2, 3, 4, 5])));
+        foreach (var candidate in candidates) {
+            Assert.Equal(candidate != expectedResult, candidate.IsDisposed);
+        }
     }
 
     [Fact]
     public void Constructor() {
-        using var subject = new DataItem([98, 97, 114]);
+        var identity = new DataIdentity();
+        var plainNameSpan = new ReadOnlySpan<byte>([110, 97, 109, 101]);
+        using var subject = new DataItem(identity, plainNameSpan);
 
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
+        Assert.Same(identity, subject.Identity);
+        Assert.Equal(plainNameSpan, subject.Name);
     }
 
     [Fact]
     public void SetName() {
-        using var subject = new DataItem();
+        using var subject = new DataItem(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainNameBuffer");
 
-        subject.Name = new ReadOnlySpan<byte>([99, 99, 99]);
+        subject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]);
 
-        Assert.Equal(new ReadOnlySpan<byte>([99, 99, 99]), subject.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void SetFields() {
-        using var subject = new DataItem();
+        using var subject = new DataItem(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var previousFields = subject.Fields;
         var newFields = new DataCollection<DataField>();
@@ -76,11 +110,13 @@ public class DataItemTests {
 
         Assert.Same(newFields, subject.Fields);
         Assert.True(previousFields.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void SetLabels() {
-        using var subject = new DataItem();
+        using var subject = new DataItem(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var previousLabels = subject.Labels;
         var newLabels = new DataCollection<DataValue>();
@@ -89,11 +125,13 @@ public class DataItemTests {
 
         Assert.Same(newLabels, subject.Labels);
         Assert.True(previousLabels.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void SetLocations() {
-        using var subject = new DataItem();
+        using var subject = new DataItem(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var previousLocations = subject.Locations;
         var newLocations = new DataCollection<DataValue>();
@@ -102,51 +140,65 @@ public class DataItemTests {
 
         Assert.Same(newLocations, subject.Locations);
         Assert.True(previousLocations.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void FieldLengths() {
-        using var subject = new DataItem([98, 97, 114]);
-        subject.Fields.Add(new([102, 111, 111], [1, 2, 3, 4, 5]));
-        subject.Fields.Add(new([98, 97, 114], [5, 6, 7, 8, 9]));
-        subject.Labels.Add(new([102, 111, 111]));
-        subject.Labels.Add(new([98, 97, 114]));
-        subject.Locations.Add(new([102, 111, 111]));
-        subject.Locations.Add(new([98, 97, 114]));
+        using var subject = new DataItem([110, 97, 109, 101]) {
+            Fields = {
+                DataProvider.CreateField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101])
+            },
+            Labels = {
+                DataProvider.CreateValue(2, [108, 97, 98, 101, 108])
+            },
+            Locations = {
+                DataProvider.CreateValue(3, [108, 111, 99, 97, 116, 105, 111, 110])
+            }
+        };
 
-        Assert.Equal([3, 48, 22, 22], subject.FieldLengths);
+        Assert.Equal([32, 4, 61, 49, 52], subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new DataItem([98, 97, 114]);
-        subject.Fields.Add(new([102, 111, 111], [1, 2, 3, 4, 5]));
-        subject.Fields.Add(new([98, 97, 114], [5, 6, 7, 8, 9]));
-        subject.Labels.Add(new([102, 111, 111]));
-        subject.Labels.Add(new([98, 97, 114]));
-        subject.Locations.Add(new([102, 111, 111]));
-        subject.Locations.Add(new([98, 97, 114]));
+        using var subject = new DataItem(DataProvider.CreateIdentity(0), [110, 97, 109, 101]) {
+            Fields = {
+                DataProvider.CreateField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101])
+            },
+            Labels = {
+                DataProvider.CreateValue(2, [108, 97, 98, 101, 108])
+            },
+            Locations = {
+                DataProvider.CreateValue(3, [108, 111, 99, 97, 116, 105, 111, 110])
+            }
+        };
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([111, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 48, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 20, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 22, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 22, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 7, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([218, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 61, 0, 0, 0, .. DataProvider.CreateSerializedField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101]), 49, 0, 0, 0, .. DataProvider.CreateSerializedValue(2, [108, 97, 98, 101, 108]), 52, 0, 0, 0, .. DataProvider.CreateSerializedValue(3, [108, 111, 99, 97, 116, 105, 111, 110])]), result.GetValue());
     }
 
     [Fact]
     public void Dispose() {
+        DataItem subject;
+        DataIdentity identity;
         SecureBuffer plainNameBuffer;
         DataCollection<DataField> fields;
         DataCollection<DataValue> labels;
         DataCollection<DataValue> locations;
 
-        using (var subject = new DataItem()) {
+        using (subject = new()) {
+            identity = subject.Identity;
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             fields = subject.Fields;
             labels = subject.Labels;
             locations = subject.Locations;
         }
 
+        Assert.True(subject.IsDisposed);
+        Assert.True(identity.IsDisposed);
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(fields.IsDisposed);
         Assert.True(labels.IsDisposed);
@@ -154,113 +206,102 @@ public class DataItemTests {
     }
 
     [Fact]
+    public void IdentityThrowsIfDisposed() {
+        DataItem subject;
+
+        using (subject = new()) { }
+
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Identity; });
+    }
+
+    [Fact]
     public void GetNameThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Name; });
     }
 
     [Fact]
     public void SetNameThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
+        Assert.Throws<ObjectDisposedException>(() => subject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]));
     }
 
     [Fact]
     public void GetFieldsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Fields);
+        Assert.Throws<ObjectDisposedException>(() => subject.Fields);
     }
 
     [Fact]
     public void SetFieldsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Fields = []);
+        Assert.Throws<ObjectDisposedException>(() => subject.Fields = []);
     }
 
     [Fact]
     public void GetLabelsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Labels);
+        Assert.Throws<ObjectDisposedException>(() => subject.Labels);
     }
 
     [Fact]
     public void SetLabelsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Labels = []);
+        Assert.Throws<ObjectDisposedException>(() => subject.Labels = []);
     }
 
     [Fact]
     public void GetLocationsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Locations);
+        Assert.Throws<ObjectDisposedException>(() => subject.Locations);
     }
 
     [Fact]
     public void SetLocationsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Locations = []);
+        Assert.Throws<ObjectDisposedException>(() => subject.Locations = []);
     }
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        DataItem disposedSubject;
+        DataItem subject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new DataItem()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
 }

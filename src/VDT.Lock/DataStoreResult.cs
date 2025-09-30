@@ -2,7 +2,7 @@
 
 namespace VDT.Lock;
 
-public sealed class SaveDataStoreResult : IDisposable {
+public sealed class DataStoreResult : IDisposable {
     private readonly DataCollection<DataValue> succeededStorageSites = [];
     private readonly DataCollection<DataValue> failedStorageSites = [];
 

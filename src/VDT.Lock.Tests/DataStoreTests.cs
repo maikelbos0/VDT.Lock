@@ -1,51 +1,82 @@
 ﻿using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace VDT.Lock.Tests;
 
 public class DataStoreTests {
     [Fact]
-    public void DeserializeFromDeserializesName() {
-        var plainSpan = new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 0, 0, 0, 0]);
+    public void DeserializeFrom() {
+        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 60, 0, 0, 0, .. DataProvider.CreateSerializedItem(1, [105, 116, 101, 109])]);
 
         using var subject = DataStore.DeserializeFrom(plainSpan);
 
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
+        Assert.Equal(DataProvider.CreateIdentity(0), subject.Identity);
+        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([105, 116, 101, 109]), Assert.Single(subject.Items).Name);
     }
 
     [Fact]
-    public void DeserializeFromDeserializesItems() {
-        var plainSpan = new ReadOnlySpan<byte>([0, 0, 0, 0, 46, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    public void SelectNewest() {
+        var expectedItem = new DataItem(DataProvider.CreateIdentity(1, 10), [105, 116, 101, 109]);
+        var expectedResult = new DataStore(DataProvider.CreateIdentity(0, 5), [110, 97, 109, 101]) {
+            Items = {
+                new(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114]),
+            }
+        };
 
-        using var subject = DataStore.DeserializeFrom(plainSpan);
+        var candidates = new List<DataStore>() {
+            new(DataProvider.CreateIdentity(0, 3), [111, 108, 100, 101, 114]) {
+                Items = {
+                    new DataItem(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114])
+                }
+            },
+            expectedResult,
+            new(DataProvider.CreateIdentity(0, 4), [111, 108, 100, 101, 114]) {
+                Items = {
+                    expectedItem
+                }
+            }
+        };
 
-        Assert.Equal(2, subject.Items.Count);
-        Assert.Contains(subject.Items, item => item.Name.SequenceEqual(new ReadOnlySpan<byte>([98, 97, 114])));
-        Assert.Contains(subject.Items, item => item.Name.SequenceEqual(new ReadOnlySpan<byte>([102, 111, 111])));
+        var result = DataStore.Merge(candidates);
+
+        Assert.Same(expectedResult, result);
+        Assert.Equal(expectedItem, Assert.Single(result.Items));
+
+        foreach (var candidate in candidates) {
+            Assert.Equal(candidate != expectedResult, candidate.IsDisposed);
+        }
     }
 
     [Fact]
     public void Constructor() {
-        using var subject = new DataStore([98, 97, 114]);
+        var identity = new DataIdentity();
+        var plainNameSpan = new ReadOnlySpan<byte>([110, 97, 109, 101]);
+        using var subject = new DataStore(identity, plainNameSpan);
 
-        Assert.Equal(new ReadOnlySpan<byte>([98, 97, 114]), subject.Name);
+        Assert.Same(identity, subject.Identity);
+        Assert.Equal(plainNameSpan, subject.Name);
     }
 
     [Fact]
     public void SetName() {
-        using var subject = new DataStore();
+        using var subject = new DataStore(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var plainPreviousValueBuffer = subject.GetBuffer("plainNameBuffer");
 
-        subject.Name = new ReadOnlySpan<byte>([99, 99, 99]);
+        subject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]);
 
-        Assert.Equal(new ReadOnlySpan<byte>([99, 99, 99]), subject.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
         Assert.True(plainPreviousValueBuffer.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void SetItems() {
-        using var subject = new DataStore();
+        using var subject = new DataStore(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
 
         var previousItems = subject.Items;
         var newItems = new DataCollection<DataItem>();
@@ -54,107 +85,114 @@ public class DataStoreTests {
 
         Assert.Same(newItems, subject.Items);
         Assert.True(previousItems.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
     public void FieldLengths() {
-        using var subject = new DataStore([98, 97, 114]);
-        subject.Items.Add(new DataItem([102, 111, 111]));
-        subject.Items.Add(new DataItem([5, 6, 7, 8, 9]));
+        using var subject = new DataStore([110, 97, 109, 101]) {
+            Items = {
+                DataProvider.CreateItem(1, [105, 116, 101, 109])
+            }
+        };
 
-        Assert.Equal([3, 48], subject.FieldLengths);
+        Assert.Equal([32, 4, 60], subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new DataStore([98, 97, 114]);
-        subject.Items.Add(new DataItem([102, 111, 111]));
-        subject.Items.Add(new DataItem([5, 6, 7, 8, 9]));
+        using var subject = new DataStore(DataProvider.CreateIdentity(0), [110, 97, 109, 101]) {
+            Items = {
+                DataProvider.CreateItem(1, [105, 116, 101, 109])
+            }
+        };
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([3, 0, 0, 0, 98, 97, 114, 48, 0, 0, 0, 19, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 5, 0, 0, 0, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 60, 0, 0, 0, .. DataProvider.CreateSerializedItem(1, [105, 116, 101, 109])]), result.GetValue());
     }
 
     [Fact]
     public void Dispose() {
+        DataStore subject;
+        DataIdentity identity;
         SecureBuffer plainNameBuffer;
         DataCollection<DataItem> items;
 
-        using (var subject = new DataStore()) {
+        using (subject = new()) {
+            identity = subject.Identity;
             plainNameBuffer = subject.GetBuffer("plainNameBuffer");
             items = subject.Items;
         }
 
+        Assert.True(subject.IsDisposed);
+        Assert.True(identity.IsDisposed);
         Assert.True(plainNameBuffer.IsDisposed);
         Assert.True(items.IsDisposed);
     }
 
     [Fact]
+    public void IdentityThrowsIfDisposed() {
+        DataStore subject;
+
+        using (subject = new()) { }
+
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Identity; });
+    }
+
+    [Fact]
     public void GetNameThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => { var _ = disposedSubject.Name; });
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Name; });
     }
 
     [Fact]
     public void SetNameThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
+        Assert.Throws<ObjectDisposedException>(() => subject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]));
     }
 
     [Fact]
     public void GetItemsThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Items);
+        Assert.Throws<ObjectDisposedException>(() => subject.Items);
     }
 
     [Fact]
     public void SetItemsThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Items = []);
+        Assert.Throws<ObjectDisposedException>(() => subject.Items = []);
     }
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        DataStore disposedSubject;
+        DataStore subject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new DataStore()) {
-            disposedSubject = subject;
-        }
+        using (subject = new()) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
 }

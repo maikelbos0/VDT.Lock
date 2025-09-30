@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -6,14 +7,44 @@ namespace VDT.Lock.Tests;
 
 public class DataCollectionTests {
     [Fact]
+    public void Merge() {
+        var expectedValue1 = new DataValue(DataProvider.CreateIdentity(1, 10), [118, 97, 108, 117, 101]);
+        var expectedValue2 = new DataValue(DataProvider.CreateIdentity(2, 10), [118, 97, 108, 117, 101]);
+        var expectedValue3 = new DataValue(DataProvider.CreateIdentity(3, 10), [118, 97, 108, 117, 101]);
+
+        var candidates = new List<DataCollection<DataValue>>() {
+            new() {
+                expectedValue2,
+                new DataValue(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+            },
+            new() {
+                expectedValue1,
+                new DataValue(DataProvider.CreateIdentity(2, 5), [111, 108, 100, 101, 114])
+            },
+            new() {
+                new DataValue(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114]),
+                expectedValue3
+            }
+        };
+
+        var result = DataCollection.Merge(candidates);
+
+        Assert.Equal([expectedValue1, expectedValue2, expectedValue3], result.OrderBy(selector => selector.Identity.Key[0]));
+
+        foreach (var candidate in candidates) {
+            Assert.True(candidate.IsDisposed);
+        }
+    }
+
+    [Fact]
     public void DeserializeFrom() {
-        var plainSpan = new ReadOnlySpan<byte>([7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5]);
+        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedValue(0, [122, 101, 114, 111]), .. DataProvider.CreateSerializedValue(1, [111, 110, 101])]);
 
         using var subject = DataCollection<DataValue>.DeserializeFrom(plainSpan);
 
         Assert.Equal(2, subject.Count);
-        Assert.Contains(subject, dataValue => dataValue.Value.SequenceEqual(new byte[] { 102, 111, 111 }));
-        Assert.Contains(subject, dataValue => dataValue.Value.SequenceEqual(new byte[] { 1, 2, 3, 4, 5 }));
+        Assert.Contains(subject, dataValue => dataValue.Value.SequenceEqual(new byte[] { 122, 101, 114, 111 }));
+        Assert.Contains(subject, dataValue => dataValue.Value.SequenceEqual(new byte[] { 111, 110, 101 }));
     }
 
     [Fact]
@@ -36,11 +67,11 @@ public class DataCollectionTests {
     [Fact]
     public void FieldLengths() {
         using var subject = new DataCollection<DataValue>() {
-            new([102, 111, 111]),
-            new([1, 2, 3, 4, 5])
+            new([122, 101, 114, 111]),
+            new([111, 110, 101])
         };
 
-        Assert.Equal([7, 9], subject.FieldLengths);
+        Assert.Equal([44, 43], subject.FieldLengths);
     }
 
     [Fact]
@@ -108,148 +139,170 @@ public class DataCollectionTests {
         Assert.True(item.IsDisposed);
     }
 
-    [Theory]
-    [InlineData(true, new byte[] { 24, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5 })]
-    [InlineData(false, new byte[] { 7, 0, 0, 0, 3, 0, 0, 0, 102, 111, 111, 9, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4, 5 })]
-    public void SerializeTo(bool includeLength, byte[] expectedResult) {
-        using var subject = new DataCollection<DataValue>() {
-            new([102, 111, 111]),
-            new([1, 2, 3, 4, 5])
-        };
+    [Fact]
+    public void UnsafeClear() {
+        using var subject = new DataCollection<DataValue>();
+        var item = new DataValue();
+        subject.Add(item);
 
-        using var result = new SecureByteList();
-        subject.SerializeTo(result, includeLength);
+        var result = subject.UnsafeClear();
 
-        Assert.Equal(expectedResult, result.GetValue());
+        Assert.Empty(subject);
+        Assert.Equal(item, Assert.Single(result));
+        Assert.False(item.IsDisposed);
     }
 
     [Fact]
-    public void CopyToThrows() {
-        using var subject = new DataCollection<DataValue>();
+    public void SerializeToIncludingLength() {
+        using var subject = new DataCollection<DataValue>() {
+            DataProvider.CreateValue(0, [122, 101, 114, 111]),
+            DataProvider.CreateValue(1, [111, 110, 101])
+        };
 
-        Assert.Throws<NotSupportedException>(() => subject.CopyTo([], 0));
+        using var result = new SecureByteList();
+        subject.SerializeTo(result, true);
+
+        Assert.Equal(new ReadOnlySpan<byte>([95, 0, 0, 0, .. DataProvider.CreateSerializedValue(0, [122, 101, 114, 111]), .. DataProvider.CreateSerializedValue(1, [111, 110, 101])]), result.GetValue());
+    }
+
+    [Fact]
+    public void SerializeToExcludingLength() {
+        using var subject = new DataCollection<DataValue>() {
+            DataProvider.CreateValue(0, [122, 101, 114, 111]),
+            DataProvider.CreateValue(1, [111, 110, 101])
+        };
+
+        using var result = new SecureByteList();
+        subject.SerializeTo(result, false);
+
+        Assert.Equal(new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedValue(0, [122, 101, 114, 111]), .. DataProvider.CreateSerializedValue(1, [111, 110, 101])]), result.GetValue());
+    }
+
+    [Fact]
+    public void CopyTo() {
+        using var subject = new DataCollection<DataValue>() {
+            DataProvider.CreateValue(0, [122, 101, 114, 111]),
+            DataProvider.CreateValue(1, [111, 110, 101])
+        };
+        var target = new DataValue[3];
+
+        subject.CopyTo(target, 1);
+
+        Assert.Equal(subject.First(), target[1]);
+        Assert.Equal(subject.Last(), target[2]);
     }
 
     [Fact]
     public void Dispose() {
+        DataCollection<DataValue> subject;
         var item = new DataValue();
 
-        using (var subject = new DataCollection<DataValue>()) {
+        using (subject = []) {
             subject.Add(item);
         }
 
+        Assert.True(subject.IsDisposed);
         Assert.True(item.IsDisposed);
     }
 
     [Fact]
-    public void IsDisposed() {
-        DataCollection<DataValue> disposedSubject;
-
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
-
-        Assert.True(disposedSubject.IsDisposed);
-    }
-
-    [Fact]
     public void CountThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Count);
+        Assert.Throws<ObjectDisposedException>(() => subject.Count);
     }
 
     [Fact]
     public void IsReadOnlyThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.IsReadOnly);
+        Assert.Throws<ObjectDisposedException>(() => subject.IsReadOnly);
     }
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.FieldLengths);
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
 
     [Fact]
     public void AddThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
         using var item = new DataValue();
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Add(item));
+        Assert.Throws<ObjectDisposedException>(() => subject.Add(item));
     }
 
     [Fact]
     public void ContainsThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Contains(new DataValue()));
+        Assert.Throws<ObjectDisposedException>(() => subject.Contains(new DataValue()));
     }
 
     [Fact]
     public void RemoveThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Remove(new DataValue()));
+        Assert.Throws<ObjectDisposedException>(() => subject.Remove(new DataValue()));
     }
 
     [Fact]
     public void ClearThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.Clear());
+        Assert.Throws<ObjectDisposedException>(() => subject.Clear());
+    }
+
+    [Fact]
+    public void UnsafeClearThrowsIfDisposed() {
+        DataCollection<DataValue> subject;
+
+        using (subject = []) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.UnsafeClear());
+    }
+
+    [Fact]
+    public void CopyToThrowsIfDisposed() {
+        DataCollection<DataValue> subject;
+
+        using (subject = []) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.CopyTo([], 0));
     }
 
     [Fact]
     public void GetEnumeratorThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.GetEnumerator());
+        Assert.Throws<ObjectDisposedException>(() => subject.GetEnumerator());
     }
 
     [Fact]
     public void SerializeToThrowsIfDisposed() {
-        DataCollection<DataValue> disposedSubject;
+        DataCollection<DataValue> subject;
         using var plainBytes = new SecureByteList();
 
-        using (var subject = new DataCollection<DataValue>()) {
-            disposedSubject = subject;
-        }
+        using (subject = []) { }
 
-        Assert.Throws<ObjectDisposedException>(() => disposedSubject.SerializeTo(plainBytes));
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
 }
