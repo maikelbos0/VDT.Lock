@@ -69,21 +69,10 @@ public class DataIdentityTests {
     public void SelectNewest() {
         var key = Guid.NewGuid().ToByteArray();
 
-        using var identity1 = DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 226, 189, 209, 101, 0, 0, 0, 0]);
-        var candidate1 = Substitute.For<IIdentifiableData>();
-        candidate1.Identity.Returns(identity1);
-
-        using var identity2 = DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 226, 189, 189, 201, 0, 0, 0, 0]);
-        var candidate2 = Substitute.For<IIdentifiableData>();
-        candidate2.Identity.Returns(identity2);
-
-        using var identity3 = DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 226, 209, 189, 101, 0, 0, 0, 0]);
-        var candidate3 = Substitute.For<IIdentifiableData>();
-        candidate3.Identity.Returns(identity3);
-
-        using var identity4 = DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 246, 189, 209, 101, 0, 0, 0, 0]);
-        var candidate4 = Substitute.For<IIdentifiableData>();
-        candidate4.Identity.Returns(identity4);
+        using var candidate1 = new DataValue(DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 226, 189, 209, 101, 0, 0, 0, 0]), []);
+        using var candidate2 = new DataValue(DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 226, 189, 189, 201, 0, 0, 0, 0]), []);
+        using var candidate3 = new DataValue(DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 226, 209, 189, 101, 0, 0, 0, 0]), []);
+        using var candidate4 = new DataValue(DataIdentity.DeserializeFrom([16, 0, 0, 0, .. key, 8, 0, 0, 0, 246, 189, 189, 101, 0, 0, 0, 0]), []);
 
         var result = DataIdentity.SelectNewest([candidate1, candidate2, candidate3, candidate4]);
 

@@ -15,7 +15,7 @@ public sealed class DataIdentity : IData<DataIdentity>, IEquatable<DataIdentity>
 
     public static bool operator !=(DataIdentity? a, DataIdentity? b) => !(a == b);
 
-    public static T SelectNewest<T>(IEnumerable<T> candidates) where T : IIdentifiableData {
+    public static T SelectNewest<T>(IEnumerable<T> candidates) where T : IIdentifiableData<T> {
         T result = default!;
         var newestVersion = long.MinValue;
 
