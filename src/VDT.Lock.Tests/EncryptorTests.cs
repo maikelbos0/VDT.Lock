@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -9,10 +10,9 @@ public class EncryptorTests {
     public async Task EncryptAndDecrypt() {
         var expectedResult = Encoding.UTF8.GetBytes("password");
 
-        var randomByteGenerator = new RandomByteGenerator();
-        var subject = new Encryptor(randomByteGenerator);
+        var subject = new Encryptor();
 
-        using var keyBuffer = new SecureBuffer(randomByteGenerator.Generate(Encryptor.KeySizeInBytes));
+        using var keyBuffer = new SecureBuffer(RandomNumberGenerator.GetBytes(Encryptor.KeySizeInBytes));
         using var plainBuffer = new SecureBuffer(expectedResult);
         var encryptedBytes = await subject.Encrypt(plainBuffer, keyBuffer);
         var result = await subject.Decrypt(encryptedBytes, keyBuffer);

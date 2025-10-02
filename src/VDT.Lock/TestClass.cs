@@ -1,5 +1,6 @@
 ﻿#if BROWSER
 using System.Runtime.InteropServices.JavaScript;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using VDT.Lock.StorageSites;
@@ -10,9 +11,8 @@ public static partial class TestClass {
     [JSExport]
     public static async Task<string> TestEncryption(string value) {
         using var plainBuffer = new SecureBuffer(Encoding.UTF8.GetBytes(value));
-        var randomByteGenerator = new RandomByteGenerator();
-        var encryptor = new Encryptor(randomByteGenerator);
-        using var key = new SecureBuffer(randomByteGenerator.Generate(Encryptor.KeySizeInBytes));
+        var encryptor = new Encryptor();
+        using var key = new SecureBuffer(RandomNumberGenerator.GetBytes(Encryptor.KeySizeInBytes));
         using var encryptedBytes = await encryptor.Encrypt(plainBuffer, key);
         using var resultBuffer = await encryptor.Decrypt(encryptedBytes, key);
 

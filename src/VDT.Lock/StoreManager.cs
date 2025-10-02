@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace VDT.Lock;
@@ -10,7 +11,6 @@ public sealed class StoreManager : IDisposable {
     public static byte[] MasterPasswordSalt => [66, 6, 86, 3, 238, 211, 38, 177, 32, 98, 112, 223, 115, 234, 230, 103];
 
     private readonly IEncryptor encryptor;
-    private readonly IRandomByteGenerator randomByteGenerator;
     private readonly IHashProvider hashProvider;
 
     private SecureBuffer? plainSessionKeyBuffer;
@@ -44,9 +44,8 @@ public sealed class StoreManager : IDisposable {
         }
     }
 
-    public StoreManager(IEncryptor encryptor, IRandomByteGenerator randomByteGenerator, IHashProvider hashProvider) {
+    public StoreManager(IEncryptor encryptor, IHashProvider hashProvider) {
         this.encryptor = encryptor;
-        this.randomByteGenerator = randomByteGenerator;
         this.hashProvider = hashProvider;
     }
 
@@ -59,7 +58,7 @@ public sealed class StoreManager : IDisposable {
         }
 
         using var storeKeyBuffer = hashProvider.Provide(plainMasterPasswordBuffer, MasterPasswordSalt);
-        plainSessionKeyBuffer = new SecureBuffer(randomByteGenerator.Generate(Encryptor.KeySizeInBytes));
+        plainSessionKeyBuffer = new SecureBuffer(RandomNumberGenerator.GetBytes(Encryptor.KeySizeInBytes));
         encryptedStoreKeyBuffer = await encryptor.Encrypt(storeKeyBuffer, plainSessionKeyBuffer);
     }
 
