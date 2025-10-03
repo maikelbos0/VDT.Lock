@@ -61,7 +61,7 @@ public class StorageSiteBaseTests {
         var storageSettings = new StorageSettings();
         storageSettings.Set("location", new ReadOnlySpan<byte>([118, 97, 108, 117, 101]));
 
-        using var subject = new TestStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), storageSettings);
+        using var subject = new TestStorageSite([110, 97, 109, 101], storageSettings);
 
         Assert.Equal([15, 4, 21], subject.FieldLengths);
     }
@@ -78,7 +78,7 @@ public class StorageSiteBaseTests {
 
     [Fact]
     public async Task Save() {
-        using var subject = new TestStorageSite(new ReadOnlySpan<byte>([]), new StorageSettings());
+        using var subject = new TestStorageSite([], new StorageSettings());
 
         var result = await subject.Save(new SecureBuffer([]));
 
@@ -90,7 +90,7 @@ public class StorageSiteBaseTests {
         var storageSettings = new StorageSettings();
         storageSettings.Set("location", new ReadOnlySpan<byte>([118, 97, 108, 117, 101]));
 
-        using var subject = new TestStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), storageSettings);
+        using var subject = new TestStorageSite([110, 97, 109, 101], storageSettings);
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
@@ -104,7 +104,7 @@ public class StorageSiteBaseTests {
         SecureBuffer plainNameBuffer;
         using var storageSettings = new StorageSettings();
 
-        using (subject = new TestStorageSite(new ReadOnlySpan<byte>([]), storageSettings)) {
+        using (subject = new([], storageSettings)) {
             plainNameBuffer = subject.GetBuffer<StorageSiteBase>("plainNameBuffer");
         }
 
@@ -117,7 +117,7 @@ public class StorageSiteBaseTests {
     public void GetNameThrowsIfDisposed() {
         TestStorageSite subject;
 
-        using (subject = new TestStorageSite(new ReadOnlySpan<byte>([]), new StorageSettings())) { }
+        using (subject = new([], new StorageSettings())) { }
 
         Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Name; });
     }
@@ -126,16 +126,16 @@ public class StorageSiteBaseTests {
     public void SetNameThrowsIfDisposed() {
         TestStorageSite subject;
 
-        using (subject = new TestStorageSite(new ReadOnlySpan<byte>([]), new StorageSettings())) { }
+        using (subject = new([], new StorageSettings())) { }
 
-        Assert.Throws<ObjectDisposedException>(() => subject.Name = new ReadOnlySpan<byte>([15, 15, 15]));
+        Assert.Throws<ObjectDisposedException>(() => subject.Name = new ReadOnlySpan<byte>([110, 97, 109, 101]));
     }
 
     [Fact]
     public void FieldLengthsThrowsIfDisposed() {
         TestStorageSite subject;
 
-        using (subject = new TestStorageSite(new ReadOnlySpan<byte>([]), new StorageSettings())) { }
+        using (subject = new([], new StorageSettings())) { }
 
         Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
@@ -144,7 +144,7 @@ public class StorageSiteBaseTests {
     public async Task LoadThrowsIfDisposed() {
         TestStorageSite subject;
 
-        using (subject = new TestStorageSite(new ReadOnlySpan<byte>([]), new StorageSettings())) { }
+        using (subject = new([], new StorageSettings())) { }
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => subject.Load());
     }
@@ -153,7 +153,7 @@ public class StorageSiteBaseTests {
     public async Task SaveThrowsIfDisposed() {
         TestStorageSite subject;
 
-        using (subject = new TestStorageSite(new ReadOnlySpan<byte>([]), new StorageSettings())) { }
+        using (subject = new([], new StorageSettings())) { }
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => subject.Save(new SecureBuffer([])));
     }
@@ -163,7 +163,7 @@ public class StorageSiteBaseTests {
         TestStorageSite subject;
         using var plainBytes = new SecureByteList();
 
-        using (subject = new TestStorageSite(new ReadOnlySpan<byte>([]), new StorageSettings())) { }
+        using (subject = new([], new StorageSettings())) { }
 
         Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
     }
