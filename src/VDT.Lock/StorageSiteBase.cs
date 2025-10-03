@@ -77,7 +77,7 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
         storageSettings.SerializeTo(plainBytes);
     }
 
-    public void Dispose() {
+    public virtual void Dispose() {
         plainNameBuffer.Dispose();
         //storageSettings.Dispose();
         IsDisposed = true;

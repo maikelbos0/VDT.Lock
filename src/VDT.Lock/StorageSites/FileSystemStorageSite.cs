@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+
 
 #if !BROWSER
 using System.IO;
@@ -9,15 +11,42 @@ using System.Text;
 namespace VDT.Lock.StorageSites;
 
 public class FileSystemStorageSite : StorageSiteBase {
+    public const int TypeId = 1;
+
+    public static FileSystemStorageSite DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+        var position = 0;
+
+        return new(plainSpan.ReadSpan(ref position), plainSpan.ReadSpan(ref position));
+    }
+
+    protected SecureBuffer plainLocationBuffer;
+
+    public ReadOnlySpan<byte> Location {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return new(plainLocationBuffer.Value);
+        }
+        set {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            plainLocationBuffer.Dispose();
+            plainLocationBuffer = new(value.ToArray());
+        }
+    }
+
+    public override IEnumerable<int> FieldLengths {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return [0, plainNameBuffer.Value.Length, plainLocationBuffer.Value.Length];
+        }
+    }
+
     public FileSystemStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
 
     public FileSystemStorageSite(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> location) : base(plainNameSpan, new StorageSettings()) {
-        Location = location;
-    }
-
-    public ReadOnlySpan<byte> Location {
-        get => storageSettings.Get(nameof(Location));
-        set => storageSettings.Set(nameof(Location), value);
+        this.plainLocationBuffer = new(location.ToArray());
     }
 
 #if BROWSER
@@ -44,4 +73,18 @@ public class FileSystemStorageSite : StorageSiteBase {
         return Task.FromResult(true);
     }
 #endif
+
+    public void SerializeTo(SecureByteList plainBytes) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        plainBytes.WriteInt(this.GetLength());
+        plainBytes.WriteInt(TypeId);
+        plainBytes.WriteSecureBuffer(plainNameBuffer);
+        plainBytes.WriteSecureBuffer(plainLocationBuffer);
+    }
+
+    public override void Dispose() {
+        base.Dispose();
+        plainLocationBuffer.Dispose();
+    }
 }

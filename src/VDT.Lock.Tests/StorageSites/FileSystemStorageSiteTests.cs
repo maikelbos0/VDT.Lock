@@ -8,11 +8,26 @@ namespace VDT.Lock.Tests.StorageSites;
 
 public class FileSystemStorageSiteTests {
     [Fact]
-    public void Constructor() {
-        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([102, 111, 111]), new ReadOnlySpan<byte>([97, 98, 99]));
+    public void DeserializeFrom() {
+        var result = FileSystemStorageSite.DeserializeFrom(new ReadOnlySpan<byte>([4, 0, 0, 0, 110, 97, 109, 101, 8, 0, 0, 0, 108, 111, 99, 97, 116, 105, 111, 110]));
 
-        Assert.Equal(new byte[] { 102, 111, 111 }, subject.Name);
-        Assert.Equal(new byte[] { 97, 98, 99 }, subject.Location);
+        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), result.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]), result.Location);
+    }
+    
+    [Fact]
+    public void Constructor() {
+        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]));
+
+        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
+        Assert.Equal(new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]), subject.Location);
+    }
+
+    [Fact]
+    public void FieldLengths() {
+        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]));
+
+        Assert.Equal([0, 4, 8], subject.FieldLengths);
     }
 
     [Fact]
@@ -41,5 +56,49 @@ public class FileSystemStorageSiteTests {
         var result = ContentProvider.GetFileContents(fileName);
 
         Assert.Equal(expectedResult, result);
+    }
+
+    [Fact]
+    public void SerializeTo() {
+        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]));
+
+        using var result = new SecureByteList();
+        subject.SerializeTo(result);
+
+        Assert.Equal(new ReadOnlySpan<byte>([24, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 110, 97, 109, 101, 8, 0, 0, 0, 108, 111, 99, 97, 116, 105, 111, 110]), result.GetValue());
+    }
+
+    [Fact]
+    public void Dispose() {
+        FileSystemStorageSite subject;
+        SecureBuffer plainNameBuffer;
+        SecureBuffer plainLocationBuffer;
+
+        using (subject = new([], [])) {
+            plainNameBuffer = subject.GetBuffer<StorageSiteBase>("plainNameBuffer");
+            plainLocationBuffer = subject.GetBuffer("plainLocationBuffer");
+        }
+
+        Assert.True(subject.IsDisposed);
+        Assert.True(plainNameBuffer.IsDisposed);
+        Assert.True(plainLocationBuffer.IsDisposed);
+    }
+
+    [Fact]
+    public void GetLocationThrowsIfDisposed() {
+        FileSystemStorageSite subject;
+
+        using (subject = new([], [])) { }
+
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Location; });
+    }
+
+    [Fact]
+    public void SetLocationThrowsIfDisposed() {
+        FileSystemStorageSite subject;
+
+        using (subject = new([], [])) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.Location = new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]));
     }
 }
