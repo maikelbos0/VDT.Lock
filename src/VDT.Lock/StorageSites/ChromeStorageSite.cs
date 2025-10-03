@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 #if BROWSER
@@ -8,6 +9,14 @@ using VDT.Lock.JavascriptInterop;
 namespace VDT.Lock.StorageSites;
 
 public partial class ChromeStorageSite : StorageSiteBase {
+    public const int TypeId = 0;
+
+    public static ChromeStorageSite DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+        var position = 0;
+
+        return new(plainSpan.ReadSpan(ref position), null!);
+    }
+
 #if BROWSER
     private const int sectionSize = 1024 * 5;
     private const string headerKey = "Header";
@@ -69,4 +78,20 @@ public partial class ChromeStorageSite : StorageSiteBase {
     protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer)
         => Task.FromResult(false);
 #endif
+
+    public override IEnumerable<int> FieldLengths {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return [0, plainNameBuffer.Value.Length];
+        }
+    }
+
+    public void SerializeTo(SecureByteList plainBytes) {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+        plainBytes.WriteInt(this.GetLength());
+        plainBytes.WriteInt(TypeId);
+        plainBytes.WriteSecureBuffer(plainNameBuffer);
+    }
 }

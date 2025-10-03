@@ -20,7 +20,7 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
         };
     }
 
-    private SecureBuffer plainNameBuffer;
+    protected SecureBuffer plainNameBuffer;
     protected readonly StorageSettings storageSettings;
 
     public bool IsDisposed { get; private set; }
@@ -39,7 +39,7 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
         }
     }
 
-    public IEnumerable<int> FieldLengths {
+    public virtual IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
@@ -79,7 +79,7 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
 
     public void Dispose() {
         plainNameBuffer.Dispose();
-        storageSettings.Dispose();
+        //storageSettings.Dispose();
         IsDisposed = true;
         GC.SuppressFinalize(this);
     }
