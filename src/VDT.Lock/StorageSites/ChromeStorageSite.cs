@@ -22,6 +22,15 @@ public partial class ChromeStorageSite : StorageSiteBase {
     private const string headerKey = "Header";
     private const string sectionKey = "Section";
 #endif
+    public override IEnumerable<int> FieldLengths {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return [0, plainNameBuffer.Value.Length];
+        }
+    }
+    
+    public ChromeStorageSite(ReadOnlySpan<byte> plainNameSpan) : this(plainNameSpan, null!) { }
 
     public ChromeStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
 
@@ -78,14 +87,6 @@ public partial class ChromeStorageSite : StorageSiteBase {
     protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer)
         => Task.FromResult(false);
 #endif
-
-    public override IEnumerable<int> FieldLengths {
-        get {
-            ObjectDisposedException.ThrowIf(IsDisposed, this);
-
-            return [0, plainNameBuffer.Value.Length];
-        }
-    }
 
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
