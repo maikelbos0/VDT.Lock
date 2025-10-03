@@ -14,7 +14,7 @@ public partial class ChromeStorageSite : StorageSiteBase {
     public static ChromeStorageSite DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
-        return new(plainSpan.ReadSpan(ref position), null!);
+        return new(plainSpan.ReadSpan(ref position));
     }
 
 #if BROWSER
@@ -30,9 +30,7 @@ public partial class ChromeStorageSite : StorageSiteBase {
         }
     }
     
-    public ChromeStorageSite(ReadOnlySpan<byte> plainNameSpan) : this(plainNameSpan, null!) { }
-
-    public ChromeStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
+    public ChromeStorageSite(ReadOnlySpan<byte> plainNameSpan) : base(plainNameSpan) { }
 
 #if BROWSER
     protected override async Task<SecureBuffer?> ExecuteLoad() {
@@ -88,7 +86,7 @@ public partial class ChromeStorageSite : StorageSiteBase {
         => Task.FromResult(false);
 #endif
 
-    public void SerializeTo(SecureByteList plainBytes) {
+    public override void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(this.GetLength());

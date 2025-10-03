@@ -21,14 +21,14 @@ public class ChromeStorageSiteTests {
 
     [Fact]
     public void FieldLengths() {
-        using var subject = new ChromeStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), null!);
+        using var subject = new ChromeStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]));
 
         Assert.Equal([0, 4], subject.FieldLengths);
     }
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new ChromeStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), null!);
+        using var subject = new ChromeStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]));
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);

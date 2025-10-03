@@ -9,19 +9,16 @@ namespace VDT.Lock;
 public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
     public static StorageSiteBase DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
-        var typeName = plainSpan.ReadString(ref position);
-        var plainNameSpan = plainSpan.ReadSpan(ref position);
-        var storageSettings = StorageSettings.DeserializeFrom(plainSpan.ReadSpan(ref position));
+        var typeId = plainSpan.ReadInt(ref position);
 
-        return typeName switch {
-            nameof(FileSystemStorageSite) => new FileSystemStorageSite(plainNameSpan, storageSettings),
-            nameof(ChromeStorageSite) => new ChromeStorageSite(plainNameSpan, storageSettings),
-            _ => throw new NotImplementedException($"No implementation found for '{typeName}'.")
+        return typeId switch {
+            0 => ChromeStorageSite.DeserializeFrom(plainSpan[position..]),
+            1 => FileSystemStorageSite.DeserializeFrom(plainSpan[position..]),
+            _ => throw new NotImplementedException($"No implementation found for type '{typeId}'.")
         };
     }
 
     protected SecureBuffer plainNameBuffer;
-    protected readonly StorageSettings storageSettings;
 
     public bool IsDisposed { get; private set; }
 
@@ -39,17 +36,10 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
         }
     }
 
-    public virtual IEnumerable<int> FieldLengths {
-        get {
-            ObjectDisposedException.ThrowIf(IsDisposed, this);
+    public abstract IEnumerable<int> FieldLengths { get; }
 
-            return [Encoding.UTF8.GetByteCount(GetType().Name), plainNameBuffer.Value.Length, storageSettings.GetLength()];
-        }
-    }
-
-    public StorageSiteBase(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) {
+    public StorageSiteBase(ReadOnlySpan<byte> plainNameSpan) {
         plainNameBuffer = new(plainNameSpan.ToArray());
-        this.storageSettings = storageSettings;
     }
 
     public Task<SecureBuffer?> Load() {
@@ -68,18 +58,10 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
 
     protected abstract Task<bool> ExecuteSave(SecureBuffer encryptedSpan);
 
-    public void SerializeTo(SecureByteList plainBytes) {
-        ObjectDisposedException.ThrowIf(IsDisposed, this);
-
-        plainBytes.WriteInt(this.GetLength());
-        plainBytes.WriteString(GetType().Name);
-        plainBytes.WriteSecureBuffer(plainNameBuffer);
-        storageSettings.SerializeTo(plainBytes);
-    }
+    public abstract void SerializeTo(SecureByteList plainBytes);
 
     public virtual void Dispose() {
         plainNameBuffer.Dispose();
-        //storageSettings.Dispose();
         IsDisposed = true;
         GC.SuppressFinalize(this);
     }

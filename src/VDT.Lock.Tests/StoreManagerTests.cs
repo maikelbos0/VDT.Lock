@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using VDT.Lock.StorageSites;
 using Xunit;
@@ -9,7 +10,13 @@ public class StoreManagerTests {
     public class TestStorageSite : StorageSiteBase {
         private byte[] encryptedBytes = [];
 
-        public TestStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
+        public TestStorageSite(ReadOnlySpan<byte> plainNameSpan) : base(plainNameSpan) { }
+
+        public override IEnumerable<int> FieldLengths => throw new NotImplementedException();
+
+        public override void SerializeTo(SecureByteList plainBytes) {
+            throw new NotImplementedException();
+        }
 
         protected override Task<SecureBuffer?> ExecuteLoad() {
             return Task.FromResult<SecureBuffer?>(new SecureBuffer(encryptedBytes));
@@ -90,7 +97,7 @@ public class StoreManagerTests {
 
         using var subject = new StoreManager(new Encryptor(), new HashProvider()) {
             StorageSites = {
-                new TestStorageSite([98, 97, 114], new StorageSettings())
+                new TestStorageSite([98, 97, 114])
             }
         };
 

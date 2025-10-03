@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-
 #if !BROWSER
 using System.IO;
 using System.Text;
@@ -43,10 +42,8 @@ public class FileSystemStorageSite : StorageSiteBase {
         }
     }
 
-    public FileSystemStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
-
-    public FileSystemStorageSite(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> location) : base(plainNameSpan, new StorageSettings()) {
-        this.plainLocationBuffer = new(location.ToArray());
+    public FileSystemStorageSite(ReadOnlySpan<byte> plainNameSpan, ReadOnlySpan<byte> location) : base(plainNameSpan) {
+        plainLocationBuffer = new(location.ToArray());
     }
 
 #if BROWSER
@@ -74,7 +71,7 @@ public class FileSystemStorageSite : StorageSiteBase {
     }
 #endif
 
-    public void SerializeTo(SecureByteList plainBytes) {
+    public override void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         plainBytes.WriteInt(this.GetLength());
@@ -86,5 +83,6 @@ public class FileSystemStorageSite : StorageSiteBase {
     public override void Dispose() {
         base.Dispose();
         plainLocationBuffer.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

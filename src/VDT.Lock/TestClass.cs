@@ -26,7 +26,7 @@ public static partial class TestClass {
         }
 
         using var plainBuffer = new SecureBuffer(Encoding.UTF8.GetBytes(value));
-        var chromeStorageSite = new ChromeStorageSite([], new());
+        var chromeStorageSite = new ChromeStorageSite([]);
         await chromeStorageSite.Save(plainBuffer);
         var storedValue = await chromeStorageSite.Load();
 
