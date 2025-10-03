@@ -8,9 +8,11 @@ using VDT.Lock.JavascriptInterop;
 namespace VDT.Lock.StorageSites;
 
 public partial class ChromeStorageSite : StorageSiteBase {
+#if BROWSER
     private const int sectionSize = 1024 * 5;
     private const string headerKey = "Header";
     private const string sectionKey = "Section";
+#endif
 
     public ChromeStorageSite(ReadOnlySpan<byte> plainNameSpan, StorageSettings storageSettings) : base(plainNameSpan, storageSettings) { }
 
