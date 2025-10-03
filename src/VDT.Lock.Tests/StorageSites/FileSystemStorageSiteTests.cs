@@ -101,4 +101,14 @@ public class FileSystemStorageSiteTests {
 
         Assert.Throws<ObjectDisposedException>(() => subject.Location = new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]));
     }
+
+    [Fact]
+    public void SerializeToThrowsIfDisposed() {
+        FileSystemStorageSite subject;
+        using var plainBytes = new SecureByteList();
+
+        using (subject = new([], [])) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
+    }
 }

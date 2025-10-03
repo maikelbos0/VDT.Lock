@@ -35,4 +35,14 @@ public class ChromeStorageSiteTests {
 
         Assert.Equal(new ReadOnlySpan<byte>([12, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 110, 97, 109, 101]), result.GetValue());
     }
+
+    [Fact]
+    public void SerializeToThrowsIfDisposed() {
+        ChromeStorageSite subject;
+        using var plainBytes = new SecureByteList();
+
+        using (subject = new([])) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.SerializeTo(plainBytes));
+    }
 }
