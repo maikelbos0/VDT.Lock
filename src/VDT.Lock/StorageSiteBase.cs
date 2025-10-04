@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using VDT.Lock.StorageSites;
 
@@ -12,8 +11,9 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
         var typeId = plainSpan.ReadInt(ref position);
 
         return typeId switch {
-            0 => ChromeStorageSite.DeserializeFrom(plainSpan[position..]),
-            1 => FileSystemStorageSite.DeserializeFrom(plainSpan[position..]),
+            ChromeStorageSite.TypeId => ChromeStorageSite.DeserializeFrom(plainSpan[position..]),
+            FileSystemStorageSite.TypeId => FileSystemStorageSite.DeserializeFrom(plainSpan[position..]),
+            ApiStorageSite.TypeId => ApiStorageSite.DeserializeFrom(plainSpan[position..]),
             _ => throw new NotImplementedException($"No implementation found for type '{typeId}'.")
         };
     }

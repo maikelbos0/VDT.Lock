@@ -68,7 +68,7 @@ public class FileSystemStorageSiteTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([24, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 110, 97, 109, 101, 8, 0, 0, 0, 108, 111, 99, 97, 116, 105, 111, 110]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([24, 0, 0, 0, FileSystemStorageSite.TypeId, 0, 0, 0, 4, 0, 0, 0, 110, 97, 109, 101, 8, 0, 0, 0, 108, 111, 99, 97, 116, 105, 111, 110]), result.GetValue());
     }
 
     [Fact]

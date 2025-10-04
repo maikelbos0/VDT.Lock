@@ -44,7 +44,7 @@ public class ApiStorageSiteTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([40, 0, 0, 0, 2, 0, 0, 0, 4, 0, 0, 0, 110, 97, 109, 101, 8, 0, 0, 0, 108, 111, 99, 97, 116, 105, 111, 110, 2, 0, 0, 0, 105, 100, 6, 0, 0, 0, 115, 101, 99, 114, 101, 116]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([40, 0, 0, 0, ApiStorageSite.TypeId, 0, 0, 0, 4, 0, 0, 0, 110, 97, 109, 101, 8, 0, 0, 0, 108, 111, 99, 97, 116, 105, 111, 110, 2, 0, 0, 0, 105, 100, 6, 0, 0, 0, 115, 101, 99, 114, 101, 116]), result.GetValue());
     }
     
     [Fact]

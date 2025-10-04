@@ -35,7 +35,7 @@ public class ChromeStorageSiteTests {
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([12, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 110, 97, 109, 101]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([12, 0, 0, 0, ChromeStorageSite.TypeId, 0, 0, 0, 4, 0, 0, 0, 110, 97, 109, 101]), result.GetValue());
     }
 
     [Fact]
