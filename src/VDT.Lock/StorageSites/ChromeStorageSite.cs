@@ -11,7 +11,7 @@ namespace VDT.Lock.StorageSites;
 public partial class ChromeStorageSite : StorageSiteBase {
     public const int TypeId = 0;
 
-    public static ChromeStorageSite DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+    public static new ChromeStorageSite DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
         return new(plainSpan.ReadSpan(ref position));

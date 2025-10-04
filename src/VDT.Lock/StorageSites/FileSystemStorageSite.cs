@@ -12,7 +12,7 @@ namespace VDT.Lock.StorageSites;
 public class FileSystemStorageSite : StorageSiteBase {
     public const int TypeId = 1;
 
-    public static FileSystemStorageSite DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
+    public static new FileSystemStorageSite DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
 
         return new(plainSpan.ReadSpan(ref position), plainSpan.ReadSpan(ref position));

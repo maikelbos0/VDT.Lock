@@ -24,17 +24,17 @@ public class StorageSiteBaseTests {
     }
 
     [Fact]
-    public void DeserializeFromCreatesFileSystemStorageSite() {
-        var result = StorageSiteBase.DeserializeFrom(new ReadOnlySpan<byte>([21, 0, 0, 0, 70, 105, 108, 101, 83, 121, 115, 116, 101, 109, 83, 116, 111, 114, 97, 103, 101, 83, 105, 116, 101, 0, 0, 0, 0, 0, 0, 0, 0]));
+    public void DeserializeFromCreatesChromeStorageSite() {
+        var result = StorageSiteBase.DeserializeFrom(new ReadOnlySpan<byte>([0, 0, 0, 0, 0, 0, 0, 0]));
 
-        Assert.IsType<FileSystemStorageSite>(result);
+        Assert.IsType<ChromeStorageSite>(result);
     }
 
     [Fact]
-    public void DeserializeFromCreatesChromeStorageSite() {
-        var result = StorageSiteBase.DeserializeFrom(new ReadOnlySpan<byte>([17, 0, 0, 0, 67, 104, 114, 111, 109, 101, 83, 116, 111, 114, 97, 103, 101, 83, 105, 116, 101, 0, 0, 0, 0, 0, 0, 0, 0]));
+    public void DeserializeFromCreatesFileSystemStorageSite() {
+        var result = StorageSiteBase.DeserializeFrom(new ReadOnlySpan<byte>([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
 
-        Assert.IsType<ChromeStorageSite>(result);
+        Assert.IsType<FileSystemStorageSite>(result);
     }
 
     [Fact]
