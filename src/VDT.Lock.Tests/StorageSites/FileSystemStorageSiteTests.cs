@@ -17,15 +17,18 @@ public class FileSystemStorageSiteTests {
     
     [Fact]
     public void Constructor() {
-        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]));
+        var plainNameSpan = new ReadOnlySpan<byte>([110, 97, 109, 101]);
+        var plainLocationSpan = new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]);
 
-        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), subject.Name);
-        Assert.Equal(new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]), subject.Location);
+        using var subject = new FileSystemStorageSite(plainNameSpan, plainLocationSpan);
+
+        Assert.Equal(plainNameSpan, subject.Name);
+        Assert.Equal(plainLocationSpan, subject.Location);
     }
 
     [Fact]
     public void FieldLengths() {
-        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]));
+        using var subject = new FileSystemStorageSite([110, 97, 109, 101], [108, 111, 99, 97, 116, 105, 111, 110]);
 
         Assert.Equal([0, 4, 8], subject.FieldLengths);
     }
@@ -35,7 +38,7 @@ public class FileSystemStorageSiteTests {
         const string fileName = "FileSystemStorage_ExecuteLoad.data";
         var expectedResult = ContentProvider.GetFileContents(fileName);
 
-        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
+        using var subject = new FileSystemStorageSite([110, 97, 109, 101], Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
 
         var result = await subject.Load();
 
@@ -49,7 +52,7 @@ public class FileSystemStorageSiteTests {
         const string fileContents = "This is not actually encrypted data, but normally it would be.";
         var expectedResult = Encoding.UTF8.GetBytes(fileContents);
 
-        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
+        using var subject = new FileSystemStorageSite([110, 97, 109, 101], Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
 
         Assert.True(await subject.Save(new SecureBuffer(expectedResult)));
 
@@ -60,7 +63,7 @@ public class FileSystemStorageSiteTests {
 
     [Fact]
     public void SerializeTo() {
-        using var subject = new FileSystemStorageSite(new ReadOnlySpan<byte>([110, 97, 109, 101]), new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]));
+        using var subject = new FileSystemStorageSite([110, 97, 109, 101], [108, 111, 99, 97, 116, 105, 111, 110]);
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
