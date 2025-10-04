@@ -6,4 +6,18 @@
 		<NoWarn>$(NoWarn);IDE0290</NoWarn>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$(Configuration) == 'Debug'">
+		<Exec Command="dotnet tool restore" />
+		<Exec Command="dotnet ef migrations script --no-build --idempotent --output ./Data/MigrateDatabase.sql" />
+		<Exec Command="dotnet ef database update --no-build" />
+	</Target>
+
 </Project>
