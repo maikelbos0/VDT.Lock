@@ -12,4 +12,10 @@ public sealed class SecretHasher : ISecretHasher {
 
         return (salt, hash);
     }
+
+    public bool VerifySecret(byte[] salt, byte[] secret, byte[] expectedHash) {
+        var actualHash = Rfc2898DeriveBytes.Pbkdf2(secret, salt, Iterations, HashAlgorithmName.SHA512, SHA512.HashSizeInBytes);
+
+        return CryptographicOperations.FixedTimeEquals(actualHash, expectedHash);
+    }
 }
