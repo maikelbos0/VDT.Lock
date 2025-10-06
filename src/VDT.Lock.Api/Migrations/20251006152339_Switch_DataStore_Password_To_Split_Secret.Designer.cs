@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VDT.Lock.Api.Data;
 
@@ -11,9 +12,11 @@ using VDT.Lock.Api.Data;
 namespace VDT.Lock.Api.Migrations
 {
     [DbContext(typeof(LockContext))]
-    partial class LockContextModelSnapshot : ModelSnapshot
+    [Migration("20251006152339_Switch_DataStore_Password_To_Split_Secret")]
+    partial class Switch_DataStore_Password_To_Split_Secret
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
