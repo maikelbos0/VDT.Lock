@@ -29,4 +29,10 @@ app.MapPost("/", (
     CancellationToken cancellationToken
 ) => handler.Handle(request, cancellationToken));
 
+app.MapGet("/", (
+    [FromBody] LoadDataStoreRequest request,
+    [FromServices] LoadDataStoreRequestHandler handler,
+    CancellationToken cancellationToken
+) => handler.Handle(request, cancellationToken));
+
 app.Run();
