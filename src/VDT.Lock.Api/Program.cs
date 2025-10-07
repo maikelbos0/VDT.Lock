@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Threading;
 using VDT.Lock.Api.Configuration;
 using VDT.Lock.Api.Data;
 using VDT.Lock.Api.Handlers;
@@ -22,6 +23,10 @@ builder.Services.AddScoped<CreateDataStoreRequestHandler>();
 
 var app = builder.Build();
 
-app.MapPost("/",  ([FromBody] CreateDataStoreRequest request, [FromServices] CreateDataStoreRequestHandler handler) => handler.Handle(request));
+app.MapPost("/", (
+    [FromBody] CreateDataStoreRequest request, 
+    [FromServices] CreateDataStoreRequestHandler handler,
+    CancellationToken cancellationToken
+) => handler.Handle(request, cancellationToken));
 
 app.Run();
