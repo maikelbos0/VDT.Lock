@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading;
@@ -19,14 +19,14 @@ public class LoadDataStoreRequestHandler {
         this.secretHasher = secretHasher;
     }
 
-    public async Task<IActionResult> Handle(LoadDataStoreRequest request, CancellationToken cancellationToken) {
+    public async Task<IResult> Handle(LoadDataStoreRequest request, CancellationToken cancellationToken) {
         var dataStore = await context.DataStores
             .SingleOrDefaultAsync(dataStore => dataStore.Id == request.Id, cancellationToken);
 
         if (dataStore == null || !secretHasher.VerifySecret(dataStore.SecretSalt, request.Secret, dataStore.SecretHash)) {
-            return new UnauthorizedResult();
+            return Results.Unauthorized();
         }
 
-        return new OkObjectResult(dataStore.Data);
+        return Results.Ok(dataStore.Data);
     }
 }

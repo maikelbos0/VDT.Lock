@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +18,7 @@ public class CreateDataStoreRequestHandler {
         this.secretHasher = secretHasher;
     }
 
-    public async Task<IActionResult> Handle(CreateDataStoreRequest request, CancellationToken cancellationToken) {
+    public async Task<IResult> Handle(CreateDataStoreRequest request, CancellationToken cancellationToken) {
         var id = Guid.NewGuid();
         var (secretSalt, secretHash) = secretHasher.HashSecret(request.Secret);
 
@@ -30,6 +30,6 @@ public class CreateDataStoreRequestHandler {
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return new OkObjectResult(id);
+        return Results.Ok(id);
     }
 }

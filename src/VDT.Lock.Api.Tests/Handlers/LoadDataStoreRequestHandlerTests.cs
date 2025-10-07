@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using NSubstitute;
 using System;
 using System.Threading;
@@ -33,7 +33,7 @@ public class LoadDataStoreRequestHandlerTests {
 
         var result = await subject.Handle(request, CancellationToken.None);
 
-        Assert.Equal(data, Assert.IsType<byte[]>(Assert.IsType<OkObjectResult>(result).Value));
+        Assert.Equal(data, Assert.IsType<Ok<byte[]>>(result).Value);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class LoadDataStoreRequestHandlerTests {
 
         var result = await subject.Handle(request, CancellationToken.None);
 
-        Assert.Null(Assert.IsType<OkObjectResult>(result).Value);
+        Assert.IsType<Ok>(result);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class LoadDataStoreRequestHandlerTests {
 
         var result = await subject.Handle(request, CancellationToken.None);
 
-        Assert.IsType<UnauthorizedResult>(result);
+        Assert.IsType<UnauthorizedHttpResult>(result);
     }
 
     [Fact]
@@ -95,6 +95,6 @@ public class LoadDataStoreRequestHandlerTests {
 
         var result = await subject.Handle(request, CancellationToken.None);
 
-        Assert.IsType<UnauthorizedResult>(result);
+        Assert.IsType<UnauthorizedHttpResult>(result);
     }
 }
