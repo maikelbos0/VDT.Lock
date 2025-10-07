@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 using VDT.Lock.Api.Data;
 using VDT.Lock.Api.Services;
@@ -16,7 +17,8 @@ public class CreateDataStoreRequestHandler {
         this.secretHasher = secretHasher;
     }
 
-    public async Task<Guid> Handle(CreateDataStoreRequest request) {
+    // TODO should it cancel if the request is aborted?
+    public async Task<IActionResult> Handle(CreateDataStoreRequest request) {
         var id = Guid.NewGuid();
         var (secretSalt, secretHash) = secretHasher.HashSecret(request.Secret);
 
@@ -28,6 +30,6 @@ public class CreateDataStoreRequestHandler {
 
         await context.SaveChangesAsync();
 
-        return id;
+        return new OkObjectResult(id);
     }
 }

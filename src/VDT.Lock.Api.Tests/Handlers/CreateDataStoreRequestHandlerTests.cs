@@ -1,4 +1,6 @@
-﻿using NSubstitute;
+﻿using Microsoft.AspNetCore.Mvc;
+using NSubstitute;
+using System;
 using System.Threading.Tasks;
 using VDT.Lock.Api.Handlers;
 using VDT.Lock.Api.Services;
@@ -22,9 +24,10 @@ public class CreateDataStoreRequestHandlerTests {
         var request = new CreateDataStoreRequest(secret);
 
         var result = await subject.Handle(request);
+        var resultId = Assert.IsType<Guid>(Assert.IsType<OkObjectResult>(result).Value);
 
         var dataStore = Assert.Single(context.DataStores);
-        Assert.Equal(result, dataStore.Id);
+        Assert.Equal(resultId, dataStore.Id);
         Assert.Equal(secretSalt, dataStore.SecretSalt);
         Assert.Equal(secretHash, dataStore.SecretHash);
         Assert.Null(dataStore.Data);
