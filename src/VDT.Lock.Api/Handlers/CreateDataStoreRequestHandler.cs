@@ -30,6 +30,6 @@ public class CreateDataStoreRequestHandler {
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return Results.Ok(id);
+        return new RawOkResult(id.ToByteArray());
     }
 }

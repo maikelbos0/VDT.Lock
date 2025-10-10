@@ -33,11 +33,11 @@ public class LoadDataStoreRequestHandlerTests {
 
         var result = await subject.Handle(request, CancellationToken.None);
 
-        Assert.Equal(data, Assert.IsType<Ok<byte[]>>(result).Value);
+        Assert.Equal(data, Assert.IsType<RawOkResult>(result).Value);
     }
 
     [Fact]
-    public async Task ReturnsNullIfNoDataAvailable() {
+    public async Task ReturnsNoContentIfNoDataAvailable() {
         var id = Guid.NewGuid();
 
         var context = LockContextProvider.Provide();
@@ -57,7 +57,7 @@ public class LoadDataStoreRequestHandlerTests {
 
         var result = await subject.Handle(request, CancellationToken.None);
 
-        Assert.IsType<Ok>(result);
+        Assert.IsType<NoContent>(result);
     }
 
     [Fact]

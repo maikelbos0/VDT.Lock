@@ -27,6 +27,11 @@ public class LoadDataStoreRequestHandler {
             return Results.Unauthorized();
         }
 
-        return Results.Ok(dataStore.Data);
+        if (dataStore.Data is null) {
+            return Results.NoContent();
+        }
+        else {
+            return new RawOkResult(dataStore.Data);
+        }
     }
 }

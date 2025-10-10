@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using NSubstitute;
-using System;
+﻿using NSubstitute;
 using System.Threading;
 using System.Threading.Tasks;
 using VDT.Lock.Api.Handlers;
@@ -27,7 +25,7 @@ public class CreateDataStoreRequestHandlerTests {
         var result = await subject.Handle(request, CancellationToken.None);
 
         var dataStore = Assert.Single(context.DataStores);
-        Assert.Equal(Assert.IsType<Ok<Guid>>(result).Value, dataStore.Id);
+        Assert.Equal(Assert.IsType<RawOkResult>(result).Value, dataStore.Id.ToByteArray());
         Assert.Equal(secretSalt, dataStore.SecretSalt);
         Assert.Equal(secretHash, dataStore.SecretHash);
         Assert.Null(dataStore.Data);
