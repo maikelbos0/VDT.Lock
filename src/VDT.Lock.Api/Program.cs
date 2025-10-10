@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
 using VDT.Lock.Api.Configuration;
 using VDT.Lock.Api.Data;
@@ -26,20 +27,23 @@ builder.Services.AddScoped<SaveDataStoreRequestHandler>();
 var app = builder.Build();
 
 app.MapPost("/", (
-    [FromBody] CreateDataStoreRequest request, 
+    [FromHeader] string secret,
     [FromServices] CreateDataStoreRequestHandler handler,
     CancellationToken cancellationToken
-) => handler.Handle(request, cancellationToken));
+) => handler.Handle(new CreateDataStoreRequest(Convert.FromBase64String(secret)), cancellationToken));
 
-app.MapGet("/", (
-    [FromBody] LoadDataStoreRequest request,
+app.MapGet("/{id}", (
+    [FromRoute] Guid id,
+    [FromHeader] string secret,
     [FromServices] LoadDataStoreRequestHandler handler,
     CancellationToken cancellationToken
-) => handler.Handle(request, cancellationToken));
+) => handler.Handle(new LoadDataStoreRequest(id, Convert.FromBase64String(secret)), cancellationToken));
 
-app.MapPut("/", (
-    [FromBody] SaveDataStoreRequest request,
+app.MapPut("/{id}", (
+    [FromRoute] Guid id,
+    [FromHeader] string secret,
+    [FromBody] byte[] data,
     [FromServices] SaveDataStoreRequestHandler handler
-) => handler.Handle(request));
+) => handler.Handle(new SaveDataStoreRequest(id, Convert.FromBase64String(secret), data)));
 
 app.Run();
