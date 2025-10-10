@@ -20,6 +20,8 @@ builder.Services.AddDbContext<LockContext>((serviceProvider, options) => options
 
 builder.Services.AddScoped<ISecretHasher, SecretHasher>();
 builder.Services.AddScoped<CreateDataStoreRequestHandler>();
+builder.Services.AddScoped<LoadDataStoreRequestHandler>();
+builder.Services.AddScoped<SaveDataStoreRequestHandler>();
 
 var app = builder.Build();
 
