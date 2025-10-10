@@ -35,4 +35,9 @@ app.MapGet("/", (
     CancellationToken cancellationToken
 ) => handler.Handle(request, cancellationToken));
 
+app.MapPut("/", (
+    [FromBody] SaveDataStoreRequest request,
+    [FromServices] SaveDataStoreRequestHandler handler
+) => handler.Handle(request));
+
 app.Run();
