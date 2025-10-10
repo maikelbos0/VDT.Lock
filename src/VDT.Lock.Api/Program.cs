@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -25,6 +26,9 @@ builder.Services.AddScoped<LoadDataStoreRequestHandler>();
 builder.Services.AddScoped<SaveDataStoreRequestHandler>();
 
 var app = builder.Build();
+
+app.UseExceptionHandler(applicationBuilder => applicationBuilder.Run(async httpContext 
+    => await Results.StatusCode(StatusCodes.Status500InternalServerError).ExecuteAsync(httpContext)));
 
 app.MapPost("/", (
     [FromHeader] string secret,
