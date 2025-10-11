@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
+using System.Threading.RateLimiting;
 using VDT.Lock.Api.Configuration;
 using VDT.Lock.Api.Data;
 using VDT.Lock.Api.Handlers;
@@ -21,7 +22,30 @@ builder.Services.AddDbContext<LockContext>(options => options
     .UseSqlServer(appSettings.ConnectionString)
     .ConfigureWarnings(warnings => warnings.Log(RelationalEventId.PendingModelChangesWarning))
     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
-builder.Services.AddHttpLogging(o => { });
+builder.Services.AddHttpLogging(options => { });
+builder.Services.AddRateLimiter(options => {
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Request.Headers["Secret"].ToString(),
+            factory: _ => new FixedWindowRateLimiterOptions {
+                PermitLimit = 10,
+                QueueLimit = 0,
+                Window = TimeSpan.FromMinutes(1)
+            }
+        )
+    );
+    options.AddPolicy("CreateDataStore", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+            factory: _ => new FixedWindowRateLimiterOptions {
+                PermitLimit = 10,
+                QueueLimit = 0,
+                Window = TimeSpan.FromMinutes(10)
+            }
+        )
+    );
+});
 builder.Services.AddScoped<ISecretHasher, SecretHasher>();
 builder.Services.AddScoped<CreateDataStoreRequestHandler>();
 builder.Services.AddScoped<LoadDataStoreRequestHandler>();
@@ -32,14 +56,15 @@ builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 
 var app = builder.Build();
 
 app.UseHttpLogging();
-app.UseExceptionHandler(applicationBuilder => applicationBuilder.Run(async httpContext 
+app.UseRateLimiter();
+app.UseExceptionHandler(applicationBuilder => applicationBuilder.Run(async httpContext
     => await Results.StatusCode(StatusCodes.Status500InternalServerError).ExecuteAsync(httpContext)));
 
 app.MapPost("/", (
     [FromHeader] string secret,
     [FromServices] CreateDataStoreRequestHandler handler,
     CancellationToken cancellationToken
-) => handler.Handle(new CreateDataStoreRequest(Convert.FromBase64String(secret)), cancellationToken));
+) => handler.Handle(new CreateDataStoreRequest(Convert.FromBase64String(secret)), cancellationToken)).RequireRateLimiting("CreateDataStore");
 
 app.MapGet("/{id}", (
     [FromRoute] Guid id,
