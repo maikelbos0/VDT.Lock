@@ -21,7 +21,7 @@ builder.Services.AddDbContext<LockContext>(options => options
     .UseSqlServer(appSettings.ConnectionString)
     .ConfigureWarnings(warnings => warnings.Log(RelationalEventId.PendingModelChangesWarning))
     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
-
+builder.Services.AddHttpLogging(o => { });
 builder.Services.AddScoped<ISecretHasher, SecretHasher>();
 builder.Services.AddScoped<CreateDataStoreRequestHandler>();
 builder.Services.AddScoped<LoadDataStoreRequestHandler>();
@@ -31,6 +31,7 @@ builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 
 
 var app = builder.Build();
 
+app.UseHttpLogging();
 app.UseExceptionHandler(applicationBuilder => applicationBuilder.Run(async httpContext 
     => await Results.StatusCode(StatusCodes.Status500InternalServerError).ExecuteAsync(httpContext)));
 
