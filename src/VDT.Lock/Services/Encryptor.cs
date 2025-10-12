@@ -8,7 +8,7 @@ using VDT.Lock.JavascriptInterop;
 using System.IO;
 #endif
 
-namespace VDT.Lock;
+namespace VDT.Lock.Services;
 
 public sealed class Encryptor : IEncryptor {
     public const int KeySizeInBytes = 32;
@@ -37,7 +37,7 @@ public sealed class Encryptor : IEncryptor {
 
         using var encryptor = aes.CreateEncryptor(keyBuffer.Value, ivBuffer.Value);
 
-        var payloadBuffer = new SecureBuffer(plainBuffer.Value.Length + 2 * BlockSizeInBytes - (plainBuffer.Value.Length % BlockSizeInBytes));
+        var payloadBuffer = new SecureBuffer(plainBuffer.Value.Length + 2 * BlockSizeInBytes - plainBuffer.Value.Length % BlockSizeInBytes);
         Buffer.BlockCopy(ivBuffer.Value, 0, payloadBuffer.Value, 0, BlockSizeInBytes);
 
         using var payloadStream = new MemoryStream(payloadBuffer.Value);

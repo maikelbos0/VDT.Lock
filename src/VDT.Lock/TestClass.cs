@@ -3,6 +3,7 @@ using System.Runtime.InteropServices.JavaScript;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using VDT.Lock.Services;
 using VDT.Lock.StorageSites;
 
 namespace VDT.Lock;

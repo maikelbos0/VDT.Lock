@@ -1,8 +1,9 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using VDT.Lock.Services;
 using Xunit;
 
-namespace VDT.Lock.Tests;
+namespace VDT.Lock.Tests.Services;
 
 public class HashProviderTests {
     [Fact]

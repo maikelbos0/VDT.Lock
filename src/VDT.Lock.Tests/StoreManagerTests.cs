@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using VDT.Lock.Services;
 using VDT.Lock.StorageSites;
 using Xunit;
 

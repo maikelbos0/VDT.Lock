@@ -1,9 +1,10 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using VDT.Lock.Services;
 using Xunit;
 
-namespace VDT.Lock.Tests;
+namespace VDT.Lock.Tests.Services;
 
 public class EncryptorTests {
     [Fact]
