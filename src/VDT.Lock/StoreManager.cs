@@ -106,7 +106,7 @@ public sealed class StoreManager : IDisposable {
         await Parallel.ForEachAsync(storageSites, async (storageSite, _) => {
             try {
                 using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
-                using var encryptedBuffer = await storageSites.Single().Load();
+                using var encryptedBuffer = await storageSite.Load();
 
                 if (encryptedBuffer != null) {
                     using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
