@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using VDT.Lock.Services;
 
 namespace VDT.Lock.StorageSites;
 
@@ -75,7 +76,7 @@ public class ApiStorageSite : StorageSiteBase {
         plainSecretBuffer = new(secret.ToArray());
     }
 
-    protected override Task<SecureBuffer?> ExecuteLoad() {
+    protected override Task<SecureBuffer?> ExecuteLoad(IStorageSiteServices storageSiteServices) {
         // If first time: request new storage with secret
         //      -> API generates and returns id
         // Store id + secret
@@ -84,7 +85,7 @@ public class ApiStorageSite : StorageSiteBase {
         throw new NotImplementedException();
     }
 
-    protected override Task<bool> ExecuteSave(SecureBuffer encryptedSpan) {
+    protected override Task<bool> ExecuteSave(SecureBuffer encryptedSpan, IStorageSiteServices storageSiteServices) {
         // If first time: request new storage with secret
         //      -> API generates and returns id
         // Store id + secret

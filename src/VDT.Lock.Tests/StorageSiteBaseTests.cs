@@ -1,6 +1,8 @@
-﻿using System;
+﻿using NSubstitute;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using VDT.Lock.Services;
 using VDT.Lock.StorageSites;
 using Xunit;
 
@@ -16,10 +18,10 @@ public class StorageSiteBaseTests {
             throw new NotImplementedException();
         }
 
-        protected override Task<SecureBuffer?> ExecuteLoad()
+        protected override Task<SecureBuffer?> ExecuteLoad(IStorageSiteServices storageSiteServices)
             => Task.FromResult<SecureBuffer?>(new SecureBuffer([]));
 
-        protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer)
+        protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer, IStorageSiteServices storageSiteServices)
             => Task.FromResult(true);
     }
 
@@ -60,7 +62,7 @@ public class StorageSiteBaseTests {
     public async Task Load() {
         using var subject = new TestStorageSite([]);
 
-        var result = await subject.Load();
+        var result = await subject.Load(Substitute.For<IStorageSiteServices>());
 
         Assert.NotNull(result);
         Assert.Equal([], result.Value);
@@ -70,7 +72,7 @@ public class StorageSiteBaseTests {
     public async Task Save() {
         using var subject = new TestStorageSite([]);
 
-        var result = await subject.Save(new SecureBuffer([]));
+        var result = await subject.Save(new SecureBuffer([]), Substitute.For<IStorageSiteServices>());
 
         Assert.True(result);
     }
@@ -112,7 +114,7 @@ public class StorageSiteBaseTests {
 
         using (subject = new([])) { }
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => subject.Load());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => subject.Load(Substitute.For<IStorageSiteServices>()));
     }
 
     [Fact]
@@ -121,6 +123,6 @@ public class StorageSiteBaseTests {
 
         using (subject = new([])) { }
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => subject.Save(new SecureBuffer([])));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => subject.Save(new SecureBuffer([]), Substitute.For<IStorageSiteServices>()));
     }
 }

@@ -26,10 +26,4 @@
 		<ProjectReference Include="..\VDT.Lock\VDT.Lock.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<None Update="Content\*.*">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-
 </Project>

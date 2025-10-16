@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using VDT.Lock.Services;
 using VDT.Lock.StorageSites;
 
 namespace VDT.Lock;
@@ -42,21 +43,21 @@ public abstract class StorageSiteBase : IData<StorageSiteBase>, IDisposable {
         plainNameBuffer = new(plainNameSpan.ToArray());
     }
 
-    public Task<SecureBuffer?> Load() {
+    public Task<SecureBuffer?> Load(IStorageSiteServices storageSiteServices) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        return ExecuteLoad();
+        return ExecuteLoad(storageSiteServices);
     }
 
-    protected abstract Task<SecureBuffer?> ExecuteLoad();
+    protected abstract Task<SecureBuffer?> ExecuteLoad(IStorageSiteServices storageSiteServices);
 
-    public Task<bool> Save(SecureBuffer encryptedBuffer) {
+    public Task<bool> Save(SecureBuffer encryptedBuffer, IStorageSiteServices storageSiteServices) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        return ExecuteSave(encryptedBuffer);
+        return ExecuteSave(encryptedBuffer, storageSiteServices);
     }
 
-    protected abstract Task<bool> ExecuteSave(SecureBuffer encryptedSpan);
+    protected abstract Task<bool> ExecuteSave(SecureBuffer encryptedSpan, IStorageSiteServices storageSiteServices);
 
     public abstract void SerializeTo(SecureByteList plainBytes);
 

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using NSubstitute;
+using System;
 using System.Text;
 using System.Threading.Tasks;
+using VDT.Lock.Services;
 using VDT.Lock.StorageSites;
 using Xunit;
 
@@ -36,11 +38,15 @@ public class FileSystemStorageSiteTests {
     [Fact]
     public async Task ExecuteLoad() {
         const string fileName = "FileSystemStorage_ExecuteLoad.data";
-        var expectedResult = ContentProvider.GetFileContents(fileName);
+        const string fileContents = "This is not actually encrypted data, but normally it would be.";
+        var expectedResult = Encoding.UTF8.GetBytes(fileContents);
 
-        using var subject = new FileSystemStorageSite([110, 97, 109, 101], Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
+        var storageSiteServices = Substitute.For<IStorageSiteServices>();
+        storageSiteServices.FileService.ReadAllBytes(fileName).Returns(expectedResult);
 
-        var result = await subject.Load();
+        using var subject = new FileSystemStorageSite([110, 97, 109, 101], Encoding.UTF8.GetBytes(fileName));
+
+        var result = await subject.Load(storageSiteServices);
 
         Assert.NotNull(result);
         Assert.Equal(expectedResult, result.Value);
@@ -52,13 +58,13 @@ public class FileSystemStorageSiteTests {
         const string fileContents = "This is not actually encrypted data, but normally it would be.";
         var expectedResult = Encoding.UTF8.GetBytes(fileContents);
 
-        using var subject = new FileSystemStorageSite([110, 97, 109, 101], Encoding.UTF8.GetBytes(ContentProvider.GetFilePath(fileName)));
+        var storageSiteServices = Substitute.For<IStorageSiteServices>();
 
-        Assert.True(await subject.Save(new SecureBuffer(expectedResult)));
+        using var subject = new FileSystemStorageSite([110, 97, 109, 101], Encoding.UTF8.GetBytes(fileName));
 
-        var result = ContentProvider.GetFileContents(fileName);
+        Assert.True(await subject.Save(new SecureBuffer(expectedResult), storageSiteServices));
 
-        Assert.Equal(expectedResult, result);
+        storageSiteServices.FileService.Received().WriteAllBytes(fileName, expectedResult);
     }
 
     [Fact]

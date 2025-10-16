@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NSubstitute;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VDT.Lock.Services;
@@ -19,11 +20,11 @@ public class StoreManagerTests {
             throw new NotImplementedException();
         }
 
-        protected override Task<SecureBuffer?> ExecuteLoad() {
+        protected override Task<SecureBuffer?> ExecuteLoad(IStorageSiteServices storageSiteServices) {
             return Task.FromResult<SecureBuffer?>(new SecureBuffer(encryptedBytes));
         }
 
-        protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer) {
+        protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer, IStorageSiteServices storageSiteServices) {
             encryptedBytes = [.. encryptedBuffer.Value];
 
             return Task.FromResult(true);
@@ -32,7 +33,7 @@ public class StoreManagerTests {
 
     [Fact]
     public void SetStorageSites() {
-        using var subject = new StoreManager(new Encryptor(), new HashProvider());
+        using var subject = new StoreManager(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>());
 
         var previousStorageSites = subject.StorageSites;
         var newStorageSites = new DataCollection<StorageSiteBase>();
@@ -48,7 +49,7 @@ public class StoreManagerTests {
         using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
         var hashProvider = new HashProvider();
-        using var subject = new StoreManager(new Encryptor(), hashProvider);
+        using var subject = new StoreManager(new Encryptor(), hashProvider, Substitute.For<IStorageSiteServices>());
 
         using var expectedStoreKey = hashProvider.Provide(plainMasterPasswordBuffer, StoreManager.MasterPasswordSalt);
 
@@ -66,13 +67,13 @@ public class StoreManagerTests {
         var encryptor = new Encryptor();
         var hashProvider = new HashProvider();
 
-        using var saveSubject = new StoreManager(encryptor, hashProvider);
+        using var saveSubject = new StoreManager(encryptor, hashProvider, Substitute.For<IStorageSiteServices>());
         saveSubject.StorageSites.Add(new FileSystemStorageSite("foo"u8, "abc"u8));
         saveSubject.StorageSites.Add(new FileSystemStorageSite("bar"u8, "def"u8));
         await saveSubject.Authenticate(plainMasterPasswordBuffer);
         using var encryptedBuffer = await saveSubject.SaveStorageSites();
 
-        using var loadSubject = new StoreManager(encryptor, hashProvider);
+        using var loadSubject = new StoreManager(encryptor, hashProvider, Substitute.For<IStorageSiteServices>());
         await loadSubject.Authenticate(plainMasterPasswordBuffer);
         await loadSubject.LoadStorageSites(encryptedBuffer);
 
@@ -86,7 +87,7 @@ public class StoreManagerTests {
         using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
         using var invalidEncryptedBuffer = new SecureBuffer([0, 0, 0, 0]);
 
-        using var subject = new StoreManager(new Encryptor(), new HashProvider());
+        using var subject = new StoreManager(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>());
 
         await subject.Authenticate(plainMasterPasswordBuffer);
         await Assert.ThrowsAsync<InvalidAuthenticationException>(() => subject.LoadStorageSites(invalidEncryptedBuffer));
@@ -96,7 +97,7 @@ public class StoreManagerTests {
     public async Task SaveDataStoreAndLoadDataStore() {
         using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
-        using var subject = new StoreManager(new Encryptor(), new HashProvider()) {
+        using var subject = new StoreManager(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>()) {
             StorageSites = {
                 new TestStorageSite([98, 97, 114])
             }
@@ -126,7 +127,7 @@ public class StoreManagerTests {
     public async Task EnsureAuthenticatedDoesNotThrowIfAuthenticated() {
         using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
-        using var subject = new StoreManager(new Encryptor(), new HashProvider());
+        using var subject = new StoreManager(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>());
 
         await subject.Authenticate(plainMasterPasswordBuffer);
 
@@ -136,7 +137,7 @@ public class StoreManagerTests {
 
     [Fact]
     public void EnsureAuthenticatedThrowsIfNotAuthenticated() {
-        using var subject = new StoreManager(new Encryptor(), new HashProvider());
+        using var subject = new StoreManager(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>());
 
         Assert.False(subject.IsAuthenticated);
         Assert.Throws<NotAuthenticatedException>(() => subject.EnsureAuthenticated());
@@ -144,14 +145,14 @@ public class StoreManagerTests {
 
     [Fact]
     public async Task SaveStorageSitesThrowsIfNotAuthenticated() {
-        using var subject = new StoreManager(new Encryptor(), new HashProvider());
+        using var subject = new StoreManager(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>());
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.SaveStorageSites());
     }
 
     [Fact]
     public async Task LoadStorageSitesThrowsIfNotAuthenticated() {
-        using var subject = new StoreManager(new Encryptor(), new HashProvider());
+        using var subject = new StoreManager(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>());
         using var encryptedBuffer = new SecureBuffer([]);
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.LoadStorageSites(encryptedBuffer));
@@ -159,7 +160,7 @@ public class StoreManagerTests {
 
     [Fact]
     public async Task SaveDataStoreThrowsIfNotAuthenticated() {
-        using var subject = new StoreManager(new Encryptor(), new HashProvider());
+        using var subject = new StoreManager(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>());
         using var dataStore = new DataStore();
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.SaveDataStore(dataStore));
@@ -167,14 +168,14 @@ public class StoreManagerTests {
 
     [Fact]
     public async Task LoadDataStoreThrowsIfNotAuthenticated() {
-        using var subject = new StoreManager(new Encryptor(), new HashProvider());
+        using var subject = new StoreManager(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>());
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.LoadDataStore());
     }
 
     [Fact]
     public async Task GetPlainStoreKeyBufferThrowsIfNotAuthenticated() {
-        using var subject = new StoreManager(new Encryptor(), new HashProvider());
+        using var subject = new StoreManager(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>());
 
         await Assert.ThrowsAsync<NotAuthenticatedException>(() => subject.GetPlainStoreKeyBuffer());
     }
@@ -186,7 +187,7 @@ public class StoreManagerTests {
         SecureBuffer encryptedStoreKeyBuffer;
         DataCollection<StorageSiteBase> storageSites;
 
-        using (subject = new(new Encryptor(), new HashProvider())) {
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) {
             using var plainMasterPasswordBuffer = new SecureBuffer("aVerySecurePassword"u8.ToArray());
 
             await subject.Authenticate(plainMasterPasswordBuffer);
@@ -206,7 +207,7 @@ public class StoreManagerTests {
     public void IsAuthenticatedThrowsIfDisposed() {
         StoreManager subject;
 
-        using (subject = new(new Encryptor(), new HashProvider())) { }
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) { }
 
         Assert.Throws<ObjectDisposedException>(() => subject.IsAuthenticated);
     }
@@ -215,7 +216,7 @@ public class StoreManagerTests {
     public void GetStorageSitesThrowsIfDisposed() {
         StoreManager subject;
 
-        using (subject = new(new Encryptor(), new HashProvider())) { }
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) { }
 
         Assert.Throws<ObjectDisposedException>(() => subject.StorageSites);
     }
@@ -224,7 +225,7 @@ public class StoreManagerTests {
     public void SetStorageSitesThrowsIfDisposed() {
         StoreManager subject;
 
-        using (subject = new(new Encryptor(), new HashProvider())) { }
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) { }
 
         Assert.Throws<ObjectDisposedException>(() => subject.StorageSites = []);
     }
@@ -234,7 +235,7 @@ public class StoreManagerTests {
         StoreManager subject;
         var plainMasterPasswordBuffer = new SecureBuffer(0);
 
-        using (subject = new(new Encryptor(), new HashProvider())) { }
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) { }
 
         await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.Authenticate(plainMasterPasswordBuffer));
     }
@@ -244,7 +245,7 @@ public class StoreManagerTests {
         StoreManager subject;
         var encryptedStorageSettingsBuffer = new SecureBuffer(0);
 
-        using (subject = new(new Encryptor(), new HashProvider())) { }
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) { }
 
         await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.LoadStorageSites(encryptedStorageSettingsBuffer));
     }
@@ -253,7 +254,7 @@ public class StoreManagerTests {
     public async Task SaveStorageSitesThrowsIfDisposed() {
         StoreManager subject;
 
-        using (subject = new(new Encryptor(), new HashProvider())) { }
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) { }
 
         await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.SaveStorageSites());
     }
@@ -262,7 +263,7 @@ public class StoreManagerTests {
     public async Task LoadDataStoreThrowsIfDisposed() {
         StoreManager subject;
 
-        using (subject = new(new Encryptor(), new HashProvider())) { }
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) { }
 
         await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.LoadDataStore());
     }
@@ -272,7 +273,7 @@ public class StoreManagerTests {
         StoreManager subject;
         using var dataStore = new DataStore();
 
-        using (subject = new(new Encryptor(), new HashProvider())) { }
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) { }
 
         await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.SaveDataStore(dataStore));
     }
@@ -281,7 +282,7 @@ public class StoreManagerTests {
     public async Task GetPlainStoreKeyBufferThrowsIfDisposed() {
         StoreManager subject;
 
-        using (subject = new(new Encryptor(), new HashProvider())) { }
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) { }
 
         await Assert.ThrowsAsync<ObjectDisposedException>(async () => await subject.GetPlainStoreKeyBuffer());
     }
@@ -290,7 +291,7 @@ public class StoreManagerTests {
     public void EnsureAuthenticatedThrowsIfDisposed() {
         StoreManager subject;
 
-        using (subject = new(new Encryptor(), new HashProvider())) { }
+        using (subject = new(new Encryptor(), new HashProvider(), Substitute.For<IStorageSiteServices>())) { }
 
         Assert.Throws<ObjectDisposedException>(() => subject.EnsureAuthenticated());
     }

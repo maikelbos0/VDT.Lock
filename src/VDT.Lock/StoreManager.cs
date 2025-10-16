@@ -13,7 +13,7 @@ public sealed class StoreManager : IDisposable {
 
     private readonly IEncryptor encryptor;
     private readonly IHashProvider hashProvider;
-
+    private readonly IStorageSiteServices storageSiteServices;
     private SecureBuffer? plainSessionKeyBuffer;
     private SecureBuffer? encryptedStoreKeyBuffer;
 
@@ -45,9 +45,10 @@ public sealed class StoreManager : IDisposable {
         }
     }
 
-    public StoreManager(IEncryptor encryptor, IHashProvider hashProvider) {
+    public StoreManager(IEncryptor encryptor, IHashProvider hashProvider, IStorageSiteServices storageSiteServices) {
         this.encryptor = encryptor;
         this.hashProvider = hashProvider;
+        this.storageSiteServices = storageSiteServices;
     }
 
     public async Task Authenticate(SecureBuffer plainMasterPasswordBuffer) {
@@ -106,7 +107,7 @@ public sealed class StoreManager : IDisposable {
         await Parallel.ForEachAsync(storageSites, async (storageSite, _) => {
             try {
                 using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
-                using var encryptedBuffer = await storageSite.Load();
+                using var encryptedBuffer = await storageSite.Load(storageSiteServices);
 
                 if (encryptedBuffer != null) {
                     using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
@@ -147,7 +148,7 @@ public sealed class StoreManager : IDisposable {
         var resultLock = new object();
 
         await Parallel.ForEachAsync(storageSites, async (storageSite, _) => {
-            if (await storageSite.Save(encryptedBuffer)) {
+            if (await storageSite.Save(encryptedBuffer, storageSiteServices)) {
                 lock (resultLock) {
                     result.SucceededStorageSites.Add(new DataValue(storageSite.Name));
                 }

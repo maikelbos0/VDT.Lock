@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using VDT.Lock.Services;
 
 #if BROWSER
 using VDT.Lock.JavascriptInterop;
@@ -33,7 +34,7 @@ public partial class ChromeStorageSite : StorageSiteBase {
     public ChromeStorageSite(ReadOnlySpan<byte> plainNameSpan) : base(plainNameSpan) { }
 
 #if BROWSER
-    protected override async Task<SecureBuffer?> ExecuteLoad() {
+    protected override async Task<SecureBuffer?> ExecuteLoad(IStorageSiteServices storageSiteServices) {
         var header = await JSChromeDataStore.Load(headerKey);
 
         if (header == null || header.Length != 4) {
@@ -57,13 +58,13 @@ public partial class ChromeStorageSite : StorageSiteBase {
         return encryptedBytes.ToBuffer();
     }
 #else
-    protected override Task<SecureBuffer?> ExecuteLoad()
+    protected override Task<SecureBuffer?> ExecuteLoad(IStorageSiteServices storageSiteServices)
         => Task.FromResult<SecureBuffer?>(null);
 #endif
 
 
 #if BROWSER
-    protected override async Task<bool> ExecuteSave(SecureBuffer encryptedBuffer) {
+    protected override async Task<bool> ExecuteSave(SecureBuffer encryptedBuffer, IStorageSiteServices storageSiteServices) {
         var encryptedBufferSplitter = new SecureBufferSplitter(encryptedBuffer, sectionSize);
         var result = await JSChromeDataStore.Clear();
 
@@ -82,7 +83,7 @@ public partial class ChromeStorageSite : StorageSiteBase {
         return result;
     }
 #else
-    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer)
+    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer, IStorageSiteServices storageSiteServices)
         => Task.FromResult(false);
 #endif
 

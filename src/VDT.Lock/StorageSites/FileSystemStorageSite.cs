@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using VDT.Lock.Services;
 
 #if !BROWSER
-using System.IO;
 using System.Text;
 #endif
 
@@ -47,25 +47,20 @@ public class FileSystemStorageSite : StorageSiteBase {
     }
 
 #if BROWSER
-    protected override Task<SecureBuffer?> ExecuteLoad()
+    protected override Task<SecureBuffer?> ExecuteLoad(IStorageSiteServices storageSiteServices)
         => Task.FromResult<SecureBuffer?>(null);
 #else
-    protected override Task<SecureBuffer?> ExecuteLoad() {
-        using var fileStream = File.OpenRead(Encoding.UTF8.GetString(Location));
-        using var encryptedBytes = new SecureByteList(fileStream);
-
-        return Task.FromResult<SecureBuffer?>(encryptedBytes.ToBuffer());
+    protected override Task<SecureBuffer?> ExecuteLoad(IStorageSiteServices storageSiteServices) {
+        return Task.FromResult<SecureBuffer?>(new SecureBuffer(storageSiteServices.FileService.ReadAllBytes(Encoding.UTF8.GetString(Location))));
     }
 #endif
 
 #if BROWSER
-    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer)
+    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer, IStorageSiteServices storageSiteServices)
         => Task.FromResult(false);
 #else
-    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer) {
-        using var fileStream = File.Create(Encoding.UTF8.GetString(Location));
-
-        fileStream.Write(encryptedBuffer.Value);
+    protected override Task<bool> ExecuteSave(SecureBuffer encryptedBuffer, IStorageSiteServices storageSiteServices) {
+        storageSiteServices.FileService.WriteAllBytes(Encoding.UTF8.GetString(Location), encryptedBuffer.Value);
 
         return Task.FromResult(true);
     }
