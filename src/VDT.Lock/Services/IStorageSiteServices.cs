@@ -1,5 +1,6 @@
 ﻿namespace VDT.Lock.Services;
 
 public interface IStorageSiteServices {
-    IFileService FileService { get; set; }
+    IFileService FileService { get; }
+    IHttpService HttpService { get; }
 }

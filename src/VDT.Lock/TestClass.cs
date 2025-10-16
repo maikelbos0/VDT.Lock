@@ -1,4 +1,6 @@
 ﻿#if BROWSER
+using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http;
 using System.Runtime.InteropServices.JavaScript;
 using System.Security.Cryptography;
 using System.Text;
@@ -26,9 +28,13 @@ public static partial class TestClass {
             value += " " + value;
         }
 
+        using var serviceProvider = new ServiceCollection()
+            .AddHttpClient()
+            .BuildServiceProvider();
+
         using var plainBuffer = new SecureBuffer(Encoding.UTF8.GetBytes(value));
         var chromeStorageSite = new ChromeStorageSite([]);
-        var storageSiteServices = new StorageSiteServices();
+        var storageSiteServices = new StorageSiteServices(serviceProvider.GetRequiredService<IHttpClientFactory>());
         await chromeStorageSite.Save(plainBuffer, storageSiteServices);
         var storedValue = await chromeStorageSite.Load(storageSiteServices);
 
