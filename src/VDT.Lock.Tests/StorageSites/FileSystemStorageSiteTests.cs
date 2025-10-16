@@ -16,7 +16,18 @@ public class FileSystemStorageSiteTests {
         Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), result.Name);
         Assert.Equal(new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]), result.Location);
     }
-    
+
+    [Fact]
+    public void SetLocation() {
+        var subject = new FileSystemStorageSite([], []);
+        var plainPreviousValueBuffer = subject.GetBuffer("plainLocationBuffer");
+
+        subject.Location = new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]);
+
+        Assert.Equal(new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]), subject.Location);
+        Assert.True(plainPreviousValueBuffer.IsDisposed);
+    }
+
     [Fact]
     public void Constructor() {
         var plainNameSpan = new ReadOnlySpan<byte>([110, 97, 109, 101]);
