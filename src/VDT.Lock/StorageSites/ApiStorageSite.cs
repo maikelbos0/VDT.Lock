@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using VDT.Lock.Services;
 
@@ -29,34 +31,6 @@ public class ApiStorageSite : StorageSiteBase {
 
             plainLocationBuffer.Dispose();
             plainLocationBuffer = new(value.ToArray());
-        }
-    }
-
-    public ReadOnlySpan<byte> DataStoreId {
-        get {
-            ObjectDisposedException.ThrowIf(IsDisposed, this);
-
-            return new(plainDataStoreIdBuffer.Value);
-        }
-        set {
-            ObjectDisposedException.ThrowIf(IsDisposed, this);
-
-            plainDataStoreIdBuffer.Dispose();
-            plainDataStoreIdBuffer = new(value.ToArray());
-        }
-    }
-
-    public ReadOnlySpan<byte> Secret {
-        get {
-            ObjectDisposedException.ThrowIf(IsDisposed, this);
-
-            return new(plainSecretBuffer.Value);
-        }
-        set {
-            ObjectDisposedException.ThrowIf(IsDisposed, this);
-
-            plainSecretBuffer.Dispose();
-            plainSecretBuffer = new(value.ToArray());
         }
     }
 
