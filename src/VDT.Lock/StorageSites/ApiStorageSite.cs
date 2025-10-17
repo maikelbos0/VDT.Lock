@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using VDT.Lock.Services;
@@ -9,6 +10,7 @@ namespace VDT.Lock.StorageSites;
 
 public class ApiStorageSite : StorageSiteBase {
     public const int TypeId = 2;
+    public const int SecretSizeInBytes = 32;
 
     public static new ApiStorageSite DeserializeFrom(ReadOnlySpan<byte> plainSpan) {
         var position = 0;
@@ -66,22 +68,51 @@ public class ApiStorageSite : StorageSiteBase {
         plainSecretBuffer = new(secret.ToArray());
     }
 
-    protected override Task<SecureBuffer?> ExecuteLoad(IStorageSiteServices storageSiteServices) {
-        // If first time: request new storage with secret
-        //      -> API generates and returns id
-        // Store id + secret
+    protected override async Task<SecureBuffer?> ExecuteLoad(IStorageSiteServices storageSiteServices) {
+        if (!(await Initialize(storageSiteServices))) {
+            return null;
+        }
 
-        // Request data using id + passcode
-        throw new NotImplementedException();
+        // Request data using id + secret
+        return null;
     }
 
-    protected override Task<bool> ExecuteSave(SecureBuffer encryptedSpan, IStorageSiteServices storageSiteServices) {
-        // If first time: request new storage with secret
-        //      -> API generates and returns id
-        // Store id + secret
+    protected override async Task<bool> ExecuteSave(SecureBuffer encryptedSpan, IStorageSiteServices storageSiteServices) {
+        if (!(await Initialize(storageSiteServices))) {
+            return false;
+        }
 
         // Save data using id + secret
-        throw new NotImplementedException();
+        return false;
+    }
+
+    private async Task<bool> Initialize(IStorageSiteServices storageSiteServices) {
+        if (plainDataStoreIdBuffer.Value.Length > 0) {
+            return true;
+        }
+
+        if (plainSecretBuffer.Value.Length == 0) {
+            plainSecretBuffer.Dispose();
+            plainSecretBuffer = new(RandomNumberGenerator.GetBytes(SecretSizeInBytes));
+        }
+
+        var request = new HttpRequestMessage() {
+            RequestUri = new(Encoding.UTF8.GetString(plainLocationBuffer.Value)),
+            Method = HttpMethod.Post,
+            Headers = {
+                {  "Secret", Convert.ToBase64String(plainSecretBuffer.Value) }
+            }
+        };
+        var response = await storageSiteServices.HttpService.SendAsync(request);
+
+        if (response.IsSuccessStatusCode) {
+            plainDataStoreIdBuffer.Dispose();
+            plainDataStoreIdBuffer = new(await response.Content.ReadAsByteArrayAsync());
+
+            return true;
+        }
+
+        return false;
     }
 
     public override void SerializeTo(SecureByteList plainBytes) {

@@ -11,9 +11,17 @@ document.getElementById('encryptionTest').addEventListener('click', async functi
     document.getElementById("encryptionResult").innerText = result;
 });
 
-document.getElementById('storageTest').addEventListener('click', async function () {
-    const input = document.getElementById('storageInput').value;
+document.getElementById('chromeStorageTest').addEventListener('click', async function () {
+    const input = document.getElementById('chromeStorageInput').value;
     const result = await exports.VDT.Lock.TestClass.TestChromeStorage(input);
     
-    document.getElementById('storageResult').innerText = result.substring(0, 25) + "...";
+    document.getElementById('chromeStorageResult').innerText = result.substring(0, 25) + "...";
+});
+
+document.getElementById('apiStorageTest').addEventListener('click', async function () {
+    console.log(exports);
+    const input = document.getElementById('apiStorageInput').value;
+    const result = await exports.VDT.Lock.TestClass.TestApiStorage(input);
+
+    document.getElementById('apiStorageResult').innerText = result.substring(0, 25) + "...";
 });

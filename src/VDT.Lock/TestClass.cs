@@ -40,5 +40,24 @@ public static partial class TestClass {
 
         return Encoding.UTF8.GetString(storedValue?.Value ?? []);
     }
+
+    [JSExport]
+    public static async Task<string> TestApiStorage(string value) {
+        for (int i = 0; i < 10; i++) {
+            value += " " + value;
+        }
+
+        using var serviceProvider = new ServiceCollection()
+            .AddHttpClient()
+            .BuildServiceProvider();
+
+        using var plainBuffer = new SecureBuffer(Encoding.UTF8.GetBytes(value));
+        var apiStorageSite = new ApiStorageSite([], Encoding.UTF8.GetBytes("https://localhost:7008"));
+        var storageSiteServices = new StorageSiteServices(serviceProvider.GetRequiredService<IHttpClientFactory>());
+        await apiStorageSite.Save(plainBuffer, storageSiteServices);
+        var storedValue = await apiStorageSite.Load(storageSiteServices);
+
+        return Encoding.UTF8.GetString(storedValue?.Value ?? []);
+    }
 }
 #endif
