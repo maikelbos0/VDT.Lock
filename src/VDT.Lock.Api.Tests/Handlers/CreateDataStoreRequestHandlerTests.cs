@@ -1,4 +1,5 @@
 ﻿using NSubstitute;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using VDT.Lock.Api.Handlers;
@@ -25,7 +26,7 @@ public class CreateDataStoreRequestHandlerTests {
         var result = await subject.Handle(request, CancellationToken.None);
 
         var dataStore = Assert.Single(context.DataStores);
-        Assert.Equal(Assert.IsType<RawOkResult>(result).Value, dataStore.Id.ToByteArray());
+        Assert.Equal(Assert.IsType<RawOkResult>(result).Value, Encoding.UTF8.GetBytes(dataStore.Id.ToString()));
         Assert.Equal(secretSalt, dataStore.SecretSalt);
         Assert.Equal(secretHash, dataStore.SecretHash);
         Assert.Null(dataStore.Data);

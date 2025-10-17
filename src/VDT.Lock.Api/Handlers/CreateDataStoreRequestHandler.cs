@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using VDT.Lock.Api.Data;
@@ -30,6 +31,6 @@ public class CreateDataStoreRequestHandler {
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return new RawOkResult(id.ToByteArray());
+        return new RawOkResult(Encoding.UTF8.GetBytes(id.ToString()));
     }
 }
