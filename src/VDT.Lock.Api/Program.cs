@@ -46,6 +46,12 @@ builder.Services.AddRateLimiter(options => {
         )
     );
 });
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy 
+    => policy
+        .AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod()));
+
 builder.Services.AddScoped<ISecretHasher, SecretHasher>();
 builder.Services.AddScoped<CreateDataStoreRequestHandler>();
 builder.Services.AddScoped<LoadDataStoreRequestHandler>();
@@ -59,6 +65,7 @@ app.UseHttpLogging();
 app.UseRateLimiter();
 app.UseExceptionHandler(applicationBuilder => applicationBuilder.Run(async httpContext
     => await Results.StatusCode(StatusCodes.Status500InternalServerError).ExecuteAsync(httpContext)));
+app.UseCors();
 
 app.MapPost("/", (
     [FromHeader] string secret,
