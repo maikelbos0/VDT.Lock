@@ -34,6 +34,22 @@ public class ApiStorageSite : StorageSiteBase {
         }
     }
 
+    public ReadOnlySpan<byte> DataStoreId {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return new(plainDataStoreIdBuffer.Value);
+        }
+    }
+
+    public ReadOnlySpan<byte> Secret {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return new(plainSecretBuffer.Value);
+        }
+    }
+
     public override IEnumerable<int> FieldLengths {
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);

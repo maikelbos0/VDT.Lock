@@ -11,8 +11,8 @@ public class ApiStorageSiteTests {
 
         Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), result.Name);
         Assert.Equal(new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]), result.Location);
-        Assert.Equal(new ReadOnlySpan<byte>([105, 100]), result.GetBuffer("plainDataStoreIdBuffer"));
-        Assert.Equal(new ReadOnlySpan<byte>([115, 101, 99, 114, 101, 116]), result.GetBuffer("plainSecretBuffer"));
+        Assert.Equal(new ReadOnlySpan<byte>([105, 100]), result.DataStoreId);
+        Assert.Equal(new ReadOnlySpan<byte>([115, 101, 99, 114, 101, 116]), result.Secret);
     }
 
     [Fact]
@@ -37,8 +37,8 @@ public class ApiStorageSiteTests {
 
         Assert.Equal(plainNameSpan, subject.Name);
         Assert.Equal(plainLocationSpan, subject.Location);
-        Assert.Equal(plainDataStoreIdSpan, subject.GetBuffer("plainDataStoreIdBuffer"));
-        Assert.Equal(plainSecretSpan, subject.GetBuffer("plainSecretBuffer"));
+        Assert.Equal(plainDataStoreIdSpan, subject.DataStoreId);
+        Assert.Equal(plainSecretSpan, subject.Secret);
     }
 
     [Fact]
@@ -74,6 +74,24 @@ public class ApiStorageSiteTests {
         using (subject = new([], [])) { }
 
         Assert.Throws<ObjectDisposedException>(() => subject.Location = new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]));
+    }
+
+    [Fact]
+    public void GetDataStoreIdThrowsIfDisposed() {
+        ApiStorageSite subject;
+
+        using (subject = new([], [])) { }
+
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.DataStoreId; });
+    }
+
+    [Fact]
+    public void GetSecretThrowsIfDisposed() {
+        ApiStorageSite subject;
+
+        using (subject = new([], [])) { }
+
+        Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Secret; });
     }
 
     [Fact]
