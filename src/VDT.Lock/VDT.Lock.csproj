@@ -12,7 +12,7 @@
 		<DefaultItemExcludes>$(DefaultItemExcludes);publish\**\*.*</DefaultItemExcludes>
 	</PropertyGroup>
 
-	<Target Name="PostBuildScript" AfterTargets="AfterBuild" Condition="$(TargetFramework) == 'net8.0-browser'">
+	<Target Name="PostBuildScript" AfterTargets="AfterBuild" Condition="$(TargetFramework) == 'net9.0-browser'">
 		<ItemGroup>
 			<WasmFiles Include="$(TargetDir)wwwroot\_framework/*.*" />
 		</ItemGroup>
