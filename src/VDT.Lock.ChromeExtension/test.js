@@ -8,14 +8,14 @@ document.getElementById('encryptionTest').addEventListener('click', async functi
     const input = document.getElementById('encryptionInput').value;
     const result = await exports.VDT.Lock.TestClass.TestEncryption(input);
 
-    document.getElementById("encryptionResult").innerText = result;
+    document.getElementById("encryptionResult").value = result;
 });
 
 document.getElementById('chromeStorageTest').addEventListener('click', async function () {
     const input = document.getElementById('chromeStorageInput').value;
     const result = await exports.VDT.Lock.TestClass.TestChromeStorage(input);
     
-    document.getElementById('chromeStorageResult').innerText = result.substring(0, 25) + "...";
+    document.getElementById('chromeStorageResult').value = result.substring(0, 25) + "...";
 });
 
 document.getElementById('apiStorageTest').addEventListener('click', async function () {
@@ -23,5 +23,5 @@ document.getElementById('apiStorageTest').addEventListener('click', async functi
     const input = document.getElementById('apiStorageInput').value;
     const result = await exports.VDT.Lock.TestClass.TestApiStorage(input);
 
-    document.getElementById('apiStorageResult').innerText = result.substring(0, 25) + "...";
+    document.getElementById('apiStorageResult').value = result.substring(0, 25) + "...";
 });

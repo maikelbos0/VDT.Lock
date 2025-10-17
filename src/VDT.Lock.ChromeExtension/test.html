@@ -1,24 +1,67 @@
 <html>
+<head>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 1rem;
+            padding-bottom: 0;
+        }
+
+        .container {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccccff;
+            background: #eeeeff;
+            width: 20rem;
+        }
+
+            .container > :not(:last-child) {
+                margin-bottom: 0.5rem;
+            }
+
+        button, input {
+            width: 100%;
+            padding: 0.25rem;
+        }
+
+        button {
+            border: 1px solid #000033;
+            background: #333366;
+            color: #ffffff;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid #ccccff;
+        }
+
+            input:disabled {
+                background: #eeeeff;
+            }
+
+        .container, button, input {
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
 <body>
-    <h1>Test</h1>
+    <div class="container">
+        <input type="text" id="encryptionInput" value="My password" />
+        <button id="encryptionTest">Encryption test</button>
+        <input type="text" id="encryptionResult" disabled />
+    </div>
 
-    <input type="text" id="encryptionInput" value="My password" />
+    <div class="container">
+        <input type="text" id="chromeStorageInput" value="Something to store" />
+        <button id="chromeStorageTest">Chrome storage test</button>
+        <input type="text" id="chromeStorageResult" disabled />
+    </div>
 
-    <button id="encryptionTest">Encryption test</button>
-
-    <div id="encryptionResult"></div>
-
-    <input type="text" id="chromeStorageInput" value="Something to store" />
-
-    <button id="chromeStorageTest">Chrome storage test</button>
-
-    <div id="chromeStorageResult"></div>
-
-    <input type="text" id="apiStorageInput" value="Something to store" />
-
-    <button id="apiStorageTest">Api storage test</button>
-
-    <div id="apiStorageResult"></div>
+    <div class="container">
+        <input type="text" id="apiStorageInput" value="Something to store" />
+        <button id="apiStorageTest">Api storage test</button>
+        <input type="text" id="apiStorageResult" disabled />
+    </div>
 
     <script type="module" src="test.js"></script>
 </body>
