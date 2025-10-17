@@ -46,7 +46,7 @@ builder.Services.AddRateLimiter(options => {
         )
     );
 });
-builder.Services.AddCors(options => options.AddDefaultPolicy(policy 
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy
     => policy
         .AllowAnyOrigin()
         .AllowAnyHeader()
@@ -83,8 +83,10 @@ app.MapGet("/{id}", (
 app.MapPut("/{id}", (
     [FromRoute] Guid id,
     [FromHeader] string secret,
-    [FromBody] byte[] data,
+    HttpRequest request,
     [FromServices] SaveDataStoreRequestHandler handler
-) => handler.Handle(new SaveDataStoreRequest(id, Convert.FromBase64String(secret), data)));
+) => {
+    return handler.Handle(new SaveDataStoreRequest(id, Convert.FromBase64String(secret), request.Body));
+});
 
 app.Run();

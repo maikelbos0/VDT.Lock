@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using VDT.Lock.Api.Data;
 using VDT.Lock.Api.Services;
 
 namespace VDT.Lock.Api.Handlers;
 
-public record SaveDataStoreRequest(Guid Id, byte[] Secret, byte[] Data);
+public record SaveDataStoreRequest(Guid Id, byte[] Secret, Stream DataStream);
 
 public class SaveDataStoreRequestHandler {
     private readonly LockContext context;
@@ -27,7 +28,10 @@ public class SaveDataStoreRequestHandler {
             return Results.Unauthorized();
         }
 
-        dataStore.Data = request.Data;
+        using var dataStream = new MemoryStream();
+        await request.DataStream.CopyToAsync(dataStream);
+        dataStore.Data = dataStream.ToArray();
+
         await context.SaveChangesAsync();
 
         return Results.Ok();
