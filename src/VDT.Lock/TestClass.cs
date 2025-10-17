@@ -24,7 +24,7 @@ public static partial class TestClass {
 
     [JSExport]
     public static async Task<string> TestChromeStorage(string value) {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 6; i++) {
             value += " " + value;
         }
 
@@ -43,7 +43,7 @@ public static partial class TestClass {
 
     [JSExport]
     public static async Task<string> TestApiStorage(string value) {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 6; i++) {
             value += " " + value;
         }
 

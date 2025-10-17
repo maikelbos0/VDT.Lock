@@ -82,8 +82,17 @@ public class ApiStorageSite : StorageSiteBase {
             return false;
         }
 
-        // Save data using id + secret
-        return false;
+        var request = new HttpRequestMessage() {
+            RequestUri = new(Encoding.UTF8.GetString(plainLocationBuffer.Value).TrimEnd('/') + "/" + Encoding.UTF8.GetString(plainDataStoreIdBuffer.Value)),
+            Method = HttpMethod.Put,
+            Headers = {
+                {  "Secret", Convert.ToBase64String(plainSecretBuffer.Value) }
+            },
+            Content = new ByteArrayContent(encryptedSpan.Value)
+        };
+        var response = await storageSiteServices.HttpService.SendAsync(request);
+
+        return response.IsSuccessStatusCode;
     }
 
     private async Task<bool> Initialize(IStorageSiteServices storageSiteServices) {
