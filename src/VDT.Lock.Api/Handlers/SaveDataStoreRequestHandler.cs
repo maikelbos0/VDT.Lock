@@ -54,7 +54,7 @@ public class SaveDataStoreRequestHandler {
             position += count;
             count = Math.Min(bufferSize, dataLength - position);
         }
-        while ((await dataStream.ReadAsync(data.AsMemory(position, count))) != 0);
+        while ((count = await dataStream.ReadAsync(data.AsMemory(position, count))) != 0);
 
         return data;
     }
