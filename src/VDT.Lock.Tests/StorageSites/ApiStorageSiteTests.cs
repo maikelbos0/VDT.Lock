@@ -1,4 +1,14 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using NSubstitute;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using VDT.Lock.Services;
 using VDT.Lock.StorageSites;
 using Xunit;
 
@@ -46,6 +56,200 @@ public class ApiStorageSiteTests {
         using var subject = new ApiStorageSite([110, 97, 109, 101], [108, 111, 99, 97, 116, 105, 111, 110], [105, 100], [115, 101, 99, 114, 101, 116]);
 
         Assert.Equal([0, 4, 8, 2, 6], subject.FieldLengths);
+    }
+
+    [Fact]
+    public async Task ExecuteLoad() {
+        var expectedResult = Encoding.UTF8.GetBytes("This is not actually encrypted data, but normally it would be.");
+
+        using var subject = new ApiStorageSite([110, 97, 109, 101], [104, 116, 116, 112, 115, 58, 47, 47, 108, 111, 99, 97, 108, 104, 111, 115, 116, 47], [105, 100], [115, 101, 99, 114, 101, 116]);
+
+        var storageSiteServices = Substitute.For<IStorageSiteServices>();
+        storageSiteServices.HttpService.SendAsync(Arg.Any<HttpRequestMessage>()).Returns(new HttpResponseMessage() {
+            StatusCode = HttpStatusCode.OK,
+            Content = new ByteArrayContent(expectedResult)
+        });
+
+        var result = await subject.Load(storageSiteServices);
+
+        Assert.NotNull(result);
+        Assert.Equal(expectedResult, result.Value);
+
+        await storageSiteServices.HttpService.DidNotReceive().SendAsync(Arg.Is<HttpRequestMessage>(message => message.Method == HttpMethod.Post));
+        await storageSiteServices.HttpService.Received(1).SendAsync(Arg.Is<HttpRequestMessage>(message
+            => message.Method == HttpMethod.Get
+            && message.RequestUri == new Uri("https://localhost/id")
+            && message.Headers.Contains("Secret")
+            && message.Headers.GetValues("Secret").SequenceEqual(new string[] { Convert.ToBase64String(new byte[] { 115, 101, 99, 114, 101, 116 }) })));
+    }
+
+    [Fact]
+    public async Task ExecuteLoadReturnsNullForError() {
+        using var subject = new ApiStorageSite([110, 97, 109, 101], [104, 116, 116, 112, 115, 58, 47, 47, 108, 111, 99, 97, 108, 104, 111, 115, 116, 47], [105, 100], [115, 101, 99, 114, 101, 116]);
+
+        var storageSiteServices = Substitute.For<IStorageSiteServices>();
+        storageSiteServices.HttpService.SendAsync(Arg.Any<HttpRequestMessage>()).Returns(new HttpResponseMessage() {
+            StatusCode = HttpStatusCode.BadRequest
+        });
+
+        var result = await subject.Load(storageSiteServices);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task ExecuteLoadInitializesIfNeeded() {
+        var expectedResult = Encoding.UTF8.GetBytes("This is not actually encrypted data, but normally it would be.");
+        var expectedId = Guid.NewGuid().ToString();
+
+        using var subject = new ApiStorageSite([110, 97, 109, 101], [104, 116, 116, 112, 115, 58, 47, 47, 108, 111, 99, 97, 108, 104, 111, 115, 116, 47]);
+
+        var storageSiteServices = Substitute.For<IStorageSiteServices>();
+        storageSiteServices.HttpService.SendAsync(Arg.Is<HttpRequestMessage>(message => message.Method == HttpMethod.Post)).Returns(new HttpResponseMessage() {
+            StatusCode = HttpStatusCode.OK,
+            Content = new ByteArrayContent(Encoding.UTF8.GetBytes(expectedId))
+        });
+        storageSiteServices.HttpService.SendAsync(Arg.Is<HttpRequestMessage>(message => message.Method == HttpMethod.Get)).Returns(new HttpResponseMessage() {
+            StatusCode = HttpStatusCode.OK,
+            Content = new ByteArrayContent(expectedResult)
+        });
+
+        var result = await subject.Load(storageSiteServices);
+
+        Assert.NotNull(result);
+        Assert.Equal(expectedResult, result.Value);
+
+        Assert.NotEqual(0, subject.DataStoreId.Length);
+        Assert.NotEqual(0, subject.Secret.Length);
+        var secret = Convert.ToBase64String(subject.Secret);
+
+        await storageSiteServices.HttpService.Received(1).SendAsync(Arg.Is<HttpRequestMessage>(message
+            => message.Method == HttpMethod.Post
+            && message.RequestUri == new Uri($"https://localhost/")
+            && message.Headers.Contains("Secret")
+            && message.Headers.GetValues("Secret").SequenceEqual(new string[] { secret })));
+        await storageSiteServices.HttpService.Received(1).SendAsync(Arg.Is<HttpRequestMessage>(message
+            => message.Method == HttpMethod.Get
+            && message.RequestUri == new Uri($"https://localhost/{expectedId}")
+            && message.Headers.Contains("Secret")
+            && message.Headers.GetValues("Secret").SequenceEqual(new string[] { secret })));
+    }
+
+    [Fact]
+    public async Task ExecuteLoadReturnsNullForInitializationError() {
+        using var subject = new ApiStorageSite([110, 97, 109, 101], [104, 116, 116, 112, 115, 58, 47, 47, 108, 111, 99, 97, 108, 104, 111, 115, 116, 47]);
+
+        var storageSiteServices = Substitute.For<IStorageSiteServices>();
+        storageSiteServices.HttpService.SendAsync(Arg.Any<HttpRequestMessage>()).Returns(new HttpResponseMessage() {
+            StatusCode = HttpStatusCode.BadRequest
+        });
+
+        var result = await subject.Load(storageSiteServices);
+
+        Assert.Null(result);
+
+        await storageSiteServices.HttpService.DidNotReceive().SendAsync(Arg.Is<HttpRequestMessage>(message => message.Method == HttpMethod.Put));
+    }
+
+    [Fact]
+    public async Task ExecuteSave() {
+        var expectedResult = Encoding.UTF8.GetBytes("This is not actually encrypted data, but normally it would be.");
+
+        using var subject = new ApiStorageSite([110, 97, 109, 101], [104, 116, 116, 112, 115, 58, 47, 47, 108, 111, 99, 97, 108, 104, 111, 115, 116, 47], [105, 100], [115, 101, 99, 114, 101, 116]);
+
+        var storageSiteServices = Substitute.For<IStorageSiteServices>();
+        storageSiteServices.HttpService.SendAsync(Arg.Any<HttpRequestMessage>()).Returns(new HttpResponseMessage() {
+            StatusCode = HttpStatusCode.OK,
+            Content = new ByteArrayContent(expectedResult)
+        });
+
+        var result = await subject.Save(new(expectedResult), storageSiteServices);
+
+        Assert.True(result);
+
+        await storageSiteServices.HttpService.DidNotReceive().SendAsync(Arg.Is<HttpRequestMessage>(message => message.Method == HttpMethod.Post));
+        await storageSiteServices.HttpService.Received(1).SendAsync(Arg.Is<HttpRequestMessage>(message
+            => message.Method == HttpMethod.Put
+            && message.RequestUri == new Uri("https://localhost/id")
+            && message.Headers.Contains("Secret")
+            && message.Headers.GetValues("Secret").SequenceEqual(new string[] { Convert.ToBase64String(new byte[] { 115, 101, 99, 114, 101, 116 }) })
+            && message.Content != null
+            && message.Content.GetType() == typeof(ByteArrayContent)
+            && expectedResult.SequenceEqual(((ByteArrayContent)message.Content).ReadAsByteArrayAsync().GetAwaiter().GetResult())));
+    }
+
+    [Fact]
+    public async Task ExecuteSaveReturnsFalseForError() {
+        var expectedResult = Encoding.UTF8.GetBytes("This is not actually encrypted data, but normally it would be.");
+        
+        using var subject = new ApiStorageSite([110, 97, 109, 101], [104, 116, 116, 112, 115, 58, 47, 47, 108, 111, 99, 97, 108, 104, 111, 115, 116, 47], [105, 100], [115, 101, 99, 114, 101, 116]);
+
+        var storageSiteServices = Substitute.For<IStorageSiteServices>();
+        storageSiteServices.HttpService.SendAsync(Arg.Any<HttpRequestMessage>()).Returns(new HttpResponseMessage() {
+            StatusCode = HttpStatusCode.BadRequest
+        });
+
+        var result = await subject.Save(new(expectedResult), storageSiteServices);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task ExecuteSaveInitializesIfNeeded() {
+        var expectedResult = Encoding.UTF8.GetBytes("This is not actually encrypted data, but normally it would be.");
+        var expectedId = Guid.NewGuid().ToString();
+
+        using var subject = new ApiStorageSite([110, 97, 109, 101], [104, 116, 116, 112, 115, 58, 47, 47, 108, 111, 99, 97, 108, 104, 111, 115, 116, 47]);
+
+        var storageSiteServices = Substitute.For<IStorageSiteServices>();
+        storageSiteServices.HttpService.SendAsync(Arg.Is<HttpRequestMessage>(message => message.Method == HttpMethod.Post)).Returns(new HttpResponseMessage() {
+            StatusCode = HttpStatusCode.OK,
+            Content = new ByteArrayContent(Encoding.UTF8.GetBytes(expectedId))
+        });
+        storageSiteServices.HttpService.SendAsync(Arg.Is<HttpRequestMessage>(message => message.Method == HttpMethod.Put)).Returns(new HttpResponseMessage() {
+            StatusCode = HttpStatusCode.OK,
+            Content = new ByteArrayContent(expectedResult)
+        });
+
+        var result = await subject.Save(new(expectedResult), storageSiteServices);
+
+        Assert.True(result);
+
+        Assert.NotEqual(0, subject.DataStoreId.Length);
+        Assert.NotEqual(0, subject.Secret.Length);
+        var secret = Convert.ToBase64String(subject.Secret);
+
+        await storageSiteServices.HttpService.Received(1).SendAsync(Arg.Is<HttpRequestMessage>(message
+            => message.Method == HttpMethod.Post
+            && message.RequestUri == new Uri($"https://localhost/")
+            && message.Headers.Contains("Secret")
+            && message.Headers.GetValues("Secret").SequenceEqual(new string[] { secret })));
+        await storageSiteServices.HttpService.Received(1).SendAsync(Arg.Is<HttpRequestMessage>(message
+            => message.Method == HttpMethod.Put
+            && message.RequestUri == new Uri($"https://localhost/{expectedId}")
+            && message.Headers.Contains("Secret")
+            && message.Headers.GetValues("Secret").SequenceEqual(new string[] { secret })
+            && message.Content != null
+            && message.Content.GetType() == typeof(ByteArrayContent)
+            && expectedResult.SequenceEqual(((ByteArrayContent)message.Content).ReadAsByteArrayAsync().GetAwaiter().GetResult())));
+    }
+
+    [Fact]
+    public async Task ExecuteSaveReturnsFalseForInitializationError() {
+        var expectedResult = Encoding.UTF8.GetBytes("This is not actually encrypted data, but normally it would be.");
+
+        using var subject = new ApiStorageSite([110, 97, 109, 101], [104, 116, 116, 112, 115, 58, 47, 47, 108, 111, 99, 97, 108, 104, 111, 115, 116, 47]);
+
+        var storageSiteServices = Substitute.For<IStorageSiteServices>();
+        storageSiteServices.HttpService.SendAsync(Arg.Any<HttpRequestMessage>()).Returns(new HttpResponseMessage() {
+            StatusCode = HttpStatusCode.BadRequest
+        });
+
+        var result = await subject.Save(new(expectedResult), storageSiteServices);
+
+        Assert.False(result);
+
+        await storageSiteServices.HttpService.DidNotReceive().SendAsync(Arg.Is<HttpRequestMessage>(message => message.Method == HttpMethod.Put));
     }
 
     [Fact]
