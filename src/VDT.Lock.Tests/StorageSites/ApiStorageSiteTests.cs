@@ -118,9 +118,9 @@ public class ApiStorageSiteTests {
 
         Assert.NotNull(result);
         Assert.Equal(expectedResult, result.Value);
-
-        Assert.NotEqual(0, subject.DataStoreId.Length);
         Assert.NotEqual(0, subject.Secret.Length);
+        Assert.Equal(expectedId, Encoding.UTF8.GetString(subject.DataStoreId));
+
         var secret = Convert.ToBase64String(subject.Secret);
 
         await storageSiteServices.HttpService.Received(1).SendAsync(Arg.Is<HttpRequestMessage>(message
@@ -214,9 +214,9 @@ public class ApiStorageSiteTests {
         var result = await subject.Save(new(expectedResult), storageSiteServices);
 
         Assert.True(result);
-
-        Assert.NotEqual(0, subject.DataStoreId.Length);
         Assert.NotEqual(0, subject.Secret.Length);
+        Assert.Equal(expectedId, Encoding.UTF8.GetString(subject.DataStoreId));
+
         var secret = Convert.ToBase64String(subject.Secret);
 
         await storageSiteServices.HttpService.Received(1).SendAsync(Arg.Is<HttpRequestMessage>(message
