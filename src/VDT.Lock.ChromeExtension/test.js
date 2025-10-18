@@ -19,7 +19,6 @@ document.getElementById('chromeStorageTest').addEventListener('click', async fun
 });
 
 document.getElementById('apiStorageTest').addEventListener('click', async function () {
-    console.log(exports);
     const input = document.getElementById('apiStorageInput').value;
     const result = await exports.VDT.Lock.TestClass.TestApiStorage(input);
 

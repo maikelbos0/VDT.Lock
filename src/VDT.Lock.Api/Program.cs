@@ -18,6 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 var appSettings = builder.Configuration.GetSection(nameof(AppSettings)).Get<AppSettings>()
     ?? throw new InvalidOperationException();
 
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
 builder.Services.AddDbContext<LockContext>(options => options
     .UseSqlServer(appSettings.ConnectionString)
     .ConfigureWarnings(warnings => warnings.Log(RelationalEventId.PendingModelChangesWarning))
@@ -86,7 +87,7 @@ app.MapPut("/{id}", (
     HttpRequest request,
     [FromServices] SaveDataStoreRequestHandler handler
 ) => {
-    return handler.Handle(new SaveDataStoreRequest(id, Convert.FromBase64String(secret), request.Body));
+    return handler.Handle(new SaveDataStoreRequest(id, Convert.FromBase64String(secret), request.Body, request.ContentLength));
 });
 
 app.Run();
