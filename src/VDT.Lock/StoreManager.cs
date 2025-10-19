@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
+using VDT.Lock.Services;
 
 namespace VDT.Lock;
 
@@ -10,9 +12,8 @@ public sealed class StoreManager : IDisposable {
     public static byte[] MasterPasswordSalt => [66, 6, 86, 3, 238, 211, 38, 177, 32, 98, 112, 223, 115, 234, 230, 103];
 
     private readonly IEncryptor encryptor;
-    private readonly IRandomByteGenerator randomByteGenerator;
     private readonly IHashProvider hashProvider;
-
+    private readonly IStorageSiteServices storageSiteServices;
     private SecureBuffer? plainSessionKeyBuffer;
     private SecureBuffer? encryptedStoreKeyBuffer;
 
@@ -44,10 +45,10 @@ public sealed class StoreManager : IDisposable {
         }
     }
 
-    public StoreManager(IEncryptor encryptor, IRandomByteGenerator randomByteGenerator, IHashProvider hashProvider) {
+    public StoreManager(IEncryptor encryptor, IHashProvider hashProvider, IStorageSiteServices storageSiteServices) {
         this.encryptor = encryptor;
-        this.randomByteGenerator = randomByteGenerator;
         this.hashProvider = hashProvider;
+        this.storageSiteServices = storageSiteServices;
     }
 
     public async Task Authenticate(SecureBuffer plainMasterPasswordBuffer) {
@@ -59,7 +60,7 @@ public sealed class StoreManager : IDisposable {
         }
 
         using var storeKeyBuffer = hashProvider.Provide(plainMasterPasswordBuffer, MasterPasswordSalt);
-        plainSessionKeyBuffer = new SecureBuffer(randomByteGenerator.Generate(Encryptor.KeySizeInBytes));
+        plainSessionKeyBuffer = new SecureBuffer(RandomNumberGenerator.GetBytes(Encryptor.KeySizeInBytes));
         encryptedStoreKeyBuffer = await encryptor.Encrypt(storeKeyBuffer, plainSessionKeyBuffer);
     }
 
@@ -106,7 +107,7 @@ public sealed class StoreManager : IDisposable {
         await Parallel.ForEachAsync(storageSites, async (storageSite, _) => {
             try {
                 using var plainStoreKeyBuffer = await GetPlainStoreKeyBuffer();
-                using var encryptedBuffer = await storageSites.Single().Load();
+                using var encryptedBuffer = await storageSite.Load(storageSiteServices);
 
                 if (encryptedBuffer != null) {
                     using var plainBuffer = await encryptor.Decrypt(encryptedBuffer, plainStoreKeyBuffer);
@@ -147,7 +148,7 @@ public sealed class StoreManager : IDisposable {
         var resultLock = new object();
 
         await Parallel.ForEachAsync(storageSites, async (storageSite, _) => {
-            if (await storageSite.Save(encryptedBuffer)) {
+            if (await storageSite.Save(encryptedBuffer, storageSiteServices)) {
                 lock (resultLock) {
                     result.SucceededStorageSites.Add(new DataValue(storageSite.Name));
                 }

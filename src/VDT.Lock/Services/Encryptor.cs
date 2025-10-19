@@ -1,30 +1,24 @@
 ﻿using System;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 #if BROWSER
 using VDT.Lock.JavascriptInterop;
 #else
 using System.IO;
-using System.Security.Cryptography;
 #endif
 
-namespace VDT.Lock;
+namespace VDT.Lock.Services;
 
 public sealed class Encryptor : IEncryptor {
     public const int KeySizeInBytes = 32;
     public const int BlockSizeInBytes = 16;
 
-    private readonly IRandomByteGenerator randomByteGenerator;
-
-    public Encryptor(IRandomByteGenerator randomByteGenerator) {
-        this.randomByteGenerator = randomByteGenerator;
-    }
-
 #if BROWSER
     public async Task<SecureBuffer> Encrypt(SecureBuffer plainBuffer, SecureBuffer keyBuffer) {
         await JSEncryptor.ImportModule();
 
-        using var ivBuffer = new SecureBuffer(randomByteGenerator.Generate(BlockSizeInBytes));
+        using var ivBuffer = new SecureBuffer(RandomNumberGenerator.GetBytes(BlockSizeInBytes));
         using var encryptedBuffer = new SecureBuffer(await JSEncryptor.Encrypt(plainBuffer.Value, keyBuffer.Value, ivBuffer.Value));
 
         var payloadBuffer = new SecureBuffer(ivBuffer.Value.Length + encryptedBuffer.Value.Length);
@@ -35,7 +29,7 @@ public sealed class Encryptor : IEncryptor {
     }
 #else
     public Task<SecureBuffer> Encrypt(SecureBuffer plainBuffer, SecureBuffer keyBuffer) {
-        using var ivBuffer = new SecureBuffer(randomByteGenerator.Generate(BlockSizeInBytes));
+        using var ivBuffer = new SecureBuffer(RandomNumberGenerator.GetBytes(BlockSizeInBytes));
 #pragma warning disable CA1416 // Validate platform compatibility
         using var aes = Aes.Create();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -43,7 +37,7 @@ public sealed class Encryptor : IEncryptor {
 
         using var encryptor = aes.CreateEncryptor(keyBuffer.Value, ivBuffer.Value);
 
-        var payloadBuffer = new SecureBuffer(plainBuffer.Value.Length + 2 * BlockSizeInBytes - (plainBuffer.Value.Length % BlockSizeInBytes));
+        var payloadBuffer = new SecureBuffer(plainBuffer.Value.Length + 2 * BlockSizeInBytes - plainBuffer.Value.Length % BlockSizeInBytes);
         Buffer.BlockCopy(ivBuffer.Value, 0, payloadBuffer.Value, 0, BlockSizeInBytes);
 
         using var payloadStream = new MemoryStream(payloadBuffer.Value);

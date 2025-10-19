@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace VDT.Lock;
+namespace VDT.Lock.Services;
 
 public sealed class HashProvider : IHashProvider {
     public const int Iterations = 1_000_000;
