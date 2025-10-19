@@ -123,6 +123,15 @@ public class FileSystemStorageSiteTests {
     }
 
     [Fact]
+    public void FieldLengthsThrowsIfDisposed() {
+        FileSystemStorageSite subject;
+
+        using (subject = new([], [])) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
+    }
+
+    [Fact]
     public void SerializeToThrowsIfDisposed() {
         FileSystemStorageSite subject;
         using var plainBytes = new SecureByteList();

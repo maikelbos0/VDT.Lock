@@ -39,6 +39,15 @@ public class ChromeStorageSiteTests {
     }
 
     [Fact]
+    public void FieldLengthsThrowsIfDisposed() {
+        ChromeStorageSite subject;
+
+        using (subject = new([])) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
+    }
+
+    [Fact]
     public void SerializeToThrowsIfDisposed() {
         ChromeStorageSite subject;
         using var plainBytes = new SecureByteList();

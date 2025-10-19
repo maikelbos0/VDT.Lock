@@ -1,11 +1,8 @@
-﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
-using NSubstitute;
+﻿using NSubstitute;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using VDT.Lock.Services;
@@ -181,7 +178,7 @@ public class ApiStorageSiteTests {
     [Fact]
     public async Task ExecuteSaveReturnsFalseForError() {
         var expectedResult = Encoding.UTF8.GetBytes("This is not actually encrypted data, but normally it would be.");
-        
+
         using var subject = new ApiStorageSite([110, 97, 109, 101], [104, 116, 116, 112, 115, 58, 47, 47, 108, 111, 99, 97, 108, 104, 111, 115, 116, 47], [105, 100], [115, 101, 99, 114, 101, 116]);
 
         var storageSiteServices = Substitute.For<IStorageSiteServices>();
@@ -303,7 +300,7 @@ public class ApiStorageSiteTests {
     }
 
     [Fact]
-    public void GetDataStoreIdThrowsIfDisposed() {
+    public void DataStoreIdThrowsIfDisposed() {
         ApiStorageSite subject;
 
         using (subject = new([], [])) { }
@@ -312,12 +309,21 @@ public class ApiStorageSiteTests {
     }
 
     [Fact]
-    public void GetSecretThrowsIfDisposed() {
+    public void SecretThrowsIfDisposed() {
         ApiStorageSite subject;
 
         using (subject = new([], [])) { }
 
         Assert.Throws<ObjectDisposedException>(() => { var _ = subject.Secret; });
+    }
+
+    [Fact]
+    public void FieldLengthsThrowsIfDisposed() {
+        ApiStorageSite subject;
+
+        using (subject = new([], [])) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.FieldLengths);
     }
 
     [Fact]
