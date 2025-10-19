@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.RateLimiting;
@@ -19,8 +20,8 @@ var appSettings = builder.Configuration.GetSection(nameof(AppSettings)).Get<AppS
     ?? throw new InvalidOperationException();
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
-builder.Services.AddDbContext<LockContext>(options => options
-    .UseSqlServer(appSettings.ConnectionString)
+builder.Services.AddDbContext<LockContext>((serviceProvider, options) => options
+    .UseSqlServer(serviceProvider.GetRequiredService<IOptionsSnapshot<AppSettings>>().Value.ConnectionString)
     .ConfigureWarnings(warnings => warnings.Log(RelationalEventId.PendingModelChangesWarning))
     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 builder.Services.AddHttpLogging(options => { });
@@ -86,8 +87,6 @@ app.MapPut("/{id}", (
     [FromHeader] string secret,
     HttpRequest request,
     [FromServices] SaveDataStoreRequestHandler handler
-) => {
-    return handler.Handle(new SaveDataStoreRequest(id, Convert.FromBase64String(secret), request.Body, request.ContentLength));
-});
+) => handler.Handle(new SaveDataStoreRequest(id, Convert.FromBase64String(secret), request.Body, request.ContentLength)));
 
 app.Run();

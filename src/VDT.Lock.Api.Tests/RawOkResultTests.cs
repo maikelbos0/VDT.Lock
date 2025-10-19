@@ -8,7 +8,7 @@ namespace VDT.Lock.Api.Tests;
 
 public class RawOkResultTests {
     [Fact]
-    public async Task ExecuteAsyncWithData() {
+    public async Task ExecuteAsync() {
         var value = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 };
         var subject = new RawOkResult(value);
 

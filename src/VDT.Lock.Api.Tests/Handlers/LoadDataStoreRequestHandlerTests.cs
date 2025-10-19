@@ -14,14 +14,14 @@ public class LoadDataStoreRequestHandlerTests {
     [Fact]
     public async Task ReturnsData() {
         var id = Guid.NewGuid();
-        var data = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+        var expectedData = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 };
 
         var context = LockContextProvider.Provide();
         context.DataStores.Add(new() {
             Id = id,
             SecretSalt = [],
             SecretHash = [],
-            Data = data
+            Data = expectedData
         });
         await context.SaveChangesAsync();
 
@@ -33,7 +33,7 @@ public class LoadDataStoreRequestHandlerTests {
 
         var result = await subject.Handle(request, CancellationToken.None);
 
-        Assert.Equal(data, Assert.IsType<RawOkResult>(result).Value);
+        Assert.Equal(expectedData, Assert.IsType<RawOkResult>(result).Value);
     }
 
     [Fact]
