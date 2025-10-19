@@ -146,4 +146,12 @@ public class ApiStorageSite : StorageSiteBase {
         plainBytes.WriteSecureBuffer(plainDataStoreIdBuffer);
         plainBytes.WriteSecureBuffer(plainSecretBuffer);
     }
+
+    public override void Dispose() {
+        base.Dispose();
+        plainLocationBuffer.Dispose();
+        plainDataStoreIdBuffer.Dispose();
+        plainSecretBuffer.Dispose();
+        GC.SuppressFinalize(this);
+    }
 }

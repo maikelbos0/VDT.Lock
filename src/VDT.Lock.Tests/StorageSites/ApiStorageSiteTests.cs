@@ -263,6 +263,28 @@ public class ApiStorageSiteTests {
     }
 
     [Fact]
+    public void Dispose() {
+        ApiStorageSite subject;
+        SecureBuffer plainNameBuffer;
+        SecureBuffer plainLocationBuffer;
+        SecureBuffer plainDataStoreIdBuffer;
+        SecureBuffer plainSecretBuffer;
+
+        using (subject = new([], [])) {
+            plainNameBuffer = subject.GetBuffer<StorageSiteBase>("plainNameBuffer");
+            plainLocationBuffer = subject.GetBuffer("plainLocationBuffer");
+            plainDataStoreIdBuffer = subject.GetBuffer("plainDataStoreIdBuffer");
+            plainSecretBuffer = subject.GetBuffer("plainSecretBuffer");
+        }
+
+        Assert.True(subject.IsDisposed);
+        Assert.True(plainNameBuffer.IsDisposed);
+        Assert.True(plainLocationBuffer.IsDisposed);
+        Assert.True(plainDataStoreIdBuffer.IsDisposed);
+        Assert.True(plainSecretBuffer.IsDisposed);
+    }
+
+    [Fact]
     public void GetLocationThrowsIfDisposed() {
         ApiStorageSite subject;
 
