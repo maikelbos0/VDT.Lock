@@ -28,20 +28,24 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251004101908_Add_DataStore', N'9.0.9');
+    VALUES (N'20251004101908_Add_DataStore', N'10.0.1');
 END;
 
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251006152339_Switch_DataStore_Password_To_Split_Secret'
 )
 BEGIN
-    DECLARE @var sysname;
-    SELECT @var = [d].[name]
+    DECLARE @var nvarchar(max);
+    SELECT @var = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[DataStores]') AND [c].[name] = N'Password');
-    IF @var IS NOT NULL EXEC(N'ALTER TABLE [DataStores] DROP CONSTRAINT [' + @var + '];');
+    IF @var IS NOT NULL EXEC(N'ALTER TABLE [DataStores] DROP CONSTRAINT ' + @var + ';');
     ALTER TABLE [DataStores] DROP COLUMN [Password];
 END;
 
@@ -67,7 +71,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251006152339_Switch_DataStore_Password_To_Split_Secret', N'9.0.9');
+    VALUES (N'20251006152339_Switch_DataStore_Password_To_Split_Secret', N'10.0.1');
 END;
 
 COMMIT;
