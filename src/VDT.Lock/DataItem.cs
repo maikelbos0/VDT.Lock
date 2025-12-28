@@ -36,6 +36,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
     private DataCollection<DataField> fields = [];
     private DataCollection<DataValue> labels = [];
     private DataCollection<DataValue> locations = [];
+    private DataCollection<DataItem> historyItems = [];
 
     public bool IsDisposed { get; private set; }
 
@@ -103,6 +104,21 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
 
             locations.Dispose();
             locations = value;
+            identity.Update(); // TODO should collections actually update version? Collection items maintain their own versioning.
+        }
+    }
+
+    public DataCollection<DataItem> HistoryItems {
+        get {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            return historyItems;
+        }
+        set {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+
+            historyItems.Dispose();
+            historyItems = value;
             identity.Update();
         }
     }

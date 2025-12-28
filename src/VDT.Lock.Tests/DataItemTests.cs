@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace VDT.Lock.Tests;
@@ -144,6 +145,21 @@ public class DataItemTests {
     }
 
     [Fact]
+    public void SetHistoryItems() {
+        using var subject = new DataItem(DataProvider.CreateIdentity(0, 0), []);
+        var previousVersion = subject.Identity.Version;
+
+        var previousHistoryItems = subject.HistoryItems;
+        var newHistoryItems = new DataCollection<DataItem>();
+
+        subject.HistoryItems = newHistoryItems;
+
+        Assert.Same(newHistoryItems, subject.HistoryItems);
+        Assert.True(previousHistoryItems.IsDisposed);
+        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
+    }
+
+    [Fact]
     public void FieldLengths() {
         using var subject = new DataItem([110, 97, 109, 101]) {
             Fields = {
@@ -188,6 +204,7 @@ public class DataItemTests {
         DataCollection<DataField> fields;
         DataCollection<DataValue> labels;
         DataCollection<DataValue> locations;
+        DataCollection<DataItem> historyItems;
 
         using (subject = new()) {
             identity = subject.Identity;
@@ -195,6 +212,7 @@ public class DataItemTests {
             fields = subject.Fields;
             labels = subject.Labels;
             locations = subject.Locations;
+            historyItems = subject.HistoryItems;
         }
 
         Assert.True(subject.IsDisposed);
@@ -203,6 +221,7 @@ public class DataItemTests {
         Assert.True(fields.IsDisposed);
         Assert.True(labels.IsDisposed);
         Assert.True(locations.IsDisposed);
+        Assert.True(historyItems.IsDisposed);
     }
 
     [Fact]
@@ -284,6 +303,24 @@ public class DataItemTests {
         using (subject = new()) { }
 
         Assert.Throws<ObjectDisposedException>(() => subject.Locations = []);
+    }
+
+    [Fact]
+    public void GetHistoryItemsThrowsIfDisposed() {
+        DataItem subject;
+
+        using (subject = new()) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.HistoryItems);
+    }
+
+    [Fact]
+    public void SetHistoryItemsThrowsIfDisposed() {
+        DataItem subject;
+
+        using (subject = new()) { }
+
+        Assert.Throws<ObjectDisposedException>(() => subject.HistoryItems = []);
     }
 
     [Fact]
