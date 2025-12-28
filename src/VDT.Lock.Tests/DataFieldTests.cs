@@ -104,7 +104,6 @@ public class DataFieldTests {
 
         Assert.Same(newFields, subject.Selectors);
         Assert.True(previousFields.IsDisposed);
-        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]

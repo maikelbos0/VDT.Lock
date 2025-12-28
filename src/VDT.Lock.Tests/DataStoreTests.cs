@@ -85,7 +85,6 @@ public class DataStoreTests {
 
         Assert.Same(newItems, subject.Items);
         Assert.True(previousItems.IsDisposed);
-        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]

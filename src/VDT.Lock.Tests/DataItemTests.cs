@@ -129,7 +129,6 @@ public class DataItemTests {
 
         Assert.Same(newFields, subject.Fields);
         Assert.True(previousFields.IsDisposed);
-        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
@@ -144,7 +143,6 @@ public class DataItemTests {
 
         Assert.Same(newLabels, subject.Labels);
         Assert.True(previousLabels.IsDisposed);
-        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
@@ -159,7 +157,6 @@ public class DataItemTests {
 
         Assert.Same(newLocations, subject.Locations);
         Assert.True(previousLocations.IsDisposed);
-        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]
@@ -174,7 +171,6 @@ public class DataItemTests {
 
         Assert.Same(newHistoryItems, subject.HistoryItems);
         Assert.True(previousHistoryItems.IsDisposed);
-        Assert.False(previousVersion.SequenceEqual(subject.Identity.Version));
     }
 
     [Fact]

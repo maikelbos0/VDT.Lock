@@ -67,7 +67,6 @@ public sealed class DataStore : IData<DataStore>, IIdentifiableData<DataStore>, 
 
             items.Dispose();
             items = value;
-            identity.Update();
         }
     }
 

@@ -83,7 +83,6 @@ public sealed class DataField : IData<DataField>, IIdentifiableData<DataField>, 
 
             selectors.Dispose();
             selectors = value;
-            identity.Update();
         }
     }
 

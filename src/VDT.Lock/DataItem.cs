@@ -12,7 +12,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
             Fields = DataCollection<DataField>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
             Labels = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
             Locations = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
-            historyItems = DataCollection<DataItem>.DeserializeFrom(plainSpan.ReadSpan(ref position))
+            HistoryItems = DataCollection<DataItem>.DeserializeFrom(plainSpan.ReadSpan(ref position))
         };
     }
 
@@ -88,7 +88,6 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
 
             fields.Dispose();
             fields = value;
-            identity.Update();
         }
     }
 
@@ -103,7 +102,6 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
 
             labels.Dispose();
             labels = value;
-            identity.Update();
         }
     }
 
@@ -118,7 +116,6 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
 
             locations.Dispose();
             locations = value;
-            identity.Update(); // TODO should collections actually update version? Collection items maintain their own versioning.
         }
     }
 
@@ -133,7 +130,6 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
 
             historyItems.Dispose();
             historyItems = value;
-            identity.Update();
         }
     }
 
