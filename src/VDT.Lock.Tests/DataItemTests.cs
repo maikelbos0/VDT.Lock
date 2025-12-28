@@ -34,10 +34,14 @@ public class DataItemTests {
             },
             Locations = {
                 new(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+            },
+            HistoryItems = {
+                new(DataProvider.CreateIdentity(0, 1), [111, 108, 100, 101, 114])
             }
         };
 
         var candidates = new List<DataItem>() {
+            new(DataProvider.CreateIdentity(0, 1), [111, 108, 100, 101, 114]),
             new(DataProvider.CreateIdentity(0, 3), [111, 108, 100, 101, 114]) {
                 Fields = {
                     new(DataProvider.CreateIdentity(1, 5), [111, 108, 100, 101, 114], [111, 108, 100, 101, 114])
@@ -47,6 +51,9 @@ public class DataItemTests {
                 },
                 Locations = {
                     new(DataProvider.CreateIdentity(3, 5), [111, 108, 100, 101, 114])
+                },
+                HistoryItems = {
+                    new(DataProvider.CreateIdentity(0, 2), [111, 108, 100, 101, 114])
                 }
             },
             expectedResult,
@@ -59,6 +66,10 @@ public class DataItemTests {
                 },
                 Locations = {
                     expectedLocation
+                },
+                HistoryItems = {
+                    new(DataProvider.CreateIdentity(0, 1), [111, 108, 100, 101, 114]),
+                    new(DataProvider.CreateIdentity(0, 2), [111, 108, 100, 101, 114])
                 }
             }
         };
@@ -69,9 +80,15 @@ public class DataItemTests {
         Assert.Equal(expectedField, Assert.Single(result.Fields));
         Assert.Equal(expectedLabel, Assert.Single(result.Labels));
         Assert.Equal(expectedLocation, Assert.Single(result.Locations));
+        Assert.Equal(4, result.HistoryItems.Count);
+
+        foreach (var historyItem in result.HistoryItems) {
+            Assert.False(historyItem.IsDisposed);
+            Assert.Empty(historyItem.HistoryItems);
+        }
 
         foreach (var candidate in candidates) {
-            Assert.Equal(candidate != expectedResult, candidate.IsDisposed);
+            Assert.Equal(candidate != expectedResult && !result.HistoryItems.Contains(candidate), candidate.IsDisposed);
         }
     }
 

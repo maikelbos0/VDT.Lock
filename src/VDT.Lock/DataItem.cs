@@ -24,7 +24,20 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
 
         foreach (var candidate in candidates) {
             if (candidate != result) {
-                candidate.Dispose();
+                if (result.historyItems.Any(historyItem => historyItem.Identity.Version.SequenceEqual(candidate.Identity.Version))) {
+                    candidate.Dispose();
+                }
+                else {
+                    foreach (var candidateHistoryItem in candidate.HistoryItems.UnsafeClear()) {
+                        if (!result.historyItems.Any(historyItem => historyItem.Identity.Version.SequenceEqual(candidateHistoryItem.Identity.Version))) {
+                            result.HistoryItems.Add(candidateHistoryItem);
+                        }
+                        else {
+                            candidateHistoryItem.Dispose();
+                        }
+                    }
+                    result.historyItems.Add(candidate);
+                }
             }
         }
 
@@ -157,6 +170,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
         fields.Dispose();
         labels.Dispose();
         locations.Dispose();
+        historyItems.Dispose();
         IsDisposed = true;
         GC.SuppressFinalize(this);
     }
