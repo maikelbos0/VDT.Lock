@@ -8,7 +8,7 @@ namespace VDT.Lock.Tests;
 public class DataItemTests {
     [Fact]
     public void DeserializeFrom() {
-        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 61, 0, 0, 0, .. DataProvider.CreateSerializedField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101]), 49, 0, 0, 0, .. DataProvider.CreateSerializedValue(2, [108, 97, 98, 101, 108]), 52, 0, 0, 0, .. DataProvider.CreateSerializedValue(3, [108, 111, 99, 97, 116, 105, 111, 110])]);
+        var plainSpan = new ReadOnlySpan<byte>([.. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 61, 0, 0, 0, .. DataProvider.CreateSerializedField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101]), 49, 0, 0, 0, .. DataProvider.CreateSerializedValue(2, [108, 97, 98, 101, 108]), 52, 0, 0, 0, .. DataProvider.CreateSerializedValue(3, [108, 111, 99, 97, 116, 105, 111, 110]), 64, 0, 0, 0, .. DataProvider.CreateSerializedItem(0, [110, 97, 109, 101])]);
 
         using var subject = DataItem.DeserializeFrom(plainSpan);
 
@@ -17,6 +17,7 @@ public class DataItemTests {
         Assert.Equal(new ReadOnlySpan<byte>([118, 97, 108, 117, 101]), Assert.Single(subject.Fields).Value);
         Assert.Equal(new ReadOnlySpan<byte>([108, 97, 98, 101, 108]), Assert.Single(subject.Labels).Value);
         Assert.Equal(new ReadOnlySpan<byte>([108, 111, 99, 97, 116, 105, 111, 110]), Assert.Single(subject.Locations).Value);
+        Assert.Equal(new ReadOnlySpan<byte>([110, 97, 109, 101]), Assert.Single(subject.HistoryItems).Name);
     }
 
     [Fact]
@@ -187,10 +188,13 @@ public class DataItemTests {
             },
             Locations = {
                 DataProvider.CreateValue(3, [108, 111, 99, 97, 116, 105, 111, 110])
+            },
+            HistoryItems = {
+                DataProvider.CreateItem(4, [110, 97, 109, 101])
             }
         };
 
-        Assert.Equal([32, 4, 61, 49, 52], subject.FieldLengths);
+        Assert.Equal([32, 4, 61, 49, 52, 64], subject.FieldLengths);
     }
 
     [Fact]
@@ -204,13 +208,16 @@ public class DataItemTests {
             },
             Locations = {
                 DataProvider.CreateValue(3, [108, 111, 99, 97, 116, 105, 111, 110])
+            },
+            HistoryItems = {
+                DataProvider.CreateItem(4, [110, 97, 109, 101])
             }
         };
 
         using var result = new SecureByteList();
         subject.SerializeTo(result);
 
-        Assert.Equal(new ReadOnlySpan<byte>([218, 0, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 61, 0, 0, 0, .. DataProvider.CreateSerializedField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101]), 49, 0, 0, 0, .. DataProvider.CreateSerializedValue(2, [108, 97, 98, 101, 108]), 52, 0, 0, 0, .. DataProvider.CreateSerializedValue(3, [108, 111, 99, 97, 116, 105, 111, 110])]), result.GetValue());
+        Assert.Equal(new ReadOnlySpan<byte>([30, 1, 0, 0, .. DataProvider.CreateSerializedIdentity(0), 4, 0, 0, 0, 110, 97, 109, 101, 61, 0, 0, 0, .. DataProvider.CreateSerializedField(1, [110, 97, 109, 101], [118, 97, 108, 117, 101]), 49, 0, 0, 0, .. DataProvider.CreateSerializedValue(2, [108, 97, 98, 101, 108]), 52, 0, 0, 0, .. DataProvider.CreateSerializedValue(3, [108, 111, 99, 97, 116, 105, 111, 110]), 64, 0, 0, 0, .. DataProvider.CreateSerializedItem(4, [110, 97, 109, 101])]), result.GetValue());
     }
 
     [Fact]

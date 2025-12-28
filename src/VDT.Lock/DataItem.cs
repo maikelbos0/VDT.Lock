@@ -12,6 +12,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
             Fields = DataCollection<DataField>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
             Labels = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
             Locations = DataCollection<DataValue>.DeserializeFrom(plainSpan.ReadSpan(ref position)),
+            historyItems = DataCollection<DataItem>.DeserializeFrom(plainSpan.ReadSpan(ref position))
         };
     }
 
@@ -140,7 +141,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [identity.GetLength(), plainNameBuffer.Value.Length, fields.GetLength(), labels.GetLength(), locations.GetLength()];
+            return [identity.GetLength(), plainNameBuffer.Value.Length, fields.GetLength(), labels.GetLength(), locations.GetLength(), historyItems.GetLength()];
         }
     }
 
@@ -162,6 +163,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
         fields.SerializeTo(plainBytes);
         labels.SerializeTo(plainBytes);
         locations.SerializeTo(plainBytes);
+        historyItems.SerializeTo(plainBytes);
     }
 
     public void Dispose() {

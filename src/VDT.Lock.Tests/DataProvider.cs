@@ -25,7 +25,7 @@ public static class DataProvider {
         => new(CreateIdentity(key), name, data);
 
     public static IEnumerable<byte> CreateSerializedItem(byte key, byte[] name)
-        => [(byte)(52 + name.Length), 0, 0, 0, .. CreateSerializedIdentity(key), (byte)name.Length, 0, 0, 0, .. name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        => [(byte)(56 + name.Length), 0, 0, 0, .. CreateSerializedIdentity(key), (byte)name.Length, 0, 0, 0, .. name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     public static DataItem CreateItem(byte key, byte[] name)
         => new(CreateIdentity(key), name);
