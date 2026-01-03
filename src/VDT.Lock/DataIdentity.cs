@@ -93,7 +93,7 @@ public sealed class DataIdentity : IData<DataIdentity>, IEquatable<DataIdentity>
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(this.GetLength());
+        plainBytes.WriteInt(this.Length);
         plainBytes.WriteSecureBuffer(plainKeyBuffer);
         plainBytes.WriteSecureBuffer(plainVersionBuffer);
     }

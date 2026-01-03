@@ -111,7 +111,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [identity.GetLength(), plainNameBuffer.Value.Length, fields.GetLength(), labels.GetLength(), locations.GetLength()];
+            return [identity.Length, plainNameBuffer.Value.Length, fields.Length, labels.Length, locations.Length];
         }
     }
 
@@ -127,7 +127,7 @@ public sealed class DataItem : IData<DataItem>, IIdentifiableData<DataItem>, IDi
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(this.GetLength());
+        plainBytes.WriteInt(this.Length);
         identity.SerializeTo(plainBytes);
         plainBytes.WriteSecureBuffer(plainNameBuffer);
         fields.SerializeTo(plainBytes);
