@@ -75,7 +75,7 @@ public sealed class DataStore : IData<DataStore>, IIdentifiableData<DataStore>, 
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [identity.GetLength(), plainNameBuffer.Value.Length, items.GetLength()];
+            return [identity.Length, plainNameBuffer.Value.Length, items.Length];
         }
     }
 

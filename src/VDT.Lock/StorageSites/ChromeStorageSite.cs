@@ -90,7 +90,7 @@ public partial class ChromeStorageSite : StorageSiteBase {
     public override void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(this.GetLength());
+        plainBytes.WriteInt(this.Length);
         plainBytes.WriteInt(TypeId);
         plainBytes.WriteSecureBuffer(plainNameBuffer);
     }
