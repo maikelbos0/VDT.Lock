@@ -90,7 +90,7 @@ public sealed class DataField : IData<DataField>, IIdentifiableData<DataField>, 
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [identity.GetLength(), plainNameBuffer.Value.Length, plainValueBuffer.Value.Length, selectors.GetLength()];
+            return [identity.Length, plainNameBuffer.Value.Length, plainValueBuffer.Value.Length, selectors.Length];
         }
     }
 
@@ -107,7 +107,7 @@ public sealed class DataField : IData<DataField>, IIdentifiableData<DataField>, 
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(this.GetLength());
+        plainBytes.WriteInt(this.Length);
         identity.SerializeTo(plainBytes);
         plainBytes.WriteSecureBuffer(plainNameBuffer);
         plainBytes.WriteSecureBuffer(plainValueBuffer);

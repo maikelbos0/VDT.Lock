@@ -54,7 +54,7 @@ public sealed class DataValue : IData<DataValue>, IIdentifiableData<DataValue>, 
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return [Identity.GetLength(), plainValueBuffer.Value.Length];
+            return [Identity.Length, plainValueBuffer.Value.Length];
         }
     }
 
@@ -70,7 +70,7 @@ public sealed class DataValue : IData<DataValue>, IIdentifiableData<DataValue>, 
     public void SerializeTo(SecureByteList plainBytes) {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        plainBytes.WriteInt(this.GetLength());
+        plainBytes.WriteInt(this.Length);
         Identity.SerializeTo(plainBytes);
         plainBytes.WriteSecureBuffer(plainValueBuffer);
     }

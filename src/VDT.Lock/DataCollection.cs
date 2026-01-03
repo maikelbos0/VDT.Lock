@@ -67,7 +67,7 @@ public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>
         get {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-            return items.Select(static item => item.GetLength());
+            return items.Select(static item => item.Length);
         }
     }
 
@@ -129,7 +129,7 @@ public sealed class DataCollection<T> : IData<DataCollection<T>>, ICollection<T>
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         if (includeLength) {
-            plainBytes.WriteInt(this.GetLength());
+            plainBytes.WriteInt(this.Length);
         }
 
         foreach (var item in items) {
